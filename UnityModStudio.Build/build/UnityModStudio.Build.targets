@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\lib\netstandard2.0\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+
+  <Target Name="FindGameFiles">
+    <Error Condition="'$(GamePath)' == ''" Text="Game path is not set."  />
+
+    <FindGameFiles GamePath="$(GamePath)">
+      <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
+      <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
+    </FindGameFiles>
+  </Target>
+
+  <Target Name="AddGameAssemblyReferences" BeforeTargets="PrepareForBuild" DependsOnTargets="FindGameFiles">
+    <ItemGroup>
+      <Reference Include="@(GameAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
+    </ItemGroup>
+  </Target>
+
+</Project>
