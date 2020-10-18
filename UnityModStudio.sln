@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7BF079FE-B1DF-45B2-B3C1-4AA160B6E336}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		README.md = README.md
 		UnityModStudio.snk = UnityModStudio.snk
 	EndProjectSection
 EndProject
