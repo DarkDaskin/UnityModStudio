@@ -1,8 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using UnityModStudio.Common;
 
 namespace UnityModStudio.Build.Tasks
 {
@@ -19,81 +18,23 @@ namespace UnityModStudio.Build.Tasks
 
         public override bool Execute()
         {
-            if (!TryGetGameDirectory(out var gameDirectory))
+            var gamePath = GamePath?.GetMetadata("FullPath");
+            if (!GameFileResolver.TryResolveGameFiles(gamePath, out var gameDataDirectory, out var gameAssemblyFiles, out var error))
+            {
+                Log.LogError(error);
                 return false;
-
-            if (!TryGetGameDataDirectory(gameDirectory, out var gameDataDirectory))
-                return false;
+            }
 
             SetGameDataPath(gameDataDirectory);
-
-            if (!TryGetGameManagedDirectory(gameDataDirectory, out var gameManagedDirectory))
-                return false;
-
-            SetGameAssemblies(gameManagedDirectory);
+            SetGameAssemblies(gameAssemblyFiles);
             
             return true;
         }
 
-        private bool TryGetGameDirectory(out DirectoryInfo gameDirectory)
+        private void SetGameDataPath(DirectoryInfo gameDataDirectory) => GameDataPath = new TaskItem(gameDataDirectory.FullName);
+
+        private void SetGameAssemblies(FileInfo[] assemblyFiles)
         {
-            gameDirectory = new DirectoryInfo(GamePath!.GetMetadata("FullPath")!);
-            if (gameDirectory.Exists)
-                return true;
-
-            Log.LogError("Game directory does not exist.");
-            return false;
-        }
-
-        private bool TryGetGameDataDirectory(DirectoryInfo gameDirectory, [NotNullWhen(true)] out DirectoryInfo? gameDataDirectory)
-        {
-            var query =
-                from exeFile in gameDirectory.EnumerateFiles("*.exe")
-                let dataDirectoryName = Path.GetFileNameWithoutExtension(exeFile.Name) + "_Data"
-                from dataDirectory in gameDirectory.EnumerateDirectories(dataDirectoryName)
-                select dataDirectory;
-            var candidates = query.ToList();
-
-            if (candidates.Count == 1)
-            {
-                gameDataDirectory = candidates[0];
-                return true;
-            }
-
-            if (candidates.Count == 0)
-            {
-                Log.LogError("Unable to determine game data directory.");
-            }
-            else
-            {
-                foreach (var directory in candidates) 
-                    Log.LogMessage($"Potential game data directory: '{directory.FullName}'.");
-
-                Log.LogError("Ambiguous game data directory.");
-            }
-
-            gameDataDirectory = null;
-            return false;
-        }
-
-        private bool TryGetGameManagedDirectory(DirectoryInfo gameDataDirectory, [NotNullWhen(true)] out DirectoryInfo? gameManagedDirectory)
-        {
-            gameManagedDirectory = gameDataDirectory.EnumerateDirectories("Managed").FirstOrDefault();
-            if (gameManagedDirectory != null)
-                return true;
-
-            Log.LogError("Game managed assembly directory does not exist.");
-            return false;
-        }
-
-        private void SetGameDataPath(DirectoryInfo gameDataDirectory)
-        {
-            GameDataPath = new TaskItem(gameDataDirectory.FullName);
-        }
-
-        private void SetGameAssemblies(DirectoryInfo gameManagedDirectory)
-        {
-            var assemblyFiles = gameManagedDirectory.GetFiles("*.dll");
             GameAssemblies = new ITaskItem[assemblyFiles.Length];
             for (var i = 0; i < assemblyFiles.Length; i++)
                 GameAssemblies[i] = new TaskItem(assemblyFiles[i].FullName);

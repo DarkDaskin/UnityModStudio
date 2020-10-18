@@ -6,7 +6,6 @@
     <Icon>ProjectTemplate.ico</Icon>
     <ProjectType>CSharp</ProjectType>
     <LanguageTag>csharp</LanguageTag>
-    <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
     <SortOrder>1000</SortOrder>
     <TemplateID>387519ac-7584-4c99-916a-f038bac3499f</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
@@ -17,8 +16,13 @@
   </TemplateData>
   <TemplateContent>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
+      <ProjectItem TargetFileName="$projectname$.csproj.user">ProjectTemplate.csproj.user.xml</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
     </Project>
+    <CustomParameters>
+      <!-- Will be substituted during build to use the version from the working copy. -->
+      <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
+    </CustomParameters>
   </TemplateContent>
   <!-- It seems that the wizard fails on installing any packages into an SDK-style project. Probably a Visual studio bug. -->
   <!-- For now just include PackageReference into the .csproj template (this would not be able to use the extension NuGet repository though). -->
@@ -33,4 +37,8 @@
       <package id="UnityModStudio.Build" version="1.0.0" />
     </packages>
   </WizardData>-->
+  <WizardExtension>
+    <Assembly>UnityModStudio.ProjectWizard, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
+    <FullClassName>UnityModStudio.ProjectWizard.UnityModProjectWizard</FullClassName>
+  </WizardExtension>
 </VSTemplate>

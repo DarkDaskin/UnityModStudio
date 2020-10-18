@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DevelopmentDependency>true</DevelopmentDependency>
   </PropertyGroup>
@@ -20,6 +18,25 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Emulate IncludeReferencedProjects switch of nuget.exe which is not suppoerted yet in MSBuild. -->
+  <!-- See https://stackoverflow.com/a/56990424/280778 -->
+  <Target Name="IncludeProjectDependenciesInNuGet" BeforeTargets="_GetBuildOutputFilesWithTfm">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'all'))" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Exclude build output of netstandard2.1 from package - it is for nullable verification only. -->
+  <Target Name="ExcludeVerificationBuildFromNuGet" AfterTargets="_GetTargetFrameworksOutput">
+    <ItemGroup>
+      <_TargetFrameworks Remove="netstandard2.1" />
+    </ItemGroup>
+  </Target>
 
   <!-- Expose the NuGet package to VSIX packaging pipeline -->
   <Target Name="NuGetPackOutputGroup" DependsOnTargets="Pack" Returns="@(NuGetPackOutput)" />

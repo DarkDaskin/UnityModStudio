@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+
+    <Product>Unity Mod Studio</Product>
+    <Company>Dark Daskin</Company>
+    <Version>1.0.0-alpha</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <!-- Must correspond to one set in the templates' WizardExtension. -->
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)UnityModStudio.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+</Project>

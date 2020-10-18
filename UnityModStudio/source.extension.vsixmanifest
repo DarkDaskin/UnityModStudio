@@ -9,7 +9,7 @@
     <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
   </Installation>
   <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
     <Dependency d:Source="Installed" Id="NuGet.72c5d240-f742-48d4-a0f1-7016671e405b" DisplayName="NuGet package manager" Version="[16.0,17.0)" />
   </Dependencies>
   <Prerequisites>
@@ -19,5 +19,7 @@
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
     <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectTemplate.CSharp" d:TargetPath="|UnityModStudio.ProjectTemplate.CSharp;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
     <Asset Type="NuGetPackage" d:Source="Project" d:ProjectName="%CurrentProject%.Build" Path="|UnityModStudio.Build;NuGetPackOutputGroup|" d:VsixSubPath="packages" />
+    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectWizard" Path="|UnityModStudio.ProjectWizard|" AssemblyName="|UnityModStudio.ProjectWizard;AssemblyName|" />
+    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.Common" Path="|UnityModStudio.Common|" AssemblyName="|UnityModStudio.Common;AssemblyName|" />
   </Assets>
 </PackageManifest>
