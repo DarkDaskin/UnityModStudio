@@ -5,9 +5,11 @@
     <Nullable>enable</Nullable>
 
     <Product>Unity Mod Studio</Product>
+    <Authors>DarkDaskin</Authors>
     <Company>Dark Daskin</Company>
     <Version>1.0.0-alpha</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/DarkDaskin/UnityModStudio/</RepositoryUrl>
 
     <!-- Must correspond to one set in the templates' WizardExtension. -->
     <AssemblyVersion>1.0.0.0</AssemblyVersion>

@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\lib\netstandard2.0\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
+    <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
   </PropertyGroup>
 
   <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
