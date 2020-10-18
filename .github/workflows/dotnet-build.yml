@@ -17,5 +17,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         vs-version: '[16.0,17.0)'
+    - name: Restore packages
+      run: msbuild /t:Restore
     - name: Build
       run: msbuild /p:Configuration=Release
