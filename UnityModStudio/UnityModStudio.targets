@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- VSSDK suppresses built-in VS assemblies from being packaged in VSIX, but some still slip by, exclude them here. -->
+  <Target Name="SuppressRemainingVSAssemblies" BeforeTargets="GetVsixSourceItems">
+    <ItemGroup>
+      <SuppressFromVsix Include="Microsoft.VisualStudio.Debugger.Interop.16.0.dll" />
+      <SuppressFromVsix Include="Microsoft.VisualStudio.LanguageServer.Protocol.dll" />
+      <SuppressFromVsix Include="System.Buffers.dll" />
+      <SuppressFromVsix Include="System.Threading.Tasks.Extensions.dll" />
+    </ItemGroup>
+  </Target>
+</Project>
