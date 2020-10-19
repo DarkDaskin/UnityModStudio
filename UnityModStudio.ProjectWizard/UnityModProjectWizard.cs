@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using EnvDTE;
@@ -47,9 +48,14 @@ namespace UnityModStudio.ProjectWizard
             _gamePath = window.ViewModel.GamePath;
 
             replacementsDictionary["$TargetFramework$"] = window.ViewModel.TargetFrameworkMoniker;
+            replacementsDictionary["$BuildPackageVersion$"] = GetBuildPackageVersion();
 
             return true;
         }
+
+        // Assuming all projects have the same version, which is ensured by Directory.Build.props.
+        private static string GetBuildPackageVersion() => 
+            typeof(UnityModProjectWizard).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
 
         private void SaveGamePath(string projectFilePath)
         {
