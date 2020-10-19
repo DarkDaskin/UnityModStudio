@@ -7,10 +7,11 @@ namespace UnityModStudio.Common
 {
     public static class GameFileResolver
     {
+        // Supports Unity 3.x and newer. Older versions have different directory layout.
         public static bool TryResolveGameFiles(
             string? gamePath, 
             [NotNullWhen(true)] out DirectoryInfo? gameDataDirectory,
-            out FileInfo[] gameAssemblyFiles, 
+            out FileInfo[] gameAssemblyFiles,
             [NotNullWhen(false)] out string? error)
         {
             gameAssemblyFiles = Array.Empty<FileInfo>();
@@ -27,7 +28,7 @@ namespace UnityModStudio.Common
 
             if (!TryGetGameManagedDirectory(gameDataDirectory, out var gameManagedDirectory, out error))
                 return false;
-
+            
             gameAssemblyFiles = FindGameAssemblies(gameManagedDirectory);
 
             error = null;
@@ -63,7 +64,7 @@ namespace UnityModStudio.Common
             [NotNullWhen(true)] out DirectoryInfo? gameManagedDirectory,
             [NotNullWhen(false)] out string? error)
         {
-            gameManagedDirectory = gameDataDirectory.EnumerateDirectories("Managed").FirstOrDefault();
+            gameManagedDirectory = gameDataDirectory.EnumerateDirectories("Managed").SingleOrDefault();
             if (gameManagedDirectory != null)
             {
                 error = null;
@@ -73,7 +74,7 @@ namespace UnityModStudio.Common
             error = "Game managed assembly directory does not exist.";
             return false;
         }
-
+        
         private static FileInfo[] FindGameAssemblies(DirectoryInfo gameManagedDirectory) => gameManagedDirectory.GetFiles("*.dll");
     }
 }

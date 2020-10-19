@@ -10,11 +10,18 @@ namespace UnityModStudio.ProjectWizard
     {
         private readonly IWin32Window _owner;
         private string? _gamePath;
+        private string? _targetFrameworkMoniker;
 
         public string? GamePath
         {
             get => _gamePath;
             set => SetProperty(ref _gamePath, value);
+        }
+
+        public string? TargetFrameworkMoniker
+        {
+            get => _targetFrameworkMoniker;
+            set => SetProperty(ref _targetFrameworkMoniker, value);
         }
 
         public ICommand BrowseForGamePathCommand { get; }
@@ -55,9 +62,19 @@ namespace UnityModStudio.ProjectWizard
 
         private bool VerifyUnityGame()
         {
-            if (!GameFileResolver.TryResolveGameFiles(GamePath, out _, out _, out var error))
+            if (!GameFileResolver.TryResolveGameFiles(GamePath, out _, out var assemblyFiles, out var error))
             {
                 ShowError(error);
+                return false;
+            }
+
+            try
+            {
+                TargetFrameworkMoniker = TargetFrameworkResolver.GetTargetFrameworkMoniker(assemblyFiles);
+            }
+            catch (Exception exception)
+            {
+                ShowError(exception.Message);
                 return false;
             }
 

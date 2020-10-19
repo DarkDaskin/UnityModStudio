@@ -12,11 +12,11 @@ namespace UnityModStudio.ProjectWizard
     {
         private string? _gamePath;
         
-        public void RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
+        public void RunStarted(object automationObject, Dictionary<string, string?> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            if(!TryInvokeWizard(runKind))
+            if(!TryInvokeWizard(runKind, replacementsDictionary))
                 throw new WizardBackoutException();
         }
 
@@ -35,7 +35,7 @@ namespace UnityModStudio.ProjectWizard
 
         void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem) { }
 
-        private bool TryInvokeWizard(WizardRunKind runKind)
+        private bool TryInvokeWizard(WizardRunKind runKind, Dictionary<string, string?> replacementsDictionary)
         {
             if (runKind != WizardRunKind.AsNewProject)
                 return false;
@@ -45,6 +45,9 @@ namespace UnityModStudio.ProjectWizard
                 return false;
 
             _gamePath = window.ViewModel.GamePath;
+
+            replacementsDictionary["$TargetFramework$"] = window.ViewModel.TargetFrameworkMoniker;
+
             return true;
         }
 

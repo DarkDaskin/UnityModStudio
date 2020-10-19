@@ -22,6 +22,7 @@
     <CustomParameters>
       <!-- Will be substituted during build to use the version from the working copy. -->
       <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
+      <CustomParameter Name="$TargetFramework$" Value="netstandard2.0"/>
     </CustomParameters>
   </TemplateContent>
   <!-- It seems that the wizard fails on installing any packages into an SDK-style project. Probably a Visual studio bug. -->
