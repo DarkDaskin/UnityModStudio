@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="UnityModStudio.9b17354b-7dd4-432e-be43-73d169271291" Version="1.0" Language="en-US" Publisher="Dark Daskin" />
-    <DisplayName>Unity Mod Studio</DisplayName>
-    <Description xml:space="preserve">Allows creating mods for Unity games using Visual Studio.</Description>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
-    <Dependency d:Source="Installed" Id="NuGet.72c5d240-f742-48d4-a0f1-7016671e405b" DisplayName="NuGet package manager" Version="[16.0,17.0)" />
-  </Dependencies>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,17.0)" DisplayName="Visual Studio core editor" />
-  </Prerequisites>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-    <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectTemplate.CSharp" d:TargetPath="|UnityModStudio.ProjectTemplate.CSharp;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
-    <Asset Type="NuGetPackage" d:Source="Project" d:ProjectName="%CurrentProject%.Build" Path="|UnityModStudio.Build;NuGetPackOutputGroup|" d:VsixSubPath="packages" />
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectWizard" Path="|UnityModStudio.ProjectWizard|" AssemblyName="|UnityModStudio.ProjectWizard;AssemblyName|" />
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.Common" Path="|UnityModStudio.Common|" AssemblyName="|UnityModStudio.Common;AssemblyName|" />
-  </Assets>
+    <Metadata>
+        <Identity Id="UnityModStudio.9b17354b-7dd4-432e-be43-73d169271291" Version="1.0" Language="en-US" Publisher="Dark Daskin" />
+        <DisplayName>Unity Mod Studio</DisplayName>
+        <Description xml:space="preserve">Allows creating mods for Unity games using Visual Studio.</Description>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
+        <Dependency d:Source="Installed" Id="NuGet.72c5d240-f742-48d4-a0f1-7016671e405b" DisplayName="NuGet package manager" Version="[16.0,17.0)" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,17.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectTemplate.CSharp" d:TargetPath="|UnityModStudio.ProjectTemplate.CSharp;TemplateProjectOutputGroup|" Path="ProjectTemplates" d:VsixSubPath="ProjectTemplates" />
+        <Asset Type="NuGetPackage" d:Source="Project" d:ProjectName="%CurrentProject%.Build" Path="|UnityModStudio.Build;NuGetPackOutputGroup|" d:VsixSubPath="packages" />
+        <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectWizard" Path="|UnityModStudio.ProjectWizard|" AssemblyName="|UnityModStudio.ProjectWizard;AssemblyName|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.Common" Path="|UnityModStudio.Common|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.ModLoader.UnityDoorstop" Path="|UnityModStudio.ModLoader.UnityDoorstop|" />
+    </Assets>
 </PackageManifest>

@@ -81,6 +81,12 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\UnityModStudio.ModLoader.UnityDoorstop\UnityModStudio.ModLoader.UnityDoorstop.csproj">
+      <Project>{1DEC606E-1A26-42FA-989B-F4EDDEBAC210}</Project>
+      <Name>UnityModStudio.ModLoader.UnityDoorstop</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
     <ProjectReference Include="..\UnityModStudio.ProjectTemplate.CSharp\UnityModStudio.ProjectTemplate.CSharp.csproj">
       <Project>{7E897D27-BB05-4519-8C22-E88C395B014C}</Project>
       <Name>UnityModStudio.ProjectTemplate.CSharp</Name>

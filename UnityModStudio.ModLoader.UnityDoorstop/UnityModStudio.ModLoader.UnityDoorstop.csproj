@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 3rd-party binaries were put into a private package to avoid storing them in source control. -->
+    <PackageReference Include="UnityDoorstop" Version="3.0.2.2" PrivateAssets="all" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
+  </ItemGroup>
+
+  <!-- Merge UnityDoorstop package into this project package. -->
+  <!-- Can't just set Visible="false" due to https://github.com/microsoft/VSProjectSystem/issues/162, so put it into a folder instead. -->
+  <ItemGroup>
+    <None Include="$(PkgUnityDoorstop)\content\**" Link="UnityDoorstop\content\%(RecursiveDir)%(Filename)%(Extension)" Pack="true" PackagePath="content\" />
+    <None Include="$(PkgUnityDoorstop)\runtimes\**" Link="UnityDoorstop\runtimes\%(RecursiveDir)%(Filename)%(Extension)" Pack="true" PackagePath="runtimes\" />
+  </ItemGroup>
+
+</Project>

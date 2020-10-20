@@ -17,6 +17,7 @@
   <TemplateContent>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
       <ProjectItem TargetFileName="$projectname$.csproj.user">ProjectTemplate.csproj.user.xml</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true" TargetFileName="ModInit.cs">ModInit.UnityDoorstop.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
     </Project>
     <CustomParameters>

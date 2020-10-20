@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
@@ -9,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using UnityModStudio.Common;
+using UnityModStudio.Common.ModLoader;
 using IWin32Window = System.Windows.Forms.IWin32Window;
 
 namespace UnityModStudio.ProjectWizard
@@ -23,6 +28,10 @@ namespace UnityModStudio.ProjectWizard
         private string? _monoProfile;
         private string? _targetFrameworkMoniker;
         private ImageSource? _gameIcon;
+        private IModLoaderManager _detectedModLoader;
+        private IModLoaderManager _selectedModLoader;
+        private bool _isModLoaderSetByUser = false;
+        private IModLoaderManager[] _modLoaders = {NullModLoaderManager.Instance};
 
         public string? GamePath
         {
@@ -77,6 +86,22 @@ namespace UnityModStudio.ProjectWizard
             set => SetProperty(ref _gameIcon, value);
         }
 
+        public IModLoaderManager SelectedModLoader
+        {
+            get => _selectedModLoader;
+            set
+            {
+                SetProperty(ref _selectedModLoader, value ?? throw new ArgumentNullException());
+                _isModLoaderSetByUser = true;
+            }
+        }
+
+        public IModLoaderManager DetectedModLoader
+        {
+            get => _detectedModLoader;
+            set => SetProperty(ref _detectedModLoader, value ?? throw new ArgumentNullException());
+        }
+
         public bool HasValidGamePath => Error == null && !string.IsNullOrWhiteSpace(GamePath);
 
         public Visibility ErrorVisibility => HasValidGamePath ? Visibility.Collapsed : Visibility.Visible;
@@ -88,12 +113,27 @@ namespace UnityModStudio.ProjectWizard
 
         public event Action<bool>? Closed;
 
+        [ImportMany]
+        public IModLoaderManager[] ModLoaders
+        {
+            get => _modLoaders;
+            set
+            {
+                _modLoaders = value ?? throw new ArgumentNullException();
+                Debug.Assert(_modLoaders.OfType<NullModLoaderManager>().Any(), "NullModLoaderManager must be always present.");
+                Array.Sort(_modLoaders, (x, y) => x.Priority.CompareTo(y.Priority));
+                NotifyPropertyChanged();
+            }
+        }
+
         public ProjectWizardViewModel(IWin32Window owner)
         {
             _owner = owner;
             BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath);
             ConfirmCommand = new DelegateCommand(Confirm, () => HasValidGamePath);
             CancelCommand = new DelegateCommand(Cancel);
+
+            _selectedModLoader = _detectedModLoader = NullModLoaderManager.Instance;
         }
 
         private void BrowseForGamePath()
@@ -138,6 +178,14 @@ namespace UnityModStudio.ProjectWizard
             TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
             MonoProfile = GetMonoProfileString(gameInformation);
             GameIcon = GetGameIcon(gameInformation);
+
+            DetectedModLoader = DetectModLoader();
+            if (!_isModLoaderSetByUser)
+            {
+                SelectedModLoader = DetectedModLoader;
+                _isModLoaderSetByUser = false;
+            }
+
             return true;
         }
 
@@ -162,6 +210,16 @@ namespace UnityModStudio.ProjectWizard
 
             return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, new Int32Rect(0, 0, icon.Width, icon.Height),
                 BitmapSizeOptions.FromEmptyOptions());
+        }
+
+        private IModLoaderManager DetectModLoader()
+        {
+            var query =
+                from loader in ModLoaders
+                orderby loader.Priority descending
+                where loader.IsInstalled(GamePath!)
+                select loader;
+            return query.FirstOrDefault() ?? NullModLoaderManager.Instance;
         }
     }
 }
