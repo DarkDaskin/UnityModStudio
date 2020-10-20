@@ -1,8 +1,15 @@
 ﻿using System;
+using System.Drawing;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using UnityModStudio.Common;
+using IWin32Window = System.Windows.Forms.IWin32Window;
 
 namespace UnityModStudio.ProjectWizard
 {
@@ -10,12 +17,52 @@ namespace UnityModStudio.ProjectWizard
     {
         private readonly IWin32Window _owner;
         private string? _gamePath;
+        private string? _error;
+        private string? _gameName;
+        private string? _unityVersion;
+        private string? _monoProfile;
         private string? _targetFrameworkMoniker;
+        private ImageSource? _gameIcon;
 
         public string? GamePath
         {
             get => _gamePath;
-            set => SetProperty(ref _gamePath, value);
+            set
+            {
+                SetProperty(ref _gamePath, value);
+                NotifyPropertyChanged(nameof(HasValidGamePath));
+                VerifyUnityGame();
+            }
+        }
+
+        public string? Error
+        {
+            get => _error;
+            set
+            {
+                SetProperty(ref _error, value);
+                NotifyPropertyChanged(nameof(HasValidGamePath));
+                NotifyPropertyChanged(nameof(ErrorVisibility));
+                NotifyPropertyChanged(nameof(GameInformationVisibility));
+            }
+        }
+
+        public string? GameName
+        {
+            get => _gameName;
+            set => SetProperty(ref _gameName, value);
+        }
+
+        public string? UnityVersion
+        {
+            get => _unityVersion;
+            set => SetProperty(ref _unityVersion, value);
+        }
+
+        public string? MonoProfile
+        {
+            get => _monoProfile;
+            set => SetProperty(ref _monoProfile, value);
         }
 
         public string? TargetFrameworkMoniker
@@ -24,6 +71,17 @@ namespace UnityModStudio.ProjectWizard
             set => SetProperty(ref _targetFrameworkMoniker, value);
         }
 
+        public ImageSource? GameIcon
+        {
+            get => _gameIcon;
+            set => SetProperty(ref _gameIcon, value);
+        }
+
+        public bool HasValidGamePath => Error == null && !string.IsNullOrWhiteSpace(GamePath);
+
+        public Visibility ErrorVisibility => HasValidGamePath ? Visibility.Collapsed : Visibility.Visible;
+        public Visibility GameInformationVisibility => HasValidGamePath ? Visibility.Visible : Visibility.Hidden;
+        
         public ICommand BrowseForGamePathCommand { get; }
         public ICommand ConfirmCommand { get; }
         public ICommand CancelCommand { get; }
@@ -34,7 +92,7 @@ namespace UnityModStudio.ProjectWizard
         {
             _owner = owner;
             BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath);
-            ConfirmCommand = new DelegateCommand(Confirm);
+            ConfirmCommand = new DelegateCommand(Confirm, () => HasValidGamePath);
             CancelCommand = new DelegateCommand(Cancel);
         }
 
@@ -62,25 +120,48 @@ namespace UnityModStudio.ProjectWizard
 
         private bool VerifyUnityGame()
         {
-            if (!GameFileResolver.TryResolveGameFiles(GamePath, out _, out var assemblyFiles, out var error))
+            if (string.IsNullOrWhiteSpace(GamePath))
             {
-                ShowError(error);
+                Error = "Specify a path.";
                 return false;
             }
 
-            try
+            if (!GameInformationResolver.TryGetGameInformation(GamePath, out var gameInformation, out var error))
             {
-                TargetFrameworkMoniker = TargetFrameworkResolver.GetTargetFrameworkMoniker(assemblyFiles);
-            }
-            catch (Exception exception)
-            {
-                ShowError(exception.Message);
+                Error = error;
                 return false;
             }
-
+            
+            Error = null;
+            GameName = gameInformation.Name;
+            UnityVersion = gameInformation.UnityVersion;
+            TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
+            MonoProfile = GetMonoProfileString(gameInformation);
+            GameIcon = GetGameIcon(gameInformation);
             return true;
         }
 
-        private void ShowError(string message) => MessageBox.Show(_owner, message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        private static string GetMonoProfileString(GameInformation gameInformation)
+        {
+            var match = Regex.Match(gameInformation.TargetFrameworkMoniker, @"(?<NetStandard>netstandard(?<Version>\d+\.\d+))|(?<NetFull>net(?<Version>\d+))");
+
+            if (match.Groups["NetStandard"].Success)
+                return ".NET Standard " + match.Groups["Version"].Value;
+
+            if (match.Groups["NetFull"].Success)
+                return ".NET " + string.Join(".", match.Groups["Version"].Value.ToCharArray()) + (gameInformation.IsSubsetProfile ? " Subset" : "");
+
+            return "<unknown>";
+        }
+
+        private static ImageSource? GetGameIcon(GameInformation gameInformation)
+        {
+            using var icon = Icon.ExtractAssociatedIcon(gameInformation.GameExecutableFile.FullName);
+            if (icon == null)
+                return null;
+
+            return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, new Int32Rect(0, 0, icon.Width, icon.Height),
+                BitmapSizeOptions.FromEmptyOptions());
+        }
     }
 }

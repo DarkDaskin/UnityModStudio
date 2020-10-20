@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using UnityModStudio.Common;
@@ -19,25 +20,26 @@ namespace UnityModStudio.Build.Tasks
         public override bool Execute()
         {
             var gamePath = GamePath?.GetMetadata("FullPath");
-            if (!GameFileResolver.TryResolveGameFiles(gamePath, out var gameDataDirectory, out var gameAssemblyFiles, out var error))
+            if (!GameInformationResolver.TryGetGameInformation(gamePath, out var gameInformation, out var error))
             {
                 Log.LogError(error);
                 return false;
             }
 
-            SetGameDataPath(gameDataDirectory);
-            SetGameAssemblies(gameAssemblyFiles);
+            SetGameDataPath(gameInformation.GameDataDirectory);
+            SetGameAssemblies(gameInformation.GameAssemblyFiles);
             
             return true;
         }
 
         private void SetGameDataPath(DirectoryInfo gameDataDirectory) => GameDataPath = new TaskItem(gameDataDirectory.FullName);
 
-        private void SetGameAssemblies(FileInfo[] assemblyFiles)
+        private void SetGameAssemblies(IReadOnlyCollection<FileInfo> assemblyFiles)
         {
-            GameAssemblies = new ITaskItem[assemblyFiles.Length];
-            for (var i = 0; i < assemblyFiles.Length; i++)
-                GameAssemblies[i] = new TaskItem(assemblyFiles[i].FullName);
+            GameAssemblies = new ITaskItem[assemblyFiles.Count];
+            var index = 0;
+            foreach (var assemblyFile in assemblyFiles)
+                GameAssemblies[index++] = new TaskItem(assemblyFile.FullName);
         }
     }
 }
