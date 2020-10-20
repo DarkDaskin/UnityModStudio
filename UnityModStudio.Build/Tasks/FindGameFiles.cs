@@ -15,6 +15,9 @@ namespace UnityModStudio.Build.Tasks
         public ITaskItem? GameDataPath { get; private set; }
 
         [Output]
+        public ITaskItem[]? FrameworkAssemblies { get; private set; }
+
+        [Output]
         public ITaskItem[]? GameAssemblies { get; private set; }
 
         public override bool Execute()
@@ -26,20 +29,20 @@ namespace UnityModStudio.Build.Tasks
                 return false;
             }
 
-            SetGameDataPath(gameInformation.GameDataDirectory);
-            SetGameAssemblies(gameInformation.GameAssemblyFiles);
+            GameDataPath = new TaskItem(gameInformation.GameDataDirectory.FullName);
+            FrameworkAssemblies = GetTaskItems(gameInformation.FrameworkAssemblyFiles);
+            GameAssemblies = GetTaskItems(gameInformation.GameAssemblyFiles);
             
             return true;
         }
 
-        private void SetGameDataPath(DirectoryInfo gameDataDirectory) => GameDataPath = new TaskItem(gameDataDirectory.FullName);
-
-        private void SetGameAssemblies(IReadOnlyCollection<FileInfo> assemblyFiles)
+        private static ITaskItem[] GetTaskItems(IReadOnlyCollection<FileInfo> files)
         {
-            GameAssemblies = new ITaskItem[assemblyFiles.Count];
+            var items = new ITaskItem[files.Count];
             var index = 0;
-            foreach (var assemblyFile in assemblyFiles)
-                GameAssemblies[index++] = new TaskItem(assemblyFile.FullName);
+            foreach (var file in files)
+                items[index++] = new TaskItem(file.FullName);
+            return items;
         }
     }
 }

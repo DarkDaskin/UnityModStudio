@@ -14,6 +14,7 @@ namespace UnityModStudio.Common
 
         public FileInfo GameExecutableFile { get; set; } = null!;
         public DirectoryInfo GameDataDirectory { get; set; } = null!;
+        public IReadOnlyCollection<FileInfo> FrameworkAssemblyFiles { get; set; } = null!;
         public IReadOnlyCollection<FileInfo> GameAssemblyFiles { get; set; } = null!;
 
     }

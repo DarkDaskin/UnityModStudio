@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace UnityModStudio.Common
 {
@@ -30,11 +31,13 @@ namespace UnityModStudio.Common
                 if (!TryGetGameManagedDirectory(gameDataDirectory, out var gameManagedDirectory, out error))
                     return false;
             
-                var gameAssemblyFiles = FindGameAssemblies(gameManagedDirectory);
+                var assemblyFiles = GetAssemblies(gameManagedDirectory);
 
-                var (moniker, isSubset) = GetTargetFrameworkInfo(gameAssemblyFiles);
+                var (moniker, isSubset) = GetTargetFrameworkInfo(assemblyFiles);
             
                 var (gameName, company) = GetAppInfo(gameDataDirectory);
+
+                var (frameworkAssemblyFiles, gameAssemblyFiles) = GroupAssemblies(assemblyFiles);
 
                 gameInformation = new GameInformation
                 {
@@ -45,6 +48,7 @@ namespace UnityModStudio.Common
                     IsSubsetProfile = isSubset,
                     GameExecutableFile = gameExecutableFile,
                     GameDataDirectory = gameDataDirectory,
+                    FrameworkAssemblyFiles = frameworkAssemblyFiles,
                     GameAssemblyFiles = gameAssemblyFiles,
                 };
                 return true;
@@ -99,7 +103,7 @@ namespace UnityModStudio.Common
             return false;
         }
 
-        private static FileInfo[] FindGameAssemblies(DirectoryInfo gameManagedDirectory) => gameManagedDirectory.GetFiles("*.dll");
+        private static FileInfo[] GetAssemblies(DirectoryInfo gameManagedDirectory) => gameManagedDirectory.GetFiles("*.dll");
 
         private static (string moniker, bool isSubset) GetTargetFrameworkInfo(IReadOnlyCollection<FileInfo> assemblyFiles)
         {
@@ -131,15 +135,22 @@ namespace UnityModStudio.Common
                 // Unity 3.x .NET 2.0 profile
                 2 => ("net20", false),
                 // Probably some future version of Unity.
-                _ => throw UnknownTargetFrameworkException()
+                _ => throw new NotSupportedException("Specified assembly set does not correspond to any known target framework.")
             };
         }
 
         private static FileInfo? GetAssemblyFile(IEnumerable<FileInfo> assemblyFiles, string name) =>
             assemblyFiles.SingleOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
-        private static Exception UnknownTargetFrameworkException() =>
-            throw new NotSupportedException("Specified assembly set does not correspond to any known target framework.");
+        private static (IReadOnlyCollection<FileInfo> frameworkAssemblyFiles, IReadOnlyCollection<FileInfo> gameAssemblyFiles)
+            GroupAssemblies(IReadOnlyCollection<FileInfo> assemblyFiles)
+        {
+            var netstandardAssemblyFile = GetAssemblyFile(assemblyFiles, "netstandard.dll");
+            var frameworkAssemblyNames = netstandardAssemblyFile != null ? NetStandardFrameworkAssemblyNames : FullFrameworkAssemblyNames;
+            var frameworkAssemblyFiles = assemblyFiles.Where(f => frameworkAssemblyNames.Contains(f.Name, StringComparer.OrdinalIgnoreCase)).ToList();
+            var gameAssemblyFiles = assemblyFiles.Except(frameworkAssemblyFiles).ToList();
+            return (frameworkAssemblyFiles, gameAssemblyFiles);
+        }
 
         private static string GetUnityVersion(FileInfo gameExecutableFile) =>
             FileVersionInfo.GetVersionInfo(gameExecutableFile.FullName).FileVersion;
@@ -153,5 +164,40 @@ namespace UnityModStudio.Common
             var appInfo = File.ReadAllLines(appInfoFile.FullName);
             return (appInfo.ElementAtOrDefault(1), appInfo.ElementAtOrDefault(0));
         }
+
+        private static readonly string[] FullFrameworkAssemblyNames =
+        {
+            "mscorlib.dll",
+            "System.dll",
+            "System.Configuration.dll",
+            "System.Core.dll",
+            "System.Security.dll",
+            "System.Xml.dll",
+        };
+
+        private static readonly string[] NetStandardFrameworkAssemblyNames =
+        {
+            "netstandard.dll",
+            "mscorlib.dll",
+            "System.dll",
+            "System.ComponentModel.Composition.dll",
+            "System.Configuration.dll",
+            "System.Core.dll",
+            "System.Data.dll",
+            "System.Diagnostics.StackTrace.dll",
+            "System.Drawing.dll",
+            "System.EnterpriseServices.dll",
+            "System.Globalization.Extensions.dll",
+            "System.IO.Compression.dll",
+            "System.IO.Compression.FileSystem.dll",
+            "System.Net.Http.dll",
+            "System.Numerics.dll",
+            "System.Runtime.Serialization.dll",
+            "System.Runtime.Serialization.Xml.dll",
+            "System.Transactions.dll",
+            "System.Xml.dll",
+            "System.Xml.Linq.dll",
+            "System.Xml.XPath.XDocument.dll",
+        };
     }
 }

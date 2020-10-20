@@ -48,7 +48,12 @@ namespace UnityModStudio.ProjectWizard
             _gamePath = window.ViewModel.GamePath;
 
             replacementsDictionary["$TargetFramework$"] = window.ViewModel.TargetFrameworkMoniker;
+            replacementsDictionary["$GameName$"] = window.ViewModel.GameName;
             replacementsDictionary["$BuildPackageVersion$"] = GetBuildPackageVersion();
+
+            // In .props there is no TargetFramework, in .targets it's too late, so it has to be specified in .csproj.
+            if (!window.ViewModel.TargetFrameworkMoniker?.StartsWith("netstandard") ?? false)
+                replacementsDictionary["$DisableImplicitFrameworkReferences$"] = "true";
 
             return true;
         }

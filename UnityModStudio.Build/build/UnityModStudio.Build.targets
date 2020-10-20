@@ -12,11 +12,15 @@
 
     <FindGameFiles GamePath="$(GamePath)">
       <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
+      <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
       <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
     </FindGameFiles>
   </Target>
 
   <Target Name="AddGameAssemblyReferences" BeforeTargets="PrepareForBuild" DependsOnTargets="FindGameFiles">
+    <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+      <Reference Include="@(FrameworkAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
+    </ItemGroup>
     <ItemGroup>
       <Reference Include="@(GameAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
     </ItemGroup>

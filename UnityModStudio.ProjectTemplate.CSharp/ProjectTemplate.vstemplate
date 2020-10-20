@@ -21,6 +21,8 @@
     </Project>
     <CustomParameters>
       <CustomParameter Name="$TargetFramework$" Value="netstandard2.0"/>
+      <CustomParameter Name="$DisableImplicitFrameworkReferences$" Value="false"/>
+      <CustomParameter Name="$GameName$" Value=""/>
       <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
     </CustomParameters>
   </TemplateContent>
