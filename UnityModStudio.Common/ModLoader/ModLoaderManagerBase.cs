@@ -12,7 +12,6 @@ namespace UnityModStudio.Common.ModLoader
         public virtual int Priority => 0;
         public virtual string? PackageName => null;
         public virtual string? PackageVersion => null;
-        public virtual string? ExampleTemplatePath => null;
 
         public abstract bool IsInstalled(string gamePath);
 
@@ -21,7 +20,7 @@ namespace UnityModStudio.Common.ModLoader
         protected string GetConventionalPackageName() => GetType().Assembly.GetName().Name;
 
         protected string? GetConventionalPackageVersion() =>
-            GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
 
         protected string? GetConventionalExampleTemplatePath(string language, string templateName, string? category = null)
         {

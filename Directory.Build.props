@@ -3,18 +3,18 @@
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-
     <Product>Unity Mod Studio</Product>
     <Authors>DarkDaskin</Authors>
     <Company>Dark Daskin</Company>
-    <Version>1.0.0-alpha</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/DarkDaskin/UnityModStudio/</RepositoryUrl>
-
     <!-- Must correspond to one set in the templates' WizardExtension. -->
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)UnityModStudio.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.3.37" PrivateAssets="all" />
+  </ItemGroup>
 </Project>
