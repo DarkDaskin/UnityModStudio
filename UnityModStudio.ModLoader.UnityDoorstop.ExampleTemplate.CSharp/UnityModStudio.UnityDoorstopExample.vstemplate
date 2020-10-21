@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Note: template filename must not be too long (around 40 characters max), otherwise VS will not load it correctly due to MAX_PATH limitation. -->
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <Name>Unity Doorstop example (C#)</Name>
+    <Hidden>true</Hidden>
+    <Icon>ItemTemplate.ico</Icon>
+    <TemplateID>14964095-5136-479a-a656-b030bfecd4ca</TemplateID>
+    <ProjectType>CSharp</ProjectType>
+    <LanguageTag>CSharp</LanguageTag>
+    <DefaultName>ModInit.cs</DefaultName>
+    <CreateInPlace>true</CreateInPlace>
+  </TemplateData>
+  <TemplateContent>
+    <ProjectItem ReplaceParameters="true" OpenInEditor="true">ModInit.cs</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

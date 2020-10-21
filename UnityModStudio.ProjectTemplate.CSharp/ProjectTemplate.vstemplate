@@ -5,7 +5,7 @@
     <Description>Unity game mod (C#)</Description>
     <Icon>ProjectTemplate.ico</Icon>
     <ProjectType>CSharp</ProjectType>
-    <LanguageTag>csharp</LanguageTag>
+    <LanguageTag>CSharp</LanguageTag>
     <SortOrder>1000</SortOrder>
     <TemplateID>387519ac-7584-4c99-916a-f038bac3499f</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
@@ -17,7 +17,6 @@
   <TemplateContent>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
       <ProjectItem TargetFileName="$projectname$.csproj.user">ProjectTemplate.csproj.user.xml</ProjectItem>
-      <ProjectItem ReplaceParameters="true" OpenInEditor="true" TargetFileName="ModInit.cs">ModInit.UnityDoorstop.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
     </Project>
     <CustomParameters>

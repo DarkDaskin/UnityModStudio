@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -14,11 +15,21 @@ using UnityModStudio.Common.ModLoader;
 
 namespace UnityModStudio.ProjectWizard
 {
+    [SuppressMessage("vs-threading", "VSTHRD010", Justification = "All code runs on main thread.")]
     public class UnityModProjectWizard : IWizard
     {
+        private static readonly IXmlNamespaceResolver XmlNsResolver;
+
         private IComponentModel? _componentModel;
         private string? _gamePath;
         private IModLoaderManager _modLoaderManager = NullModLoaderManager.Instance;
+
+        static UnityModProjectWizard()
+        {
+            var nsManager = new XmlNamespaceManager(new NameTable());
+            nsManager.AddNamespace("t", "http://schemas.microsoft.com/developer/vstemplate/2005");
+            XmlNsResolver = nsManager;
+        }
         
         public void RunStarted(object automationObject, Dictionary<string, string?> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
@@ -30,29 +41,20 @@ namespace UnityModStudio.ProjectWizard
                 throw new WizardBackoutException();
         }
 
-        public bool ShouldAddProjectItem(string filePath)
-        {
-            // Skip example ModInit files for mod loaders except the selected one.
-            // TODO: store example files in corresponding packages.
-            var nameParts = Path.GetFileNameWithoutExtension(filePath).Split('.');
-            if (nameParts.Length == 2 && 
-                nameParts[0].Equals("ModInit", StringComparison.OrdinalIgnoreCase) &&
-                !nameParts[1].Equals(_modLoaderManager.Id, StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            return true;
-        }
-
         public void ProjectFinishedGenerating(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
             SaveGamePath(project.FullName);
 
-            AddModLoaderReference(project.FullName);
+            AddModLoaderReference(project);
+
+            AddModLoaderExampleItem(project);
         }
 
         void IWizard.RunFinished() { }
+
+        bool IWizard.ShouldAddProjectItem(string filePath) => true;
 
         void IWizard.BeforeOpeningFile(ProjectItem projectItem) { }
 
@@ -95,19 +97,58 @@ namespace UnityModStudio.ProjectWizard
             document.Save(userFilePath);
         }
 
-        private void AddModLoaderReference(string projectFilePath)
+        private void AddModLoaderReference(Project project)
         {
             if (_modLoaderManager.PackageName == null || _modLoaderManager.PackageVersion == null)
                 return;
 
-            var document = XDocument.Load(projectFilePath);
-            var packageItemGroupElement = document.XPathSelectElement("/Project/ItemGroup[PackageReference]")!;
-            packageItemGroupElement.Add(new XElement("PackageReference", 
-                new XAttribute("Include", _modLoaderManager.PackageName),
-                new XAttribute("Version", _modLoaderManager.PackageVersion),
-                // Install as development dependency only.
-                new XAttribute("IncludeAssets", "build;analyzers")));
-            document.Save(projectFilePath);
+            EditProject(project, document =>
+            {
+                var packageItemGroupElement = document.XPathSelectElement("/Project/ItemGroup[PackageReference]")!;
+                packageItemGroupElement.Add(new XElement("PackageReference", 
+                    new XAttribute("Include", _modLoaderManager.PackageName),
+                    new XAttribute("Version", _modLoaderManager.PackageVersion),
+                    // Install as development dependency only.
+                    new XAttribute("IncludeAssets", "build;analyzers")));
+            });
+        }
+
+        private void AddModLoaderExampleItem(Project project)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var exampleTemplatePath = _modLoaderManager.GetExampleTemplatePath(GetLanguage(project.FullName));
+            if (exampleTemplatePath == null)
+                return;
+
+            var fileName = GetDefaultFileName(exampleTemplatePath);
+            project.ProjectItems.AddFromTemplate(exampleTemplatePath, fileName);
+        }
+
+        private static void EditProject(Project project, Action<XDocument> action)
+        {
+            if (!project.Saved)
+                project.Save();
+
+            var document = XDocument.Load(project.FullName);
+            action(document);
+            document.Save(project.FullName);
+        }
+
+        private static string GetLanguage(string projectFilePath) => Path.GetExtension(projectFilePath).ToLowerInvariant() switch
+        {
+            ".csproj" => "CSharp",
+            ".vbproj" => "VisualBasic",
+            ".vcxproj" => "VC",
+            _ => ""
+        };
+
+        private static string GetDefaultFileName(string itemTemplatePath)
+        {
+            var document = XDocument.Load(itemTemplatePath);
+            return document.XPathSelectElement("/t:VSTemplate/t:TemplateData/t:DefaultName", XmlNsResolver)?.Value ?? 
+                   document.XPathSelectElement("/t:VSTemplate/t:TemplateContent/t:ProjectItem", XmlNsResolver)?.Value ?? 
+                   throw new InvalidOperationException($"Item template at '{itemTemplatePath}' does not define a file name.");
         }
     }
 }

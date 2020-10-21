@@ -12,5 +12,6 @@ namespace UnityModStudio.Common.ModLoader
         string? PackageVersion { get; }
 
         bool IsInstalled(string gamePath);
+        string? GetExampleTemplatePath(string language);
     }
 }

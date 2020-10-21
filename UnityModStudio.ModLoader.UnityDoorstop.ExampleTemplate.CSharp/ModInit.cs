@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 $if$ ($targetframeworkversion$ >= 3.5)using System.Linq;
 $endif$using System.Text;
-using UnityEngine;
 
-namespace $safeprojectname$
+namespace $rootnamespace$
 {
-    public static class ModInit
-    {
-        public static void Main()
+	class $safeitemrootname$
+	{
+	    public static void Main()
         {
             // This method is called by Unity Doorstop during Mono initialization.
             // Place your mod initialization code here.

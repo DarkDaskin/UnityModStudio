@@ -1,18 +1,18 @@
 ﻿using System.IO;
-using System.Reflection;
 using UnityModStudio.Common.ModLoader;
 
 namespace UnityModStudio.ModLoader.UnityDoorstop
 {
-    public class UnityDoorstopManager : IModLoaderManager
+    public class UnityDoorstopManager : ModLoaderManagerBase
     {
-        public string Id => "UnityDoorstop";
-        public string Name => "Unity Doorstop";
-        public int Priority => 0;
-        public string? PackageName => typeof(UnityDoorstopManager).Namespace;
-        public string? PackageVersion => 
-            typeof(UnityDoorstopManager).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+        public override string Id => "UnityDoorstop";
+        public override string Name => "Unity Doorstop";
+        public override string? PackageName => GetConventionalPackageName();
+        public override string? PackageVersion => GetConventionalPackageVersion();
 
-        public bool IsInstalled(string gamePath) => File.Exists(Path.Combine(gamePath, "doorstop_config.ini"));
+        public override bool IsInstalled(string gamePath) => File.Exists(Path.Combine(gamePath, "doorstop_config.ini"));
+
+        public override string? GetExampleTemplatePath(string language) =>
+            GetConventionalExampleTemplatePath(language, "UnityModStudio.UnityDoorstopExample", "UnityModStudio");
     }
 }
