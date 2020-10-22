@@ -50,7 +50,4 @@
     </ItemGroup>
   </Target>
 
-  <!-- Expose the NuGet package to VSIX packaging pipeline -->
-  <Target Name="NuGetPackOutputGroup" DependsOnTargets="Pack" Returns="@(NuGetPackOutput)" />
-
 </Project>

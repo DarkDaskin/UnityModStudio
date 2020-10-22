@@ -31,19 +31,6 @@
       <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
     </CustomParameters>
   </TemplateContent>
-  <!-- It seems that the wizard fails on installing any packages into an SDK-style project. Probably a Visual studio bug. -->
-  <!-- For now just include PackageReference into the .csproj template (this would not be able to use the extension NuGet repository though). -->
-  <!-- Also it seems that using TemplateContent for SDK-style projects is not supported, NuGet-based templates should be used instead. -->
-  <!-- See https://github.com/ligershark/sidewafflev2 -->
-  <!--<WizardExtension>
-    <Assembly>NuGet.VisualStudio.Interop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
-    <FullClassName>NuGet.VisualStudio.TemplateWizard</FullClassName>
-  </WizardExtension>
-  <WizardData>
-    <packages repository="extension" repositoryId="UnityModStudio.9b17354b-7dd4-432e-be43-73d169271291">
-      <package id="UnityModStudio.Build" version="1.0.0" />
-    </packages>
-  </WizardData>-->
   <WizardExtension>
     <Assembly>UnityModStudio.ProjectWizard, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
     <FullClassName>UnityModStudio.ProjectWizard.UnityModProjectWizard</FullClassName>

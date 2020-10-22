@@ -78,13 +78,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UnityModStudio.Build\UnityModStudio.Build.csproj">
-      <Project>{3A59A25A-51A3-4969-8C21-C2802BD9C442}</Project>
-      <Name>UnityModStudio.Build</Name>
-      <VSIXSubPath>packages</VSIXSubPath>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <IncludeOutputGroupsInVSIX>NuGetPackOutputGroup%3b</IncludeOutputGroupsInVSIX>
-    </ProjectReference>
     <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj">
       <Project>{D3CEA042-AE51-469E-96AB-B49E1BB38100}</Project>
       <Name>UnityModStudio.Common</Name>
