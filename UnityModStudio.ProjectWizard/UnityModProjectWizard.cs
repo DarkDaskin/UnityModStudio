@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -11,6 +11,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
+using UnityModStudio.Common;
 using UnityModStudio.Common.ModLoader;
 
 namespace UnityModStudio.ProjectWizard
@@ -21,13 +22,13 @@ namespace UnityModStudio.ProjectWizard
         private static readonly IXmlNamespaceResolver XmlNsResolver;
 
         private IComponentModel? _componentModel;
-        private string? _gamePath;
         private IModLoaderManager _modLoaderManager = NullModLoaderManager.Instance;
 
         static UnityModProjectWizard()
         {
             var nsManager = new XmlNamespaceManager(new NameTable());
             nsManager.AddNamespace("t", "http://schemas.microsoft.com/developer/vstemplate/2005");
+            nsManager.AddNamespace("p", "http://schemas.microsoft.com/developer/msbuild/2003");
             XmlNsResolver = nsManager;
         }
         
@@ -44,9 +45,7 @@ namespace UnityModStudio.ProjectWizard
         public void ProjectFinishedGenerating(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-
-            SaveGamePath(project.FullName);
-
+            
             AddModLoaderReference(project);
 
             AddModLoaderExampleItem(project);
@@ -71,12 +70,15 @@ namespace UnityModStudio.ProjectWizard
             if (!window.ShowDialog() ?? false)
                 return false;
 
-            _gamePath = viewModel.GamePath;
             _modLoaderManager = viewModel.SelectedModLoader;
 
             replacementsDictionary["$TargetFramework$"] = viewModel.TargetFrameworkMoniker;
-            replacementsDictionary["$GameName$"] = viewModel.GameName;
             replacementsDictionary["$BuildPackageVersion$"] = GetBuildPackageVersion();
+            replacementsDictionary["$GamePath$"] = viewModel.GamePath;
+            // Just for information.
+            replacementsDictionary["$GameName$"] = viewModel.GameName;
+            // Must be known without running any targets to be picked up by launchSettings.json
+            replacementsDictionary["$GameExecutableFileName$"] = viewModel.GameExecutableFileName;
 
             // In .props there is no TargetFramework, in .targets it's too late, so it has to be specified in .csproj.
             if (!viewModel.TargetFrameworkMoniker?.StartsWith("netstandard") ?? false)
@@ -85,18 +87,9 @@ namespace UnityModStudio.ProjectWizard
             return true;
         }
 
-        // Assuming all projects have the same version, which is ensured by Directory.Build.props.
-        private static string GetBuildPackageVersion() => 
-            typeof(UnityModProjectWizard).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
-
-        private void SaveGamePath(string projectFilePath)
-        {
-            var userFilePath = Path.ChangeExtension(projectFilePath, ".csproj.user");
-            var document = XDocument.Load(userFilePath);
-            document.XPathSelectElement("//*[local-name()='GamePath']")!.Value = _gamePath;
-            document.Save(userFilePath);
-        }
-
+        // Assuming all projects have the same version, which is ensured by version.json.
+        private static string GetBuildPackageVersion() => Utils.GetPackageVersion(typeof(UnityModProjectWizard).Assembly)!;
+        
         private void AddModLoaderReference(Project project)
         {
             if (_modLoaderManager.PackageName == null || _modLoaderManager.PackageVersion == null)
@@ -123,6 +116,11 @@ namespace UnityModStudio.ProjectWizard
 
             var fileName = GetDefaultFileName(exampleTemplatePath);
             project.ProjectItems.AddFromTemplate(exampleTemplatePath, fileName);
+
+            // Delete our dummy class since mod loader template provides a better one.
+            project.ProjectItems.Cast<ProjectItem>()
+                .First(item => Path.GetFileNameWithoutExtension(item.Name).Equals("Class1", StringComparison.OrdinalIgnoreCase))
+                .Delete();
         }
 
         private static void EditProject(Project project, Action<XDocument> action)

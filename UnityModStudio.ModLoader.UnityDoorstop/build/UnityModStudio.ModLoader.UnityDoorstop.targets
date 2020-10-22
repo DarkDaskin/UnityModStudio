@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <ModLoaderTasksAssembly>$(MSBuildThisFileDirectory)..\lib\netstandard2.0\UnityModStudio.ModLoader.UnityDoorstop.dll</ModLoaderTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ConfigureModLoader" AssemblyFile="$(ModLoaderTasksAssembly)" />
+
+  <Target Name="DeployModLoader" DependsOnTargets="FindGameFiles">
+    <ItemGroup>
+      <ModLoaderNativeFiles Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\**" Condition="'$(GameArchitecture)' == 'X86'" />
+      <ModLoaderNativeFiles Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**" Condition="'$(GameArchitecture)' == 'X64'" />
+      <ModLoaderContentFiles Include="$(MSBuildThisFileDirectory)..\content\**" />
+    </ItemGroup>
+
+    <Error Text="No mod loader native files available for architecture '$(GameArchitecture)'" Condition="'@(ModLoaderNativeFiles)' == ''" />
+
+    <Copy SourceFiles="@(ModLoaderNativeFiles)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ModLoaderContentFiles)" DestinationFolder="$(GamePath)" Condition="!Exists('$(GamePath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="ConfigureModLoader" AfterTargets="PrepareForRun" DependsOnTargets="DeployModLoader;CopyModToGame">
+    <PropertyGroup>
+      <ModLoaderConfigFile>$(GamePath)doorstop_config.ini</ModLoaderConfigFile>
+    </PropertyGroup>
+
+    <ConfigureModLoader ConfigPath="$(ModLoaderConfigFile)" TargetAssemblyPath="$(ModPath)$(TargetFileName)" />
+  </Target>
+
+</Project>
+  

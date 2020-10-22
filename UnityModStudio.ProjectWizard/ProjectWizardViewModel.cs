@@ -28,6 +28,7 @@ namespace UnityModStudio.ProjectWizard
         private string? _unityVersion;
         private string? _monoProfile;
         private string? _targetFrameworkMoniker;
+        private string? _gameExecutableFileName;
         private ImageSource? _gameIcon;
         private IModLoaderManager _detectedModLoader;
         private IModLoaderManager _selectedModLoader;
@@ -85,6 +86,12 @@ namespace UnityModStudio.ProjectWizard
         {
             get => _targetFrameworkMoniker;
             set => SetProperty(ref _targetFrameworkMoniker, value);
+        }
+
+        public string? GameExecutableFileName
+        {
+            get => _gameExecutableFileName;
+            set => SetProperty(ref _gameExecutableFileName, value);
         }
 
         public ImageSource? GameIcon
@@ -185,6 +192,7 @@ namespace UnityModStudio.ProjectWizard
             UnityVersion = gameInformation.UnityVersion;
             TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
             MonoProfile = GetMonoProfileString(gameInformation);
+            GameExecutableFileName = gameInformation.GameExecutableFile.Name;
             GameIcon = GetGameIcon(gameInformation);
 
             DetectedModLoader = DetectModLoader();

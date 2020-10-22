@@ -1,7 +1,5 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
-using System.Reflection;
 
 namespace UnityModStudio.Common.ModLoader
 {
@@ -19,8 +17,7 @@ namespace UnityModStudio.Common.ModLoader
 
         protected string GetConventionalPackageName() => GetType().Assembly.GetName().Name;
 
-        protected string? GetConventionalPackageVersion() =>
-            GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
+        protected string? GetConventionalPackageVersion() => Utils.GetPackageVersion(GetType().Assembly);
 
         protected string? GetConventionalExampleTemplatePath(string language, string templateName, string? category = null)
         {

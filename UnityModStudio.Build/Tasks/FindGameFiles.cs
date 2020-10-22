@@ -10,7 +10,7 @@ namespace UnityModStudio.Build.Tasks
     {
         [Required]
         public ITaskItem? GamePath { get; set; }
-
+        
         [Output]
         public ITaskItem? GameDataPath { get; private set; }
 
@@ -19,6 +19,9 @@ namespace UnityModStudio.Build.Tasks
 
         [Output]
         public ITaskItem[]? GameAssemblies { get; private set; }
+
+        [Output]
+        public ITaskItem? Architecture { get; private set; }
 
         public override bool Execute()
         {
@@ -29,14 +32,17 @@ namespace UnityModStudio.Build.Tasks
                 return false;
             }
 
-            GameDataPath = new TaskItem(gameInformation.GameDataDirectory.FullName);
+            GameDataPath = GetTaskItem(gameInformation.GameDataDirectory);
             FrameworkAssemblies = GetTaskItems(gameInformation.FrameworkAssemblyFiles);
             GameAssemblies = GetTaskItems(gameInformation.GameAssemblyFiles);
+            Architecture = new TaskItem(gameInformation.Architecture.ToString());
             
             return true;
         }
 
-        private static ITaskItem[] GetTaskItems(IReadOnlyCollection<FileInfo> files)
+        private static ITaskItem GetTaskItem(FileSystemInfo file) => new TaskItem(file.FullName);
+
+        private static ITaskItem[] GetTaskItems(IReadOnlyCollection<FileSystemInfo> files)
         {
             var items = new ITaskItem[files.Count];
             var index = 0;

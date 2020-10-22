@@ -54,10 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Class1.cs" />
+    <None Include="Properties\launchSettings.json" />
     <None Include="ProjectTemplate.csproj" />
     <None Include="ProjectTemplate.ico" />
   </ItemGroup>

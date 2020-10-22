@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
+    <GamePath Condition="'$(GamePath)' != '' and !HasTrailingSlash('$(GamePath)')">$(GamePath)\</GamePath>
   </PropertyGroup>
 
   <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
@@ -14,6 +15,7 @@
       <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
       <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
+      <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
     </FindGameFiles>
   </Target>
 
@@ -24,6 +26,17 @@
     <ItemGroup>
       <Reference Include="@(GameAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
     </ItemGroup>
+  </Target>
+
+  <Target Name="CopyModToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles">
+    <PropertyGroup>
+      <ModPath Condition="'$(ModPath)' == ''">$(GamePath)$(ProjectName)</ModPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <ModFiles Include="$(TargetDir)**" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(ModFiles)" DestinationFolder="$(ModPath)" />
   </Target>
 
 </Project>

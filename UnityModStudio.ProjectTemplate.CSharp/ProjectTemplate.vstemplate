@@ -16,13 +16,18 @@
   </TemplateData>
   <TemplateContent>
     <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
-      <ProjectItem TargetFileName="$projectname$.csproj.user">ProjectTemplate.csproj.user.xml</ProjectItem>
+      <ProjectItem TargetFileName="$projectname$.csproj.user" ReplaceParameters="true">ProjectTemplate.csproj.user.xml</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
+      <Folder Name="Properties">
+        <ProjectItem>launchSettings.json</ProjectItem>
+      </Folder>
     </Project>
     <CustomParameters>
       <CustomParameter Name="$TargetFramework$" Value="netstandard2.0"/>
       <CustomParameter Name="$DisableImplicitFrameworkReferences$" Value="false"/>
       <CustomParameter Name="$GameName$" Value=""/>
+      <CustomParameter Name="$GamePath$" Value=""/>
+      <CustomParameter Name="$GameExecutableFileName$" Value=""/>
       <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
     </CustomParameters>
   </TemplateContent>
