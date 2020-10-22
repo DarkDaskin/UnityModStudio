@@ -25,3 +25,15 @@ jobs:
       run: msbuild /t:Restore
     - name: Build
       run: msbuild /p:Configuration=Release
+    - name: Upload NuGet artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: nupkg
+        path: |
+          **/*.nupkg
+    - name: Upload VSIX artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: vsix
+        path: |
+          **/*.vsix
