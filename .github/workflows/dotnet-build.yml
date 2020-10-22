@@ -17,6 +17,8 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
       with:
         vs-version: '[16.0,17.0)'
+    - name: Add package source
+      run: dotnet nuget add source https://nuget.pkg.github.com/DarkDaskin/index.json -n github  -u DarkDaskin -p ${{ secrets.GITHUB_TOKEN }}
     - name: Restore packages
       run: msbuild /t:Restore
     - name: Build
