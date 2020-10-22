@@ -24,6 +24,7 @@ namespace UnityModStudio.ProjectWizard
         private string? _gamePath;
         private string? _error;
         private string? _gameName;
+        private string? _architecture;
         private string? _unityVersion;
         private string? _monoProfile;
         private string? _targetFrameworkMoniker;
@@ -60,6 +61,12 @@ namespace UnityModStudio.ProjectWizard
         {
             get => _gameName;
             set => SetProperty(ref _gameName, value);
+        }
+
+        public string? Architecture
+        {
+            get => _architecture;
+            set => SetProperty(ref _architecture, value);
         }
 
         public string? UnityVersion
@@ -174,6 +181,7 @@ namespace UnityModStudio.ProjectWizard
             
             Error = null;
             GameName = gameInformation.Name;
+            Architecture = gameInformation.Architecture.ToString();
             UnityVersion = gameInformation.UnityVersion;
             TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
             MonoProfile = GetMonoProfileString(gameInformation);

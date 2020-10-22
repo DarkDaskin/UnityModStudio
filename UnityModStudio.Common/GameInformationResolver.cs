@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace UnityModStudio.Common
 {
@@ -43,6 +44,7 @@ namespace UnityModStudio.Common
                 {
                     Name = gameName,
                     Company = company,
+                    Architecture = GetExecutableArchitecture(gameExecutableFile),
                     UnityVersion = GetUnityVersion(gameExecutableFile),
                     TargetFrameworkMoniker = moniker,
                     IsSubsetProfile = isSubset,
@@ -150,6 +152,39 @@ namespace UnityModStudio.Common
             var frameworkAssemblyFiles = assemblyFiles.Where(f => frameworkAssemblyNames.Contains(f.Name, StringComparer.OrdinalIgnoreCase)).ToList();
             var gameAssemblyFiles = assemblyFiles.Except(frameworkAssemblyFiles).ToList();
             return (frameworkAssemblyFiles, gameAssemblyFiles);
+        }
+
+        // See https://stackoverflow.com/a/1002672/280778 and https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
+        private static Architecture GetExecutableArchitecture(FileInfo executableFile)
+        {
+            const int peHeaderOffsetOffset = 0x3c;
+            const uint peSignature = 0x00004550; // 'PE\0\0'
+            // ReSharper disable InconsistentNaming
+            const ushort IMAGE_FILE_MACHINE_I386 = 0x14c;
+            const ushort IMAGE_FILE_MACHINE_AMD64 = 0x8664;
+            const ushort IMAGE_FILE_MACHINE_ARM = 0x1c0;
+            const ushort IMAGE_FILE_MACHINE_ARMNT = 0x1c4;
+            const ushort IMAGE_FILE_MACHINE_ARM64= 0xaa64;
+            // ReSharper restore InconsistentNaming
+
+            using var reader = new BinaryReader(File.OpenRead(executableFile.FullName));
+            reader.BaseStream.Position = peHeaderOffsetOffset;
+            var peHeaderOffset = reader.ReadInt32();
+            reader.BaseStream.Position = peHeaderOffset;
+            var actualPeSignature = reader.ReadUInt32();
+            if (actualPeSignature != peSignature)
+                throw new BadImageFormatException("Invalid PE header.");
+
+            var machineType = reader.ReadUInt16();
+            return machineType switch
+            {
+                IMAGE_FILE_MACHINE_I386 => Architecture.X86,
+                IMAGE_FILE_MACHINE_AMD64 => Architecture.X64,
+                IMAGE_FILE_MACHINE_ARM => Architecture.Arm,
+                IMAGE_FILE_MACHINE_ARMNT => Architecture.Arm,
+                IMAGE_FILE_MACHINE_ARM64 => Architecture.Arm64,
+                _ => throw new BadImageFormatException("Unsupported PE architecture.")
+            };
         }
 
         private static string GetUnityVersion(FileInfo gameExecutableFile) =>

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace UnityModStudio.Common
 {
@@ -8,6 +9,7 @@ namespace UnityModStudio.Common
         public string? Name { get; set; }
         public string? Company { get; set; }
 
+        public Architecture Architecture { get; set; }
         public string UnityVersion { get; set; } = null!;
         public string TargetFrameworkMoniker { get; set; } = null!;
         public bool IsSubsetProfile { get; set; }
