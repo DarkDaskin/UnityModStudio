@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -7,7 +8,8 @@
     <Authors>DarkDaskin</Authors>
     <Company>Dark Daskin</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/DarkDaskin/UnityModStudio/</RepositoryUrl>
+    <RepositoryUrl>https://github.com/DarkDaskin/UnityModStudio.git</RepositoryUrl>
+    <PackageIcon>UnityModStudio-32.png</PackageIcon>
     <!-- Must correspond to one set in the templates' WizardExtension. -->
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SignAssembly>true</SignAssembly>
@@ -17,4 +19,9 @@
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="3.3.37" PrivateAssets="all" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)UnityModStudio-32.png" Pack="true" PackagePath="\" Visible="false" Condition="'$(IsPackable)' == 'true'"  />
+  </ItemGroup>
+
 </Project>

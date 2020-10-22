@@ -1,8 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Unity Mod Studio common types.</Description>
+    <PackageTags>unity; mod</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

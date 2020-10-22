@@ -8,6 +8,7 @@
     Title="Unity mod configuration"
     Width="500"
     d:DataContext="{d:DesignInstance local:ProjectWizardViewModel}"
+    Icon="../UnityModStudio.ico"
     SizeToContent="Height"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">

@@ -4,12 +4,17 @@
     <TargetFramework>net472</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- Reset assembly search paths, so registry is looked up and Visual Studio assemblies not in the SDK can be resolved. -->
     <AssemblySearchPaths></AssemblySearchPaths>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\UnityModStudio.ico" Link="UnityModStudio.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" />

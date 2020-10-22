@@ -49,6 +49,16 @@
     <Compile Include="UnityModStudioPackage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\LICENSE">
+      <Link>LICENSE</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <TargetPath>LICENSE.txt</TargetPath>
+    </Content>
+    <Content Include="..\UnityModStudio.ico">
+      <Link>UnityModStudio.ico</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
