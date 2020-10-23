@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\UnityModStudio.ico" Link="UnityModStudio.ico" />
+    <Resource Include="..\UnityModStudio.ico" Link="%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
