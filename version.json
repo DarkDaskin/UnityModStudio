@@ -3,8 +3,11 @@
   "version": "1.0-alpha",
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
-    "^refs/heads/v\\d+(?:\\.\\d+)?$"
+    "^refs/heads/release/\\d+(?:\\.\\d+)?$"
   ],
+  "release": {
+    "branchName": "release/{version}"
+  },
   "pathFilters": [ ":/", ":!README.md", ":!.github" ],
   "cloudBuild": {
     "buildNumber": {
