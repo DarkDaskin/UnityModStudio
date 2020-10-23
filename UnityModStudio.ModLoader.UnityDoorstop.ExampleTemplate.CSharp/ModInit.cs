@@ -23,7 +23,7 @@ namespace $rootnamespace$
             // The Main method is called before Unity has initialized.
             if (args.LoadedAssembly.GetType("UnityEngine.Application") != null)
             {
-                Debug.Log("Hello from $projectname$!");
+                Debug.Log("Hello from $rootnamespace$!");
             }
         }
 }

@@ -2,10 +2,16 @@
 <VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
   <TemplateData>
     <Name>Unity game mod (C#)</Name>
-    <Description>Unity game mod (C#)</Description>
-    <Icon>ProjectTemplate.ico</Icon>
+    <Description>A project for building and deploying a Unity game mod.</Description>
+    <Icon>UnityModProject.CSharp.ico</Icon>
     <ProjectType>CSharp</ProjectType>
     <LanguageTag>CSharp</LanguageTag>
+    <PlatformTag>Windows</PlatformTag>
+    <PlatformTag>Linux</PlatformTag>
+    <PlatformTag>macOS</PlatformTag>
+    <ProjectTypeTag>Library</ProjectTypeTag>
+    <ProjectTypeTag>Games</ProjectTypeTag>
+    <ProjectTypeTag>Extension</ProjectTypeTag>
     <SortOrder>1000</SortOrder>
     <TemplateID>387519ac-7584-4c99-916a-f038bac3499f</TemplateID>
     <CreateNewFolder>true</CreateNewFolder>
@@ -15,8 +21,8 @@
     <CreateInPlace>true</CreateInPlace>
   </TemplateData>
   <TemplateContent>
-    <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
-      <ProjectItem TargetFileName="$projectname$.csproj.user" ReplaceParameters="true">ProjectTemplate.csproj.user.xml</ProjectItem>
+    <Project File="UnityModProject.csproj" ReplaceParameters="true">
+      <ProjectItem TargetFileName="$projectname$.csproj.user" ReplaceParameters="true">UnityModProject.csproj.user.xml</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
       <Folder Name="Properties">
         <ProjectItem>launchSettings.json</ProjectItem>
