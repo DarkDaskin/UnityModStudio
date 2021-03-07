@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using Microsoft.VisualStudio.PlatformUI;
+
+namespace UnityModStudio.Options
+{
+    public class ObservableObjectWithValidation : ObservableObject, INotifyDataErrorInfo
+    {
+        private readonly Dictionary<string, List<object>> _errors = new Dictionary<string, List<object>>();
+
+        public IEnumerable GetErrors(string propertyName) => 
+            _errors.TryGetValue(propertyName, out var errors) ? errors : Enumerable.Empty<object>();
+
+        public bool HasErrors => _errors.Values.Any(errors => errors.Count > 0);
+
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+
+        protected void NotifyErrorsChanged([CallerMemberName] string propertyName = "")
+        {
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            NotifyPropertyChanged(nameof(HasErrors));
+        }
+
+        protected bool SetPropertyWithValidation<T>(ref T field, T newValue, Func<T, IEnumerable<object>> validator, [CallerMemberName] string propertyName = "")
+        {
+            if (!SetProperty(ref field, newValue, propertyName))
+                return false;
+
+            _errors[propertyName] = validator(newValue).ToList();
+            NotifyErrorsChanged(propertyName);
+
+            return true;
+        }
+
+        protected void ClearErrors([CallerMemberName] string propertyName = "") => _errors.Remove(propertyName);
+
+        protected void AddError(object error, [CallerMemberName] string propertyName = "")
+        {
+            if (!_errors.TryGetValue(propertyName, out var errors))
+                _errors[propertyName] = errors = new List<object>();
+
+            errors.Add(error);
+        }
+
+        protected bool HasPropertyErrors([CallerMemberName] string propertyName = "") =>
+            _errors.TryGetValue(propertyName, out var errors) && errors.Count > 0;
+    }
+}

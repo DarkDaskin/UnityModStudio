@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.Shell;
+using UnityModStudio.Options;
 using Task = System.Threading.Tasks.Task;
 
 namespace UnityModStudio
@@ -23,8 +24,9 @@ namespace UnityModStudio
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
+    [ProvideOptionPage(typeof(GameRegistryPage), GameRegistryPage.CategoryName, GameRegistryPage.PageName, 0, 0, true)]
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(UnityModStudioPackage.PackageGuidString)]
+    [Guid(PackageGuidString)]
     public sealed class UnityModStudioPackage : AsyncPackage
     {
         /// <summary>
@@ -45,7 +47,7 @@ namespace UnityModStudio
         {
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
-            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         }
 
         #endregion
