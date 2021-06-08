@@ -8,7 +8,7 @@
         {
             InitializeComponent();
 
-            ViewModel = new ProjectWizardViewModel(new WindowsFormsWindowAdapter(this));
+            ViewModel = new ProjectWizardViewModel();
             DataContext = ViewModel;
 
             ViewModel.Closed += success =>

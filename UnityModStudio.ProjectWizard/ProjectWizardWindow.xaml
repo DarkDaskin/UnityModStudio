@@ -1,17 +1,52 @@
-﻿<Window
+﻿<platformUi:DialogWindow
     x:Class="UnityModStudio.ProjectWizard.ProjectWizardWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:UnityModStudio.ProjectWizard"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
     Title="Unity mod configuration"
     Width="500"
     d:DataContext="{d:DesignInstance local:ProjectWizardViewModel}"
     Icon="UnityModStudio.ico"
+    ShowInTaskbar="False"
     SizeToContent="Height"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
+
+    <Window.Resources>
+        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+            <Setter Property="Margin" Value="4" />
+        </Style>
+        <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
+            <Setter Property="Margin" Value="4" />
+        </Style>
+        <Style BasedOn="{StaticResource {x:Type ComboBox}}" TargetType="ComboBox">
+            <Setter Property="Margin" Value="4" />
+        </Style>
+        <Style TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="HeaderedContentControl">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Header" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ContentPresenter
+                                Grid.Column="0"
+                                Margin="0,0,8,0"
+                                ContentSource="Header" />
+                            <ContentPresenter Grid.Column="1" TextBlock.FontWeight="Bold" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -19,35 +54,6 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
-        <Grid.Resources>
-            <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
-                <Setter Property="Margin" Value="4" />
-            </Style>
-            <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
-                <Setter Property="Margin" Value="4" />
-            </Style>
-            <Style TargetType="HeaderedContentControl">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="HeaderedContentControl">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" SharedSizeGroup="Header" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <ContentPresenter
-                                    Grid.Column="0"
-                                    Margin="0,0,8,0"
-                                    ContentSource="Header" />
-                                <ContentPresenter Grid.Column="1" TextBlock.FontWeight="Bold" />
-                            </Grid>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-        </Grid.Resources>
 
         <GroupBox Grid.Row="0" Header="Game selection">
             <Grid>
@@ -61,24 +67,31 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <Label
                         Grid.Row="0"
                         Grid.Column="0"
-                        Content="Game path:"
-                        Target="{Binding ElementName=GamePathTextBox}" />
-                    <TextBox
-                        Name="GamePathTextBox"
+                        Content="Game:"
+                        Target="{Binding ElementName=GamePathComboBox}" />
+                    <ComboBox
+                        Name="GamePathComboBox"
                         Grid.Row="0"
                         Grid.Column="1"
-                        Text="{Binding GamePath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+                        DisplayMemberPath="DisplayName"
+                        ItemsSource="{Binding Games}"
+                        SelectedItem="{Binding Game}" />
                     <Button
                         Grid.Row="0"
                         Grid.Column="2"
-                        Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
-                        Command="{Binding BrowseForGamePathCommand}"
-                        Content="…" />
+                        Command="{Binding NewGameCommand}"
+                        Content="New…" />
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="3"
+                        Command="{Binding UpdateGameCommand}"
+                        Content="Update…" />
                 </Grid>
 
                 <Grid Grid.Row="1">
@@ -99,6 +112,7 @@
                         Grid.IsSharedSizeScope="True"
                         Visibility="{Binding GameInformationVisibility}">
 
+                        <HeaderedContentControl Content="{Binding GamePath}" Header="Game path:" />
                         <HeaderedContentControl Content="{Binding GameName}" Header="Game name:" />
                         <HeaderedContentControl Content="{Binding Architecture}" Header="Architecture:" />
                         <HeaderedContentControl Content="{Binding UnityVersion}" Header="Unity version:" />
@@ -115,13 +129,13 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Row="1" Header="Mod loader">
+        <GroupBox
+            Grid.Row="1"
+            Grid.IsSharedSizeScope="True"
+            Header="Mod loader">
             <StackPanel>
-                <ComboBox
-                    DisplayMemberPath="Name"
-                    ItemsSource="{Binding ModLoaders}"
-                    SelectedItem="{Binding SelectedModLoader}" />
-                <HeaderedContentControl Content="{Binding DetectedModLoader.Name}" Header="Detected mod loader:" />
+                <HeaderedContentControl Content="{Binding SelectedModLoader.Name}" Header="Selected:" />
+                <HeaderedContentControl Content="{Binding DetectedModLoader.Name}" Header="Detected:" />
             </StackPanel>
         </GroupBox>
 
@@ -147,4 +161,4 @@
                 IsCancel="True" />
         </StackPanel>
     </Grid>
-</Window>
+</platformUi:DialogWindow>

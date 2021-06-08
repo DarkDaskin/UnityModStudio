@@ -67,7 +67,7 @@ namespace UnityModStudio.ProjectWizard
             var window = new ProjectWizardWindow();
             var viewModel = window.ViewModel;
             _componentModel!.DefaultCompositionService.SatisfyImportsOnce(viewModel);
-            if (!window.ShowDialog() ?? false)
+            if (!window.ShowModal() ?? false)
                 return false;
 
             _modLoaderManager = viewModel.SelectedModLoader;

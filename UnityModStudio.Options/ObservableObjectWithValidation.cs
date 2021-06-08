@@ -12,8 +12,10 @@ namespace UnityModStudio.Options
     {
         private readonly Dictionary<string, List<object>> _errors = new Dictionary<string, List<object>>();
 
-        public IEnumerable GetErrors(string propertyName) => 
+        public IEnumerable<object> GetErrors(string propertyName) => 
             _errors.TryGetValue(propertyName, out var errors) ? errors : Enumerable.Empty<object>();
+
+        IEnumerable INotifyDataErrorInfo.GetErrors(string propertyName) => GetErrors(propertyName);
 
         public bool HasErrors => _errors.Values.Any(errors => errors.Count > 0);
 
@@ -35,6 +37,8 @@ namespace UnityModStudio.Options
 
             return true;
         }
+
+        protected void ClearAllErrors() => _errors.Clear();
 
         protected void ClearErrors([CallerMemberName] string propertyName = "") => _errors.Remove(propertyName);
 
