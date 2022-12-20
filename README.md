@@ -8,7 +8,7 @@ Allows creating mods for Unity games using Visual Studio 2019.
 - Referencing game assemblies.
 - Deploying the mod into the game.
   - Deploying and configuring a mod loader.
-- Resolving the game path from built-in game gegistry.
+- Resolving the game path from built-in game registry.
 
 ## Planned features
 - Resolving the game path from Steam or Windows registry.
