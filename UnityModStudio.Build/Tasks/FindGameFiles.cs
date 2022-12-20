@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Microsoft.Build.Framework;
+﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Collections.Generic;
+using System.IO;
 using UnityModStudio.Common;
 
 namespace UnityModStudio.Build.Tasks
@@ -10,7 +10,7 @@ namespace UnityModStudio.Build.Tasks
     {
         [Required]
         public ITaskItem? GamePath { get; set; }
-        
+
         [Output]
         public ITaskItem? GameDataPath { get; private set; }
 
@@ -23,20 +23,23 @@ namespace UnityModStudio.Build.Tasks
         [Output]
         public ITaskItem? Architecture { get; private set; }
 
+        [Output]
+        public string? Error { get; private set; }
+
         public override bool Execute()
         {
             var gamePath = GamePath?.GetMetadata("FullPath");
             if (!GameInformationResolver.TryGetGameInformation(gamePath, out var gameInformation, out var error))
             {
-                Log.LogError(error);
-                return false;
+                Error = error;
+                return true;
             }
 
             GameDataPath = GetTaskItem(gameInformation.GameDataDirectory);
             FrameworkAssemblies = GetTaskItems(gameInformation.FrameworkAssemblyFiles);
             GameAssemblies = GetTaskItems(gameInformation.GameAssemblyFiles);
             Architecture = new TaskItem(gameInformation.Architecture.ToString());
-            
+
             return true;
         }
 

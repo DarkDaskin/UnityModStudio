@@ -7,16 +7,47 @@
   </PropertyGroup>
 
   <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveGamePath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
   <Target Name="FindGameFiles">
-    <Error Condition="'$(GamePath)' == ''" Text="Game path is not set."  />
-
-    <FindGameFiles GamePath="$(GamePath)">
+    <FindGameFiles GamePath="$(GamePath)" Condition="'$(GamePath)' != ''">
       <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
       <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
       <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
+      <Output TaskParameter="Error" PropertyName="_FindGameFilesErrorStage1" />
     </FindGameFiles>
+
+    <ItemGroup>
+      <GameLookupProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
+      <GameLookupProperty Include="DisplayName" Value="$(GameDisplayName)" Condition="'$(GameDisplayName)' != ''" />
+      <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
+    </ItemGroup>
+    <ResolveGamePath LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" Condition="'$(GamePath)' == '' or '$(_FindGameFilesErrorStage1)' != ''" >
+      <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
+    </ResolveGamePath>
+
+    <FindGameFiles GamePath="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''">
+      <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
+      <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
+      <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
+      <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
+      <Output TaskParameter="Error" PropertyName="_FindGameFilesErrorStage2" />
+    </FindGameFiles>
+    <Error Text="$(_FindGameFilesErrorStage2)" Condition="'$(_FindGameFilesErrorStage2)' != ''" />
+
+    <PropertyGroup>
+      <GamePath Condition="'$(_ResolvedGamePath)' != ''">$(_ResolvedGamePath)</GamePath>
+      <ProjectUserFilePath>$(MSBuildProjectFullPath).user</ProjectUserFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ProjectUserProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
+      <!-- TODO: ensure GameExecutable is always set to a correct value, resolve if needed. -->
+      <_ProjectUserProperty Include="GameExecutable" Value="$(GameExecutable)" Comment="Has to be specified here. Not picked up from .targets files." Condition="'$(GameExecutable)' != ''" />
+      <_ProjectUserProperty Include="GameDisplayName" Value="$(GameDisplayName)" Condition="'$(GameDisplayName)' != ''" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(ProjectUserFilePath)" Properties="@(_ProjectUserProperty)" Condition="'$(_ResolvedGamePath)' != ''" />
   </Target>
 
   <Target Name="AddGameAssemblyReferences" BeforeTargets="PrepareForBuild" DependsOnTargets="FindGameFiles">
