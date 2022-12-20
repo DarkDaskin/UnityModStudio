@@ -61,7 +61,7 @@
 
   <Target Name="CopyModToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles">
     <PropertyGroup>
-      <ModPath Condition="'$(ModPath)' == ''">$(GamePath)$(ProjectName)</ModPath>
+      <ModPath Condition="'$(ModPath)' == ''">$(GamePath)$(ProjectName)\</ModPath>
     </PropertyGroup>
     <ItemGroup>
       <ModFiles Include="$(TargetDir)**" />
