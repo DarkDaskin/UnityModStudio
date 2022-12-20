@@ -4,7 +4,7 @@
   "profiles": {
     "Game": {
       "commandName": "Executable",
-      "executablePath": "$(GameExecutable)",
+      "executablePath": "$(GamePath)$(GameExecutableFileName)",
       "workingDirectory": "$(GamePath)"
     }
   }

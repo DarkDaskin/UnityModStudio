@@ -75,6 +75,7 @@ namespace UnityModStudio.ProjectWizard
             replacementsDictionary["$TargetFramework$"] = viewModel.TargetFrameworkMoniker;
             replacementsDictionary["$BuildPackageVersion$"] = GetBuildPackageVersion();
             replacementsDictionary["$GamePath$"] = viewModel.GamePath;
+            replacementsDictionary["$GameDisplayName$"] = viewModel.Game?.DisplayName;
             // Just for information.
             replacementsDictionary["$GameName$"] = viewModel.GameName;
             // Must be known without running any targets to be picked up by launchSettings.json

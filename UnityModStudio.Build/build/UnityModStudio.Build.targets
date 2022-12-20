@@ -26,6 +26,7 @@
     </ItemGroup>
     <ResolveGamePath LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" Condition="'$(GamePath)' == '' or '$(_FindGameFilesErrorStage1)' != ''" >
       <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
+      <Output TaskParameter="GameDisplayName" PropertyName="GameDisplayName" />
     </ResolveGamePath>
 
     <FindGameFiles GamePath="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''">
@@ -43,8 +44,6 @@
     </PropertyGroup>
     <ItemGroup>
       <_ProjectUserProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
-      <!-- TODO: ensure GameExecutable is always set to a correct value, resolve if needed. -->
-      <_ProjectUserProperty Include="GameExecutable" Value="$(GameExecutable)" Comment="Has to be specified here. Not picked up from .targets files." Condition="'$(GameExecutable)' != ''" />
       <_ProjectUserProperty Include="GameDisplayName" Value="$(GameDisplayName)" Condition="'$(GameDisplayName)' != ''" />
     </ItemGroup>
     <UpdateProjectFile ProjectFile="$(ProjectUserFilePath)" Properties="@(_ProjectUserProperty)" Condition="'$(_ResolvedGamePath)' != ''" />

@@ -2,7 +2,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <GamePath>$GamePath$</GamePath>
-    <!-- Has to be specified here. Not picked up from .targets files. -->
-    <GameExecutable>$(GamePath)\$GameExecutableFileName$</GameExecutable>
+    <GameDisplayName>$GameDisplayName$</GameDisplayName>
   </PropertyGroup>
 </Project>

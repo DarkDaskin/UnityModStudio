@@ -16,6 +16,9 @@ namespace UnityModStudio.Build.Tasks
         [Output]
         public ITaskItem? GamePath { get; private set; }
 
+        [Output]
+        public ITaskItem? GameDisplayName { get; private set; }
+
         public override bool Execute()
         {
             var properties = LookupProperties.ToDictionary(item => item.ItemSpec, item => item.GetMetadata("Value"));
@@ -35,6 +38,7 @@ namespace UnityModStudio.Build.Tasks
             {
                 case GameMatchResult.Match match:
                     GamePath = new TaskItem(match.Game.Path);
+                    GameDisplayName = new TaskItem(match.Game.DisplayName);
                     return true;
 
                 case GameMatchResult.NoMatch:
