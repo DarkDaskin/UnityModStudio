@@ -42,8 +42,8 @@ namespace UnityModStudio.ProjectWizard
 
         public ProjectWizardViewModel()
         {
-            NewGameCommand = new DelegateCommand(NewGame);
-            UpdateGameCommand = new DelegateCommand(UpdateGame, () => Game != null);
+            NewGameCommand = new DelegateCommand(NewGame, null, ThreadHelper.JoinableTaskFactory);
+            UpdateGameCommand = new DelegateCommand(UpdateGame, () => Game != null, ThreadHelper.JoinableTaskFactory);
         }
 
         private void NewGame()

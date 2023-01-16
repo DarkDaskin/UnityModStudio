@@ -2,7 +2,7 @@
 {
     public class NullModLoaderManager : ModLoaderManagerBase
     {
-        public static readonly NullModLoaderManager Instance = new NullModLoaderManager();
+        public static readonly NullModLoaderManager Instance = new();
 
         public override string Id => "None";
         public override string Name => "None";

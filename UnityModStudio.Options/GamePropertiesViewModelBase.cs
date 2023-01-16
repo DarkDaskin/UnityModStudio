@@ -10,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
 using UnityModStudio.Common;
 using UnityModStudio.Common.ModLoader;
 using UnityModStudio.Common.Options;
@@ -141,8 +142,8 @@ namespace UnityModStudio.Options
 
         protected GamePropertiesViewModelBase()
         {
-            ConfirmCommand = new DelegateCommand(Confirm, () => !HasErrors);
-            CancelCommand = new DelegateCommand(Cancel);
+            ConfirmCommand = new DelegateCommand(Confirm, () => !HasErrors, ThreadHelper.JoinableTaskFactory);
+            CancelCommand = new DelegateCommand(Cancel, null, ThreadHelper.JoinableTaskFactory);
         }
 
         private void SetSelectedModLoader(IModLoaderManager modLoader, bool isSetByUser)

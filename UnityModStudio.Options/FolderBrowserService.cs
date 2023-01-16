@@ -32,6 +32,8 @@ namespace UnityModStudio.Options
             const uint BIF_RETURNONLYFSDIRS = 0x00000001;
             // ReSharper restore InconsistentNaming, IdentifierTypo
 
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var hr = uiShell.GetDialogOwnerHwnd(out var ownerHwnd);
             ErrorHandler.ThrowOnFailure(hr);
 

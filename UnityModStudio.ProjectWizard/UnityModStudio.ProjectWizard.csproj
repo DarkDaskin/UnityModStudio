@@ -7,28 +7,19 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Reset assembly search paths, so registry is looked up and Visual Studio assemblies not in the SDK can be resolved. -->
-    <AssemblySearchPaths></AssemblySearchPaths>
-  </PropertyGroup>
-
   <ItemGroup>
     <Resource Include="..\UnityModStudio.ico" Link="%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.4.33103.184" />
+    <PackageReference Include="Microsoft.VisualStudio.TemplateWizardInterface" Version="17.4.33103.184" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
     <ProjectReference Include="..\UnityModStudio.ModLoader.UnityDoorstop\UnityModStudio.ModLoader.UnityDoorstop.csproj" />
     <ProjectReference Include="..\UnityModStudio.Options\UnityModStudio.Options.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface" Private="false" />
-    <Reference Include="System.ComponentModel.Composition" Private="false" />
   </ItemGroup>
 
 </Project>

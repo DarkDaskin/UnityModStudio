@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Microsoft.Internal.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Options
@@ -30,9 +31,9 @@ namespace UnityModStudio.Options
 
         public GameRegistryViewModel()
         {
-            AddGameCommand = new DelegateCommand(AddGame);
-            UpdateGameCommand = new DelegateCommand<Game>(UpdateGame, IsGameSelected);
-            RemoveGameCommand = new DelegateCommand<Game>(RemoveGame, IsGameSelected);
+            AddGameCommand = new DelegateCommand(AddGame, null, ThreadHelper.JoinableTaskFactory);
+            UpdateGameCommand = new DelegateCommand<Game>(UpdateGame, IsGameSelected, ThreadHelper.JoinableTaskFactory);
+            RemoveGameCommand = new DelegateCommand<Game>(RemoveGame, IsGameSelected, ThreadHelper.JoinableTaskFactory);
         }
 
         private void AddGame()

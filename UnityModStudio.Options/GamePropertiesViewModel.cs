@@ -39,7 +39,7 @@ namespace UnityModStudio.Options
             Game = game;
             DisplayName = Game.DisplayName;
             
-            BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath);
+            BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath, null, ThreadHelper.JoinableTaskFactory);
         }
 
         private void BrowseForGamePath()
