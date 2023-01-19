@@ -70,13 +70,13 @@
     <Error Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFiles)' == ''" />
 
     <PropertyGroup>
-      <_PrimaryDoorstopDllName>winhttp.dll</_PrimaryDoorstopDllName>
-      <_AlternateDoorstopDllName>version.dll</_AlternateDoorstopDllName>
+      <_PrimaryDoorstopDllPath>$(GamePath)winhttp.dll</_PrimaryDoorstopDllPath>
+      <_AlternateDoorstopDllPath>$(GamePath)version.dll</_AlternateDoorstopDllPath>
     </PropertyGroup>
 
-    <Copy SourceFiles="@(DoorstopNativeFiles)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="True" Condition="!Exists('$(GamePath)$(_PrimaryDoorstopDllName)') and !Exists('$(GamePath)$(_AlternateDoorstopDllName)')" />
-    <Move SourceFiles="$(GamePath)$(_PrimaryDoorstopDllName)" DestinationFiles="$(GamePath)$(_AlternateDoorstopDllName)" Condition="'$(UseAlternateDoorstopDllName)' == 'True'" />
-    <Move SourceFiles="$(GamePath)$(_AlternateDoorstopDllName)" DestinationFiles="$(GamePath)$(_PrimaryDoorstopDllName)" Condition="'$(UseAlternateDoorstopDllName)' != 'True'" />
+    <Copy SourceFiles="@(DoorstopNativeFiles)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="True" Condition="!Exists('$(_PrimaryDoorstopDllPath)') and !Exists('$(_AlternateDoorstopDllPath)')" />
+    <Move SourceFiles="$(_PrimaryDoorstopDllPath)" DestinationFiles="$(_AlternateDoorstopDllPath)" Condition="Exists('$(_PrimaryDoorstopDllPath)') and '$(UseAlternateDoorstopDllName)' == 'True'" />
+    <Move SourceFiles="$(_AlternateDoorstopDllPath)" DestinationFiles="$(_PrimaryDoorstopDllPath)" Condition="Exists('$(_AlternateDoorstopDllPath)') and '$(UseAlternateDoorstopDllName)' != 'True'" />
     <Copy SourceFiles="@(DoorstopContentFiles)" DestinationFolder="$(GamePath)" Condition="!Exists('$(GamePath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
