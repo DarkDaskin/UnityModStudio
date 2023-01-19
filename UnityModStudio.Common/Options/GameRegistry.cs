@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Directory = System.IO.Directory;
@@ -13,10 +14,12 @@ namespace UnityModStudio.Common.Options
     public interface IGameRegistry
     {
         IReadOnlyCollection<Game> Games { get; }
+        bool WatchForChanges { get; set; }
 
         void AddGame(Game game);
         void RemoveGame(Game game);
-        Game? FindGameByName(string name);
+        Game? FindGameById(Guid id);
+        Game? FindGameByDisplayName(string name);
         GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties);
 
         Task LoadAsync();
@@ -28,37 +31,48 @@ namespace UnityModStudio.Common.Options
         private readonly string _storePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             @"UnityModStudio\GameRegistry.json");
-        private readonly List<Game> _games = new();
+        private readonly Dictionary<Guid, Game> _games = new();
+        private readonly FileSystemWatcher _fsWatcher;
 
-        public IReadOnlyCollection<Game> Games => _games;
+        public bool WatchForChanges
+        {
+            get => _fsWatcher.EnableRaisingEvents;
+            set => _fsWatcher.EnableRaisingEvents = value;
+        }
 
-        public void AddGame(Game game) => _games.Add(game);
+        public GameRegistry()
+        {
+            _fsWatcher = new FileSystemWatcher(Path.GetDirectoryName(_storePath)!, Path.GetFileName(_storePath))
+            {
+                NotifyFilter = NotifyFilters.LastWrite,
+                EnableRaisingEvents = false,
+            };
+            _fsWatcher.Changed += OnStoreChanged;
+        }
 
-        public void RemoveGame(Game game) => _games.Remove(game);
+        private async void OnStoreChanged(object sender, FileSystemEventArgs e) => await LoadAsync();
 
-        public Game? FindGameByName(string name) => _games.Find(game => string.Equals(game.DisplayName, name, StringComparison.CurrentCultureIgnoreCase));
+        public IReadOnlyCollection<Game> Games => _games.Values;
+
+        public void AddGame(Game game) => _games.Add(game.Id, game);
+
+        public void RemoveGame(Game game) => _games.Remove(game.Id);
+
+        public Game? FindGameById(Guid id) => _games.TryGetValue(id, out var game) ? game : null;
+
+        public Game? FindGameByDisplayName(string name) => Games.FirstOrDefault(game => string.Equals(game.DisplayName, name, StringComparison.CurrentCultureIgnoreCase));
 
         public GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties)
         {
-            IReadOnlyList<Game> matches = Array.Empty<Game>();
-
-            // First, check whether the user has moved or renamed the game.
-            // Both DisplayName and Path have equal priority and must not point to different records.
-            if (properties.TryGetValue(nameof(Game.DisplayName), out var displayName) | properties.TryGetValue(nameof(Game.Path), out var path))
-            {
-                matches = _games.FindAll(game => game.DisplayName == displayName || game.Path == path);
-                if (matches.Count > 0)
-                    return GameMatchResult.Create(matches, "");
-            }
-
-            // TODO: some way to determine which keys to match
+            if (properties.TryGetValue(nameof(Game.Id), out var idString) && _games.TryGetValue(Guid.Parse(idString), out var match))
+                return new GameMatchResult.Match(match);
+            
             if (properties.TryGetValue(nameof(Game.GameName), out var gameName))
             {
-                matches = _games.FindAll(game => game.GameName == gameName);
+                var matches = Games.Where(game => game.GameName == gameName).ToList();
                 if (matches.Count > 0)
                     return GameMatchResult.Create(matches, "");
             }
-
 
             return new GameMatchResult.NoMatch();
         }
@@ -70,7 +84,8 @@ namespace UnityModStudio.Common.Options
             try
             {
                 using var stream = File.OpenRead(_storePath);
-                _games.AddRange(await JsonSerializer.DeserializeAsync<Game[]>(stream) ?? Array.Empty<Game>());
+                foreach (var game in await JsonSerializer.DeserializeAsync<Game[]>(stream) ?? Array.Empty<Game>())
+                    AddGame(game);
             }
             catch (Exception exception)
             {
@@ -84,8 +99,8 @@ namespace UnityModStudio.Common.Options
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(_storePath)!);
 
-                using var stream = File.OpenWrite(_storePath);
-                await JsonSerializer.SerializeAsync(stream, _games);
+                using var stream = File.Open(_storePath, FileMode.Truncate);
+                await JsonSerializer.SerializeAsync(stream, Games);
             }
             catch (Exception exception)
             {

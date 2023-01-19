@@ -24,6 +24,7 @@
     <Project File="UnityModProject.csproj" ReplaceParameters="true">
       <ProjectItem TargetFileName="$projectname$.csproj.user" ReplaceParameters="true">UnityModProject.csproj.user.xml</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">ModInit.cs</ProjectItem>
       <Folder Name="Properties">
         <ProjectItem>launchSettings.json</ProjectItem>
       </Folder>

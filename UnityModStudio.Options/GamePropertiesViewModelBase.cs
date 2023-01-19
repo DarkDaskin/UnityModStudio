@@ -1,8 +1,5 @@
 ﻿using System;
-using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -12,7 +9,6 @@ using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using UnityModStudio.Common;
-using UnityModStudio.Common.ModLoader;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Options
@@ -28,10 +24,6 @@ namespace UnityModStudio.Options
         private string? _targetFrameworkMoniker;
         private string? _gameExecutableFileName;
         private ImageSource? _gameIcon;
-        private bool _isModLoaderSetByUser = false;
-        private IModLoaderManager _selectedModLoader = NullModLoaderManager.Instance;
-        private IModLoaderManager _detectedModLoader = NullModLoaderManager.Instance;
-        private IModLoaderManager[] _modLoaders = {NullModLoaderManager.Instance};
 
 
         public Game? Game
@@ -101,38 +93,7 @@ namespace UnityModStudio.Options
         }
 
         public bool HasValidGamePath => !string.IsNullOrWhiteSpace(GamePath) && !HasPropertyErrors(nameof(GamePath));
-
-        public IModLoaderManager SelectedModLoader
-        {
-            get => _selectedModLoader;
-            set => SetSelectedModLoader(value, true);
-        }
-
-        public IModLoaderManager DetectedModLoader
-        {
-            get => _detectedModLoader;
-            private set => SetProperty(ref _detectedModLoader, value ?? throw new ArgumentNullException());
-        }
-
-        [ImportMany]
-        public IModLoaderManager[] ModLoaders
-        {
-            get => _modLoaders;
-            set
-            {
-                _modLoaders = value ?? throw new ArgumentNullException();
-                Debug.Assert(_modLoaders.OfType<NullModLoaderManager>().Any(), "NullModLoaderManager must be always present.");
-                Array.Sort(_modLoaders, (x, y) => x.Priority.CompareTo(y.Priority));
-                NotifyPropertyChanged();
-
-                if (Game?.ModLoaderId != null)
-                {
-                    SelectedModLoader = _modLoaders.SingleOrDefault(loader => loader.Id == Game.ModLoaderId) ??
-                                        _modLoaders.OfType<NullModLoaderManager>().Single();
-                }
-            }
-        }
-
+        
 
         public ICommand ConfirmCommand { get; }
         public ICommand CancelCommand { get; }
@@ -144,12 +105,6 @@ namespace UnityModStudio.Options
         {
             ConfirmCommand = new DelegateCommand(Confirm, () => !HasErrors, ThreadHelper.JoinableTaskFactory);
             CancelCommand = new DelegateCommand(Cancel, null, ThreadHelper.JoinableTaskFactory);
-        }
-
-        private void SetSelectedModLoader(IModLoaderManager modLoader, bool isSetByUser)
-        {
-            SetProperty(ref _selectedModLoader, modLoader, nameof(SelectedModLoader));
-            _isModLoaderSetByUser = isSetByUser;
         }
 
         private void Confirm()
@@ -198,10 +153,6 @@ namespace UnityModStudio.Options
             GameExecutableFileName = gameInformation.GameExecutableFile.Name;
             GameIcon = GetGameIcon(gameInformation);
 
-            DetectedModLoader = DetectModLoader();
-            if (!_isModLoaderSetByUser)
-                SetSelectedModLoader(DetectedModLoader, false);
-
             return true;
         }
 
@@ -218,20 +169,9 @@ namespace UnityModStudio.Options
             return "<unknown>";
         }
 
-        private IModLoaderManager DetectModLoader()
-        {
-            var query =
-                from loader in ModLoaders
-                orderby loader.Priority descending
-                where loader.IsInstalled(GamePath!)
-                select loader;
-            return query.FirstOrDefault() ?? NullModLoaderManager.Instance;
-        }
-
         protected virtual void OnConfirm()
         {
             Game!.Path = GamePath!;
-            Game.ModLoaderId = SelectedModLoader.Id;
             Game.GameName = GameName;
             Game.GameExecutableFileName = GameExecutableFileName;
             Game.Architecture = Architecture;

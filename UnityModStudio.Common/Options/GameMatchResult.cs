@@ -5,6 +5,8 @@ namespace UnityModStudio.Common.Options
 {
     public abstract class GameMatchResult
     {
+        public virtual bool Success => false;
+
         private protected GameMatchResult()
         {
         }
@@ -17,6 +19,7 @@ namespace UnityModStudio.Common.Options
                 _ => new AmbiguousMatch(games, ambiguousMessage)
             };
 
+
         public sealed class NoMatch : GameMatchResult
         {
         }
@@ -24,6 +27,8 @@ namespace UnityModStudio.Common.Options
         public sealed class Match : GameMatchResult
         {
             public Game Game { get; }
+
+            public override bool Success => true;
 
             public Match(Game game)
             {

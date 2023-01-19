@@ -19,13 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.json = version.json
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityModStudio.ModLoader.UnityDoorstop", "UnityModStudio.ModLoader.UnityDoorstop\UnityModStudio.ModLoader.UnityDoorstop.csproj", "{1DEC606E-1A26-42FA-989B-F4EDDEBAC210}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.ModLoader.UnityDoorstop.ExampleTemplate.CSharp", "UnityModStudio.ModLoader.UnityDoorstop.ExampleTemplate.CSharp\UnityModStudio.ModLoader.UnityDoorstop.ExampleTemplate.CSharp.csproj", "{4B144ADE-6A9F-4904-8E42-30368FE363FD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityModStudio.Options", "UnityModStudio.Options\UnityModStudio.Options.csproj", "{D68FB3B2-17BB-4FB8-88C1-B80EBBA4A28C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ModLoaders", "ModLoaders", "{A4E105A3-138C-4DBC-826C-5E8DE27E66FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio", "UnityModStudio\UnityModStudio.csproj", "{1089A657-6DF7-41E5-8872-D1C5C60130F2}"
 EndProject
@@ -51,14 +45,6 @@ Global
 		{D3CEA042-AE51-469E-96AB-B49E1BB38100}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3CEA042-AE51-469E-96AB-B49E1BB38100}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3CEA042-AE51-469E-96AB-B49E1BB38100}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1DEC606E-1A26-42FA-989B-F4EDDEBAC210}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1DEC606E-1A26-42FA-989B-F4EDDEBAC210}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1DEC606E-1A26-42FA-989B-F4EDDEBAC210}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1DEC606E-1A26-42FA-989B-F4EDDEBAC210}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4B144ADE-6A9F-4904-8E42-30368FE363FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4B144ADE-6A9F-4904-8E42-30368FE363FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4B144ADE-6A9F-4904-8E42-30368FE363FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4B144ADE-6A9F-4904-8E42-30368FE363FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D68FB3B2-17BB-4FB8-88C1-B80EBBA4A28C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D68FB3B2-17BB-4FB8-88C1-B80EBBA4A28C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D68FB3B2-17BB-4FB8-88C1-B80EBBA4A28C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -70,10 +56,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{1DEC606E-1A26-42FA-989B-F4EDDEBAC210} = {A4E105A3-138C-4DBC-826C-5E8DE27E66FF}
-		{4B144ADE-6A9F-4904-8E42-30368FE363FD} = {A4E105A3-138C-4DBC-826C-5E8DE27E66FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2F1C7D6-4B1F-46DA-BFD9-C45A049B562E}

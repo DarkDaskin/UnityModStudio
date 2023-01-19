@@ -1,181 +1,192 @@
 ﻿<platformUi:DialogWindow
-    x:Class="UnityModStudio.Options.GamePropertiesWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:UnityModStudio.Options"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
-    Title="Game properties"
-    Width="500"
-    d:DataContext="{d:DesignInstance local:GamePropertiesViewModel}"
-    ShowInTaskbar="False"
-    SizeToContent="Height"
-    mc:Ignorable="d">
+  x:Class="UnityModStudio.Options.GamePropertiesWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:commonOptions="clr-namespace:UnityModStudio.Common.Options;assembly=UnityModStudio.Common"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:local="clr-namespace:UnityModStudio.Options"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:platformUi="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+  Title="Game properties"
+  Width="500"
+  d:DataContext="{d:DesignInstance local:GamePropertiesViewModel}"
+  ShowInTaskbar="False"
+  SizeToContent="Height"
+  mc:Ignorable="d">
 
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+  <Window.Resources>
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <local:EqualityConverter x:Key="EqualityConverter" />
 
-        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
-            <Setter Property="Margin" Value="4" />
-        </Style>
+    <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+      <Setter Property="Margin" Value="4" />
+    </Style>
 
-        <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
-            <Setter Property="Margin" Value="4" />
-        </Style>
+    <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
+      <Setter Property="Margin" Value="4" />
+    </Style>
 
-        <Style
-            x:Key="ErrorTextStyle"
-            BasedOn="{StaticResource {x:Type TextBlock}}"
-            TargetType="TextBlock">
-            <Setter Property="Foreground" Value="Red" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-        </Style>
+    <Style
+      x:Key="ErrorTextStyle"
+      BasedOn="{StaticResource {x:Type TextBlock}}"
+      TargetType="TextBlock">
+      <Setter Property="Foreground" Value="Red" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
 
-        <Style TargetType="HeaderedContentControl">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="HeaderedContentControl">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="Header" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <ContentPresenter
-                                Grid.Column="0"
-                                Margin="0,0,8,0"
-                                ContentSource="Header" />
-                            <ContentPresenter Grid.Column="1" TextBlock.FontWeight="Bold" />
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <GroupBox Header="Game">
+    <Style TargetType="HeaderedContentControl">
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="HeaderedContentControl">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Header" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
 
-                <Label
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Content="Display name:"
-                    Target="{Binding ElementName=DisplayNameText}" />
-                <TextBox
-                    Name="DisplayNameText"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Grid.ColumnSpan="2"
-                    Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
-
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Grid.ColumnSpan="2"
-                    Style="{StaticResource ErrorTextStyle}"
-                    Text="{Binding ElementName=DisplayNameText, Path=(Validation.Errors)[0].ErrorContent}"
-                    Visibility="{Binding ElementName=DisplayNameText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                <Label
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Content="Game path:"
-                    Target="{Binding ElementName=GamePathText}" />
-                <TextBox
-                    Name="GamePathText"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Text="{Binding GamePath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
-                <Button
-                    Grid.Row="2"
-                    Grid.Column="2"
-                    Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
-                    Command="{Binding BrowseForGamePathCommand}"
-                    Content="…" />
-
-                <TextBlock
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Grid.ColumnSpan="2"
-                    Style="{StaticResource ErrorTextStyle}"
-                    Text="{Binding ElementName=GamePathText, Path=(Validation.Errors)[0].ErrorContent}"
-                    Visibility="{Binding ElementName=GamePathText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                <Grid
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="3"
-                    d:DataContext=""
-                    Visibility="{Binding HasValidGamePath, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Grid.IsSharedSizeScope="True">
-                        <HeaderedContentControl Content="{Binding GameName}" Header="Game name:" />
-                        <HeaderedContentControl Content="{Binding Architecture}" Header="Architecture:" />
-                        <HeaderedContentControl Content="{Binding UnityVersion}" Header="Unity version:" />
-                        <HeaderedContentControl Content="{Binding MonoProfile}" Header="Mono profile:" />
-                    </StackPanel>
-                    <Image
-                        Grid.Column="1"
-                        MaxHeight="64"
-                        Source="{Binding GameIcon}"
-                        StretchDirection="DownOnly" />
-                </Grid>
+              <ContentPresenter
+                Grid.Column="0"
+                Margin="0,0,8,0"
+                ContentSource="Header" />
+              <ContentPresenter Grid.Column="1" TextBlock.FontWeight="Bold" />
             </Grid>
-        </GroupBox>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
 
-        <GroupBox Grid.Row="1" Header="Mod loader">
-            <StackPanel>
-                <ComboBox
-                    DisplayMemberPath="Name"
-                    ItemsSource="{Binding ModLoaders}"
-                    SelectedItem="{Binding SelectedModLoader}" />
-                <HeaderedContentControl Content="{Binding DetectedModLoader.Name}" Header="Detected mod loader:" />
-            </StackPanel>
-        </GroupBox>
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
 
-        <StackPanel
-            Grid.Row="3"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
-            <StackPanel.Resources>
-                <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
-                    <Setter Property="Width" Value="80" />
-                </Style>
-            </StackPanel.Resources>
+    <GroupBox Header="Game">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
 
-            <Button
-                Command="{Binding ConfirmCommand}"
-                Content="OK"
-                IsDefault="True" />
-            <Button
-                Command="{Binding CancelCommand}"
-                Content="Cancel"
-                IsCancel="True" />
-        </StackPanel>
-    </Grid>
+        <Label
+          Grid.Row="0"
+          Grid.Column="0"
+          Content="Display name:"
+          Target="{Binding ElementName=DisplayNameText}" />
+        <TextBox
+          Name="DisplayNameText"
+          Grid.Row="0"
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+
+        <TextBlock
+          Grid.Row="1"
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Style="{StaticResource ErrorTextStyle}"
+          Text="{Binding ElementName=DisplayNameText, Path=(Validation.Errors)[0].ErrorContent}"
+          Visibility="{Binding ElementName=DisplayNameText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Label
+          Grid.Row="2"
+          Grid.Column="0"
+          Content="Game path:"
+          Target="{Binding ElementName=GamePathText}" />
+        <TextBox
+          Name="GamePathText"
+          Grid.Row="2"
+          Grid.Column="1"
+          Text="{Binding GamePath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+        <Button
+          Grid.Row="2"
+          Grid.Column="2"
+          Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
+          Command="{Binding BrowseForGamePathCommand}"
+          Content="…"
+          ToolTip="Browse" />
+
+        <TextBlock
+          Grid.Row="3"
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Style="{StaticResource ErrorTextStyle}"
+          Text="{Binding ElementName=GamePathText, Path=(Validation.Errors)[0].ErrorContent}"
+          Visibility="{Binding ElementName=GamePathText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Grid
+          Grid.Row="4"
+          Grid.Column="0"
+          Grid.ColumnSpan="3"
+          d:DataContext=""
+          Visibility="{Binding HasValidGamePath, Converter={StaticResource BooleanToVisibilityConverter}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0" Grid.IsSharedSizeScope="True">
+            <HeaderedContentControl Content="{Binding GameName}" Header="Game name:" />
+            <HeaderedContentControl Content="{Binding Architecture}" Header="Architecture:" />
+            <HeaderedContentControl Content="{Binding UnityVersion}" Header="Unity version:" />
+            <HeaderedContentControl Content="{Binding MonoProfile}" Header="Mono profile:" />
+          </StackPanel>
+          <Image
+            Grid.Column="1"
+            MaxHeight="64"
+            Source="{Binding GameIcon}"
+            StretchDirection="DownOnly" />
+        </Grid>
+      </Grid>
+    </GroupBox>
+
+    <GroupBox Grid.Row="1" Header="Unity Doorstop">
+      <StackPanel>
+        <RadioButton
+          Content="Disabled"
+          IsChecked="{Binding DoorstopMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:DoorstopMode.Disabled}}"
+          ToolTip="Doorstop is not installed into the game directory." />
+        <RadioButton
+          Content="Use for mod loading"
+          IsChecked="{Binding DoorstopMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:DoorstopMode.DebuggingAndModLoading}}"
+          ToolTip="Doorstop is installed into the game directory and configured to load the mod." />
+        <CheckBox
+          Margin="0,8,0,0"
+          Content="Use alternate DLL name"
+          IsChecked="{Binding UseAlternateDoorstopDllName}"
+          ToolTip="Rename Doorstop DLL to 'version.dll' instead of 'winhttp.dll'. Might be required for some games." />
+      </StackPanel>
+    </GroupBox>
+
+    <StackPanel
+      Grid.Row="3"
+      HorizontalAlignment="Right"
+      Orientation="Horizontal">
+      <StackPanel.Resources>
+        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+          <Setter Property="Width" Value="80" />
+        </Style>
+      </StackPanel.Resources>
+
+      <Button
+        Command="{Binding ConfirmCommand}"
+        Content="OK"
+        IsDefault="True" />
+      <Button
+        Command="{Binding CancelCommand}"
+        Content="Cancel"
+        IsCancel="True" />
+    </StackPanel>
+  </Grid>
 </platformUi:DialogWindow>

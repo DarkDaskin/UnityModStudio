@@ -7,49 +7,40 @@
   </PropertyGroup>
 
   <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ResolveGamePath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ConfigureDoorstop" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
   <Target Name="FindGameFiles">
+    <ItemGroup>
+      <GameLookupProperty Include="Id" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
+      <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
+    </ItemGroup>
+    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
+      <Output TaskParameter="GamePath" PropertyName="GamePath" />
+      <Output TaskParameter="GameInstanceId" PropertyName="GameInstanceId" />
+      <Output TaskParameter="DoorstopMode" PropertyName="DoorstopMode" />
+      <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="UseAlternateDoorstopDllName" />
+    </ResolveGameProperties>
+
     <FindGameFiles GamePath="$(GamePath)" Condition="'$(GamePath)' != ''">
       <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
       <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
       <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
-      <Output TaskParameter="Error" PropertyName="_FindGameFilesErrorStage1" />
     </FindGameFiles>
-
-    <ItemGroup>
-      <GameLookupProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
-      <GameLookupProperty Include="DisplayName" Value="$(GameDisplayName)" Condition="'$(GameDisplayName)' != ''" />
-      <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
-    </ItemGroup>
-    <ResolveGamePath LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" Condition="'$(GamePath)' == '' or '$(_FindGameFilesErrorStage1)' != ''" >
-      <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
-      <Output TaskParameter="GameDisplayName" PropertyName="GameDisplayName" />
-    </ResolveGamePath>
-
-    <FindGameFiles GamePath="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''">
-      <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
-      <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
-      <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
-      <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
-      <Output TaskParameter="Error" PropertyName="_FindGameFilesErrorStage2" />
-    </FindGameFiles>
-    <Error Text="$(_FindGameFilesErrorStage2)" Condition="'$(_FindGameFilesErrorStage2)' != ''" />
 
     <PropertyGroup>
-      <GamePath Condition="'$(_ResolvedGamePath)' != ''">$(_ResolvedGamePath)</GamePath>
       <ProjectUserFilePath>$(MSBuildProjectFullPath).user</ProjectUserFilePath>
     </PropertyGroup>
     <ItemGroup>
+      <_ProjectUserProperty Include="GameInstanceId" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
       <_ProjectUserProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
-      <_ProjectUserProperty Include="GameDisplayName" Value="$(GameDisplayName)" Condition="'$(GameDisplayName)' != ''" />
     </ItemGroup>
-    <UpdateProjectFile ProjectFile="$(ProjectUserFilePath)" Properties="@(_ProjectUserProperty)" Condition="'$(_ResolvedGamePath)' != ''" />
+    <UpdateProjectFile ProjectFile="$(ProjectUserFilePath)" Properties="@(_ProjectUserProperty)" />
   </Target>
 
-  <Target Name="AddGameAssemblyReferences" BeforeTargets="PrepareForBuild" DependsOnTargets="FindGameFiles">
+  <Target Name="AddGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="FindGameFiles">
     <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
       <Reference Include="@(FrameworkAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
     </ItemGroup>
@@ -67,6 +58,34 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(ModFiles)" DestinationFolder="$(ModPath)" />
+  </Target>
+
+  <Target Name="DeployDoorstop" DependsOnTargets="FindGameFiles" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
+    <ItemGroup>
+      <DoorstopNativeFiles Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\**" Condition="'$(GameArchitecture)' == 'X86'" />
+      <DoorstopNativeFiles Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**" Condition="'$(GameArchitecture)' == 'X64'" />
+      <DoorstopContentFiles Include="$(MSBuildThisFileDirectory)..\content\**" />
+    </ItemGroup>
+
+    <Error Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFiles)' == ''" />
+
+    <PropertyGroup>
+      <_PrimaryDoorstopDllName>winhttp.dll</_PrimaryDoorstopDllName>
+      <_AlternateDoorstopDllName>version.dll</_AlternateDoorstopDllName>
+    </PropertyGroup>
+
+    <Copy SourceFiles="@(DoorstopNativeFiles)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="True" Condition="!Exists('$(GamePath)$(_PrimaryDoorstopDllName)') and !Exists('$(GamePath)$(_AlternateDoorstopDllName)')" />
+    <Move SourceFiles="$(GamePath)$(_PrimaryDoorstopDllName)" DestinationFiles="$(GamePath)$(_AlternateDoorstopDllName)" Condition="'$(UseAlternateDoorstopDllName)' == 'True'" />
+    <Move SourceFiles="$(GamePath)$(_AlternateDoorstopDllName)" DestinationFiles="$(GamePath)$(_PrimaryDoorstopDllName)" Condition="'$(UseAlternateDoorstopDllName)' != 'True'" />
+    <Copy SourceFiles="@(DoorstopContentFiles)" DestinationFolder="$(GamePath)" Condition="!Exists('$(GamePath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="ConfigureDoorstop" AfterTargets="PrepareForRun" DependsOnTargets="DeployDoorstop;CopyModToGame" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
+    <PropertyGroup>
+      <DoorstopConfigFile>$(GamePath)doorstop_config.ini</DoorstopConfigFile>
+    </PropertyGroup>
+
+    <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(ModPath)$(TargetFileName)" />
   </Target>
 
 </Project>

@@ -20,6 +20,22 @@ namespace UnityModStudio.ProjectWizard
         public Visibility GameInformationVisibility => HasValidGamePath ? Visibility.Visible : Visibility.Hidden;
 
         public IReadOnlyCollection<Game> Games => GameManager?.GameRegistry.Games ?? Array.Empty<Game>();
+
+        public string DoorstopModeString => Game?.DoorstopMode switch
+        {
+            DoorstopMode.Disabled => "Disabled",
+            DoorstopMode.DebuggingAndModLoading => "Use for mod loading",
+            _ => ""
+        };
+
+        public string DoorstopDllName => Game?.UseAlternateDoorstopDllName switch
+        {
+            false => "winhttp.dll",
+            true => "version.dll",
+            _ => ""
+        };
+
+        public bool IsDoorstopDllNameVisible => Game != null && Game.DoorstopMode != DoorstopMode.Disabled;
         
         public ICommand NewGameCommand { get; }
         public ICommand UpdateGameCommand { get; }
@@ -74,6 +90,8 @@ namespace UnityModStudio.ProjectWizard
 
             // Trigger property sync.
             GamePath = Game.Path;
+
+            UpdateDoorstopInfo();
         }
 
         protected override bool ValidateGamePath()
@@ -83,8 +101,16 @@ namespace UnityModStudio.ProjectWizard
             NotifyPropertyChanged(nameof(Error));
             NotifyPropertyChanged(nameof(ErrorVisibility));
             NotifyPropertyChanged(nameof(GameInformationVisibility));
+            UpdateDoorstopInfo();
 
             return result;
+        }
+
+        private void UpdateDoorstopInfo()
+        {
+            NotifyPropertyChanged(nameof(DoorstopModeString));
+            NotifyPropertyChanged(nameof(DoorstopDllName));
+            NotifyPropertyChanged(nameof(IsDoorstopDllNameVisible));
         }
 
         protected override void OnConfirm()

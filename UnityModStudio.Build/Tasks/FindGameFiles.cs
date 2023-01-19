@@ -21,29 +21,28 @@ namespace UnityModStudio.Build.Tasks
         public ITaskItem[]? GameAssemblies { get; private set; }
 
         [Output]
-        public ITaskItem? Architecture { get; private set; }
-
-        [Output]
-        public string? Error { get; private set; }
+        public string? Architecture { get; private set; }
+        
 
         public override bool Execute()
         {
             var gamePath = GamePath?.GetMetadata("FullPath");
             if (!GameInformationResolver.TryGetGameInformation(gamePath, out var gameInformation, out var error))
             {
-                Error = error;
-                return true;
+                Log.LogError(error);
+                return false;
             }
 
-            GameDataPath = GetTaskItem(gameInformation.GameDataDirectory);
+            GameDataPath = GetTaskItem( gameInformation.GameDataDirectory);
             FrameworkAssemblies = GetTaskItems(gameInformation.FrameworkAssemblyFiles);
             GameAssemblies = GetTaskItems(gameInformation.GameAssemblyFiles);
-            Architecture = new TaskItem(gameInformation.Architecture.ToString());
+            Architecture = gameInformation.Architecture.ToString();
 
             return true;
         }
 
-        private static ITaskItem GetTaskItem(FileSystemInfo file) => new TaskItem(file.FullName);
+        private static ITaskItem GetTaskItem(FileSystemInfo file) =>
+            file is DirectoryInfo ? new TaskItem(Utils.AppendTrailingSlash(file.FullName)) : new TaskItem(file.FullName);
 
         private static ITaskItem[] GetTaskItems(IReadOnlyCollection<FileSystemInfo> files)
         {

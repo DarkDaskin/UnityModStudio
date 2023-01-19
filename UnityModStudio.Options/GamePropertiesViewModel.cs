@@ -11,6 +11,8 @@ namespace UnityModStudio.Options
     public class GamePropertiesViewModel : GamePropertiesViewModelBase
     {
         private string _displayName = "";
+        private DoorstopMode _doorstopMode;
+        private bool _useAlternateDoorstopDllName;
 
         public string DisplayName
         {
@@ -23,6 +25,18 @@ namespace UnityModStudio.Options
                 ValidateDisplayName();
                 NotifyErrorsChanged();
             }
+        }
+
+        public DoorstopMode DoorstopMode
+        {
+            get => _doorstopMode;
+            set => SetProperty(ref _doorstopMode, value);
+        }
+
+        public bool UseAlternateDoorstopDllName
+        {
+            get => _useAlternateDoorstopDllName;
+            set => SetProperty(ref _useAlternateDoorstopDllName, value);
         }
 
         public ICommand BrowseForGamePathCommand { get; }
@@ -38,6 +52,8 @@ namespace UnityModStudio.Options
         {
             Game = game;
             DisplayName = Game.DisplayName;
+            DoorstopMode = Game.DoorstopMode;
+            UseAlternateDoorstopDllName = Game.UseAlternateDoorstopDllName;
             
             BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath, null, ThreadHelper.JoinableTaskFactory);
         }
@@ -59,7 +75,7 @@ namespace UnityModStudio.Options
 
             if (string.IsNullOrWhiteSpace(DisplayName))
                 AddError("Display name must not be empty.", nameof(DisplayName));
-            else if(GameManager?.GameRegistry.FindGameByName(DisplayName) is { } other && other != Game)
+            else if(GameManager?.GameRegistry.FindGameByDisplayName(DisplayName) is { } other && other != Game)
                 AddError("Display name must be unique.", nameof(DisplayName));
         }
 
@@ -79,6 +95,8 @@ namespace UnityModStudio.Options
             base.OnConfirm();
 
             Game!.DisplayName = DisplayName;
+            Game.DoorstopMode = DoorstopMode;
+            Game.UseAlternateDoorstopDllName = UseAlternateDoorstopDllName;
         }
     }
 }

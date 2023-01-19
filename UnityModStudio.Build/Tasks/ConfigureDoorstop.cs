@@ -4,9 +4,9 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace UnityModStudio.ModLoader.UnityDoorstop.Tasks
+namespace UnityModStudio.Build.Tasks
 {
-    public class ConfigureModLoader : Task
+    public class ConfigureDoorstop : Task
     {
         [Required]
         public ITaskItem? ConfigPath { get; set; }
@@ -19,7 +19,7 @@ namespace UnityModStudio.ModLoader.UnityDoorstop.Tasks
             var configPath = ConfigPath!.GetMetadata("FullPath");
             if (!File.Exists(configPath))
             {
-                Log.LogError("Mod loader config file does not exist.");
+                Log.LogError("Unity Doorstop config file does not exist.");
                 return false;
             }
             var targetAssemblyPath = TargetAssemblyPath!.GetMetadata("FullPath");
@@ -29,9 +29,9 @@ namespace UnityModStudio.ModLoader.UnityDoorstop.Tasks
                 return false;
             }
 
-            SetIniValues(configPath, "UnityDoorstop", 
+            SetIniValues(configPath, "General", 
                 ("enabled", "true"),
-                ("targetAssembly", GetRelativePath(targetAssemblyPath, configPath)));
+                ("target_assembly", GetRelativePath(targetAssemblyPath, configPath)));
 
             return true;
         }
