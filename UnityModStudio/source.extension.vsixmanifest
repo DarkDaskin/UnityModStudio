@@ -16,6 +16,7 @@
     </Installation>
     <Dependencies>
         <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
+        <Dependency d:Source="Installed" Id="VSTU17.0.b6546c9c-e5fe-4095-8d39-c080d9bd6a85" DisplayName="Visual Studio 2022 Tools for Unity" Version="[17.0,18.0)" d:InstallSource="Download" />
     </Dependencies>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
@@ -29,5 +30,6 @@
         <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectWizard" Path="|UnityModStudio.ProjectWizard|" AssemblyName="|UnityModStudio.ProjectWizard;AssemblyName|" />
         <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.Common" Path="|UnityModStudio.Common|" />
         <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.Options" Path="|UnityModStudio.Options|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectSystem" Path="|UnityModStudio.ProjectSystem|" />
     </Assets>
 </PackageManifest>

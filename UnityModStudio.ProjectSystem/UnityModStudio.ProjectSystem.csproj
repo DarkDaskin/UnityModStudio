@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.6142705" />
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.SDK" Version="17.0.1313-pre" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.Framework" Version="17.4.33103.184" />
+  </ItemGroup>
+
+  <!-- Fix duplicate types. See https://stackoverflow.com/a/51035245/280778 -->
+  <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop'">
+        <Aliases>shell</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+
+</Project>
