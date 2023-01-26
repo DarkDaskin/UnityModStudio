@@ -18,6 +18,9 @@ namespace UnityModStudio.Build.Tasks
         public ITaskItem? GamePath { get; private set; }
 
         [Output]
+        public string? GameExecutableFileName { get; private set; }
+
+        [Output]
         public string? GameInstanceId { get; private set; }
         
         [Output]
@@ -45,6 +48,7 @@ namespace UnityModStudio.Build.Tasks
             {
                 case GameMatchResult.Match match:
                     GamePath = new TaskItem(Utils.AppendTrailingSlash(match.Game.Path));
+                    GameExecutableFileName = match.Game.GameExecutableFileName;
                     GameInstanceId = match.Game.Id.ToString();
                     DoorstopMode = match.Game.DoorstopMode.ToString();
                     UseAlternateDoorstopDllName = match.Game.UseAlternateDoorstopDllName;

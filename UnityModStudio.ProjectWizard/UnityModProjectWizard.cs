@@ -59,6 +59,7 @@ namespace UnityModStudio.ProjectWizard
             replacementsDictionary["$GameName$"] = viewModel.GameName;
             // Must be known without running any targets to be picked up by launchSettings.json
             replacementsDictionary["$GameExecutableFileName$"] = viewModel.GameExecutableFileName;
+            replacementsDictionary["$DoorstopMode$"] = viewModel.Game?.DoorstopMode.ToString();
 
             // In .props there is no TargetFramework, in .targets it's too late, so it has to be specified in .csproj.
             if (!viewModel.TargetFrameworkMoniker?.StartsWith("netstandard") ?? false)

@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 using Microsoft.VisualStudio.Shell.Interop;
+using UnityModStudio.Common.Options;
 using Process = System.Diagnostics.Process;
 
 namespace UnityModStudio.ProjectSystem;
@@ -76,11 +77,23 @@ public class UnityModDebugger : DebugLaunchProviderBase, IDebugProfileLaunchTarg
         shell.LoadPackage(ref vstuGuid, out _);
     }
 
-    public override Task<bool> CanLaunchAsync(DebugLaunchOptions launchOptions) => 
-        Task.FromResult(true);
+    public override Task<bool> CanLaunchAsync(DebugLaunchOptions launchOptions) => IsEnabledAsync();
 
     // TODO: only support proper profile
-    public bool SupportsProfile(ILaunchProfile profile) => true;
+    public bool SupportsProfile(ILaunchProfile profile) => 
+        ThreadingService.ExecuteSynchronously(IsEnabledAsync);
+
+    private async Task<bool> IsEnabledAsync()
+    {
+        var configuration = await GetGameConfigurationAsync();
+        return configuration.DoorstopMode != DoorstopMode.Disabled;
+    }
+
+    private async Task<GameConfiguration> GetGameConfigurationAsync()
+    {
+        var properties = ConfiguredProject.Services.ProjectPropertiesProvider!.GetCommonProperties();
+        return await GameConfiguration.GetAsync(properties);
+    }
 
     public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
     {
@@ -89,8 +102,7 @@ public class UnityModDebugger : DebugLaunchProviderBase, IDebugProfileLaunchTarg
 
     public async Task OnBeforeLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
     {
-        var properties = ConfiguredProject.Services.ProjectPropertiesProvider!.GetCommonProperties();
-        var configuration = await GameConfiguration.GetAsync(properties);
+        var configuration = await GetGameConfigurationAsync();
         var exePath = configuration.GameExecutablePath;
 
         if (exePath == null)

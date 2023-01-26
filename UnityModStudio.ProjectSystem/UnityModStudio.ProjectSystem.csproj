@@ -10,6 +10,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Shell.Framework" Version="17.4.33103.184" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
+  </ItemGroup>
+
   <!-- Fix duplicate types. See https://stackoverflow.com/a/51035245/280778 -->
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
     <ItemGroup>

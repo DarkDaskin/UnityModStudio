@@ -4,7 +4,6 @@
     <TargetFramework>$TargetFramework$</TargetFramework>
     <DisableImplicitFrameworkReferences>$DisableImplicitFrameworkReferences$</DisableImplicitFrameworkReferences>
     <GameName>$GameName$</GameName>
-    <GameExecutableFileName>$GameExecutableFileName$</GameExecutableFileName>
   </PropertyGroup>
 
   <ItemGroup>

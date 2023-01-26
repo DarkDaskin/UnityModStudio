@@ -156,9 +156,13 @@
         <RadioButton
           Content="Disabled"
           IsChecked="{Binding DoorstopMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:DoorstopMode.Disabled}}"
-          ToolTip="Doorstop is not installed into the game directory." />
+          ToolTip="Doorstop is not installed into the game directory. Debugging is disabled." />
         <RadioButton
-          Content="Use for mod loading"
+          Content="Use for debugging"
+          IsChecked="{Binding DoorstopMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:DoorstopMode.Debugging}}"
+          ToolTip="Doorstop is installed into the game directory." />
+        <RadioButton
+          Content="Use for debugging and mod loading"
           IsChecked="{Binding DoorstopMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:DoorstopMode.DebuggingAndModLoading}}"
           ToolTip="Doorstop is installed into the game directory and configured to load the mod." />
         <CheckBox

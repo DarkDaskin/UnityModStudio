@@ -24,7 +24,8 @@ namespace UnityModStudio.ProjectWizard
         public string DoorstopModeString => Game?.DoorstopMode switch
         {
             DoorstopMode.Disabled => "Disabled",
-            DoorstopMode.DebuggingAndModLoading => "Use for mod loading",
+            DoorstopMode.Debugging => "Use for debugging",
+            DoorstopMode.DebuggingAndModLoading => "Use for debugging and mod loading",
             _ => ""
         };
 

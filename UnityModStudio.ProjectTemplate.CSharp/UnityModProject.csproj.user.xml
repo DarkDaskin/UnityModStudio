@@ -3,5 +3,7 @@
   <PropertyGroup>
     <GameInstanceId>$GameInstanceId$</GameInstanceId>
     <GamePath>$GamePath$</GamePath>
+    <GameExecutableFileName>$GameExecutableFileName$</GameExecutableFileName>
+    <DoorstopMode>$DoorstopMode$</DoorstopMode>
   </PropertyGroup>
 </Project>

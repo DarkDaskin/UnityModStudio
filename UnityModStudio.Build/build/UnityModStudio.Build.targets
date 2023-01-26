@@ -18,6 +18,7 @@
     </ItemGroup>
     <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
       <Output TaskParameter="GamePath" PropertyName="GamePath" />
+      <Output TaskParameter="GameExecutableFileName" PropertyName="GameExecutableFileName" />
       <Output TaskParameter="GameInstanceId" PropertyName="GameInstanceId" />
       <Output TaskParameter="DoorstopMode" PropertyName="DoorstopMode" />
       <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="UseAlternateDoorstopDllName" />
@@ -36,6 +37,8 @@
     <ItemGroup>
       <_ProjectUserProperty Include="GameInstanceId" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
       <_ProjectUserProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
+      <_ProjectUserProperty Include="GameExecutableFileName" Value="$(GameExecutableFileName)" Condition="'$(GameExecutableFileName)' != ''" />
+      <_ProjectUserProperty Include="DoorstopMode" Value="$(DoorstopMode)" Condition="'$(DoorstopMode)' != ''" />
     </ItemGroup>
     <UpdateProjectFile ProjectFile="$(ProjectUserFilePath)" Properties="@(_ProjectUserProperty)" />
   </Target>
