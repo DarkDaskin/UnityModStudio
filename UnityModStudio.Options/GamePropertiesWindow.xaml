@@ -72,6 +72,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
@@ -125,8 +126,26 @@
           Text="{Binding ElementName=GamePathText, Path=(Validation.Errors)[0].ErrorContent}"
           Visibility="{Binding ElementName=GamePathText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-        <Grid
+        <Label
           Grid.Row="4"
+          Grid.Column="0"
+          Content="Mod root path:"
+          Target="{Binding ElementName=ModRootPathText}" />
+        <TextBox
+          Name="ModRootPathText"
+          Grid.Row="4"
+          Grid.Column="1"
+          Text="{Binding ModRootPath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+        <Button
+          Grid.Row="4"
+          Grid.Column="2"
+          Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
+          Command="{Binding BrowseForModRootPathCommand}"
+          Content="…"
+          ToolTip="Browse" />
+
+        <Grid
+          Grid.Row="5"
           Grid.Column="0"
           Grid.ColumnSpan="3"
           d:DataContext=""

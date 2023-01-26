@@ -17,6 +17,7 @@ namespace UnityModStudio.Options
     {
         private Game? _game;
         private string? _gamePath;
+        private string? _modRootPath;
         private string? _gameName;
         private string? _architecture;
         private string? _unityVersion;
@@ -33,6 +34,7 @@ namespace UnityModStudio.Options
             {
                 SetProperty(ref _game, value);
                 GamePath = Game?.Path;
+                ModRootPath = Game?.ModRootPath;
             }
         }
 
@@ -48,6 +50,12 @@ namespace UnityModStudio.Options
                 NotifyErrorsChanged();
                 NotifyPropertyChanged(nameof(HasValidGamePath));
             }
+        }
+
+        public string? ModRootPath
+        {
+            get => _modRootPath;
+            set => SetProperty(ref _modRootPath, value);
         }
 
         public string? GameName
@@ -172,6 +180,7 @@ namespace UnityModStudio.Options
         protected virtual void OnConfirm()
         {
             Game!.Path = GamePath!;
+            Game.ModRootPath = ModRootPath;
             Game.GameName = GameName;
             Game.GameExecutableFileName = GameExecutableFileName;
             Game.Architecture = Architecture;

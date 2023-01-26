@@ -18,6 +18,9 @@ namespace UnityModStudio.Build.Tasks
         public ITaskItem? GamePath { get; private set; }
 
         [Output]
+        public ITaskItem? ModRootPath { get; private set; }
+
+        [Output]
         public string? GameExecutableFileName { get; private set; }
 
         [Output]
@@ -48,6 +51,7 @@ namespace UnityModStudio.Build.Tasks
             {
                 case GameMatchResult.Match match:
                     GamePath = new TaskItem(Utils.AppendTrailingSlash(match.Game.Path));
+                    ModRootPath = match.Game.ModRootPath != null ? new TaskItem(Utils.AppendTrailingSlash(match.Game.ModRootPath)) : null;
                     GameExecutableFileName = match.Game.GameExecutableFileName;
                     GameInstanceId = match.Game.Id.ToString();
                     DoorstopMode = match.Game.DoorstopMode.ToString();

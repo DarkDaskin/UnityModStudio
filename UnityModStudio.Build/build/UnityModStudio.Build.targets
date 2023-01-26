@@ -18,6 +18,7 @@
     </ItemGroup>
     <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
       <Output TaskParameter="GamePath" PropertyName="GamePath" />
+      <Output TaskParameter="ModRootPath" PropertyName="ModRootPath" />
       <Output TaskParameter="GameExecutableFileName" PropertyName="GameExecutableFileName" />
       <Output TaskParameter="GameInstanceId" PropertyName="GameInstanceId" />
       <Output TaskParameter="DoorstopMode" PropertyName="DoorstopMode" />
@@ -54,7 +55,8 @@
 
   <Target Name="CopyModToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles">
     <PropertyGroup>
-      <ModPath Condition="'$(ModPath)' == ''">$(GamePath)$(ProjectName)\</ModPath>
+      <ModRootPath Condition="'$(ModRootPath)' == ''">$(GamePath)</ModRootPath>
+      <ModPath Condition="'$(ModPath)' == ''">$(ModRootPath)$(ProjectName)\</ModPath>
     </PropertyGroup>
     <ItemGroup>
       <ModFiles Include="$(TargetDir)**" />

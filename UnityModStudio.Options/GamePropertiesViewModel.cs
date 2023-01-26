@@ -41,6 +41,8 @@ namespace UnityModStudio.Options
 
         public ICommand BrowseForGamePathCommand { get; }
 
+        public ICommand BrowseForModRootPathCommand { get; }
+
         [Import]
         public IFolderBrowserService? FolderBrowserService { get; set; }
 
@@ -56,6 +58,7 @@ namespace UnityModStudio.Options
             UseAlternateDoorstopDllName = Game.UseAlternateDoorstopDllName;
             
             BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath, null, ThreadHelper.JoinableTaskFactory);
+            BrowseForModRootPathCommand = new DelegateCommand(BrowseForModRootPath, null, ThreadHelper.JoinableTaskFactory);
         }
 
         private void BrowseForGamePath()
@@ -67,6 +70,17 @@ namespace UnityModStudio.Options
                 FolderBrowserService!.BrowseForFolderAsync("Select the game root folder", initialPath));
             if (selectedPath != null)
                 GamePath = selectedPath;
+        }
+
+        private void BrowseForModRootPath()
+        {
+            Debug.Assert(FolderBrowserService != null, nameof(FolderBrowserService) + " != null");
+
+            var initialPath = Directory.Exists(ModRootPath) ? ModRootPath : Directory.Exists(GamePath) ? GamePath : null;
+            var selectedPath = ThreadHelper.JoinableTaskFactory.Run(() => 
+                FolderBrowserService!.BrowseForFolderAsync("Select the mod root folder", initialPath));
+            if (selectedPath != null)
+                ModRootPath = selectedPath;
         }
 
         private void ValidateDisplayName()

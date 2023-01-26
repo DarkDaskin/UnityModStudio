@@ -9,6 +9,7 @@ namespace UnityModStudio.Common.Options
         // Properties for project configuration (user-editable):
         public string DisplayName { get; set; } = "";
         public string Path { get; set; } = "";
+        public string? ModRootPath { get; set; }
         public DoorstopMode DoorstopMode { get; set; } = DoorstopMode.Debugging;
         public bool UseAlternateDoorstopDllName { get; set; }
 
