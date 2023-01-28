@@ -12,13 +12,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '[16.0,17.0)'
+        vs-version: '[17.0,18.0)'
     - name: Add package source
       run: dotnet nuget add source https://nuget.pkg.github.com/DarkDaskin/index.json -n github  -u DarkDaskin -p ${{ secrets.GITHUB_TOKEN }}
     - name: Restore packages
@@ -26,13 +26,13 @@ jobs:
     - name: Build
       run: msbuild /p:Configuration=Release
     - name: Upload NuGet artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: nupkg
         path: |
           **/*.nupkg
     - name: Upload VSIX artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: vsix
         path: |
