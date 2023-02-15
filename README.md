@@ -1,3 +1,5 @@
+![build status](https://github.com/DarkDaskin/UnityModStudio/actions/workflows/dotnet-build.yml/badge.svg)
+
 # Unity Mod Studio
 Allows creating mods for Unity games using Visual Studio 2022.
 
