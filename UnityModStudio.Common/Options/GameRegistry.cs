@@ -69,7 +69,17 @@ namespace UnityModStudio.Common.Options
             
             if (properties.TryGetValue(nameof(Game.GameName), out var gameName))
             {
-                var matches = Games.Where(game => game.GameName == gameName).ToList();
+                var query = Games.Where(game => game.GameName == gameName);
+
+                if (properties.TryGetValue(nameof(Game.Version), out var version))
+                    query = query.Where(game => game.Version == version);
+
+                var matches = query.ToList();
+
+                // Only match by empty version if ambiguous, so old projects which miss GameVersion won't fail.
+                if (matches.Count > 1 && string.IsNullOrEmpty(version))
+                    matches = matches.FindAll(game => string.IsNullOrEmpty(game.Version));
+
                 if (matches.Count > 0)
                     return GameMatchResult.Create(matches, "");
             }

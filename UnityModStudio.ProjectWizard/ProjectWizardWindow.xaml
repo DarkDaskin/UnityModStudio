@@ -117,6 +117,7 @@
             <HeaderedContentControl Content="{Binding GamePath}" Header="Game path:" />
             <HeaderedContentControl Content="{Binding ModRootPath}" Header="Mod root path:" />
             <HeaderedContentControl Content="{Binding GameName}" Header="Game name:" />
+            <HeaderedContentControl Content="{Binding GameVersionString}" Header="Game version:" />
             <HeaderedContentControl Content="{Binding Architecture}" Header="Architecture:" />
             <HeaderedContentControl Content="{Binding UnityVersion}" Header="Unity version:" />
             <HeaderedContentControl Content="{Binding MonoProfile}" Header="Mono profile:" />

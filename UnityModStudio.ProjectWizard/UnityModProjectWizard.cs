@@ -57,6 +57,7 @@ namespace UnityModStudio.ProjectWizard
             replacementsDictionary["$GameInstanceId$"] = viewModel.Game?.Id.ToString();
             replacementsDictionary["$GamePath$"] = Utils.AppendTrailingSlash(viewModel.GamePath!);
             replacementsDictionary["$GameName$"] = viewModel.GameName;
+            replacementsDictionary["$GameVersion$"] = viewModel.GameVersion;
             // Must be known without running any targets to be picked up by launchSettings.json
             replacementsDictionary["$GameExecutableFileName$"] = viewModel.GameExecutableFileName;
             replacementsDictionary["$DoorstopMode$"] = viewModel.Game?.DoorstopMode.ToString();

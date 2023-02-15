@@ -18,6 +18,7 @@ namespace UnityModStudio.Options
         private Game? _game;
         private string? _gamePath;
         private string? _modRootPath;
+        private string? _gameVersion;
         private string? _gameName;
         private string? _architecture;
         private string? _unityVersion;
@@ -33,8 +34,12 @@ namespace UnityModStudio.Options
             set
             {
                 SetProperty(ref _game, value);
+
                 GamePath = Game?.Path;
                 ModRootPath = Game?.ModRootPath;
+                GameVersion = Game?.Version;
+
+                RefreshProperties();
             }
         }
 
@@ -56,6 +61,12 @@ namespace UnityModStudio.Options
         {
             get => _modRootPath;
             set => SetProperty(ref _modRootPath, value);
+        }
+
+        public string? GameVersion
+        {
+            get => _gameVersion;
+            set => SetProperty(ref _gameVersion, value);
         }
 
         public string? GameName
@@ -177,10 +188,24 @@ namespace UnityModStudio.Options
             return "<unknown>";
         }
 
+        protected virtual void RefreshProperties()
+        {
+            NotifyPropertyChanged(nameof(GamePath));
+            NotifyPropertyChanged(nameof(ModRootPath));
+            NotifyPropertyChanged(nameof(GameVersion));
+            NotifyPropertyChanged(nameof(GameName));
+            NotifyPropertyChanged(nameof(GameExecutableFileName));
+            NotifyPropertyChanged(nameof(Architecture));
+            NotifyPropertyChanged(nameof(UnityVersion));
+            NotifyPropertyChanged(nameof(MonoProfile));
+            NotifyPropertyChanged(nameof(GameIcon));
+        }
+
         protected virtual void OnConfirm()
         {
             Game!.Path = GamePath!;
             Game.ModRootPath = ModRootPath;
+            Game.Version = GameVersion;
             Game.GameName = GameName;
             Game.GameExecutableFileName = GameExecutableFileName;
             Game.Architecture = Architecture;

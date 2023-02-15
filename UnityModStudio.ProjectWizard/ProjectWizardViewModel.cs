@@ -37,7 +37,9 @@ namespace UnityModStudio.ProjectWizard
         };
 
         public bool IsDoorstopDllNameVisible => Game != null && Game.DoorstopMode != DoorstopMode.Disabled;
-        
+
+        public string? GameVersionString => string.IsNullOrWhiteSpace(GameVersion) ? "<default>" : GameVersion;
+
         public ICommand NewGameCommand { get; }
         public ICommand UpdateGameCommand { get; }
 
@@ -91,24 +93,29 @@ namespace UnityModStudio.ProjectWizard
 
             // Trigger property sync.
             GamePath = Game.Path;
+            ModRootPath = Game.ModRootPath;
+            GameVersion = Game.Version;
 
-            UpdateDoorstopInfo();
+            RefreshProperties();
         }
 
         protected override bool ValidateGamePath()
         {
             var result = base.ValidateGamePath();
 
-            NotifyPropertyChanged(nameof(Error));
-            NotifyPropertyChanged(nameof(ErrorVisibility));
-            NotifyPropertyChanged(nameof(GameInformationVisibility));
-            UpdateDoorstopInfo();
+            RefreshProperties();
 
             return result;
         }
 
-        private void UpdateDoorstopInfo()
+        protected override void RefreshProperties()
         {
+            base.RefreshProperties();
+
+            NotifyPropertyChanged(nameof(Error));
+            NotifyPropertyChanged(nameof(ErrorVisibility));
+            NotifyPropertyChanged(nameof(GameInformationVisibility));
+            NotifyPropertyChanged(nameof(GameVersionString));
             NotifyPropertyChanged(nameof(DoorstopModeString));
             NotifyPropertyChanged(nameof(DoorstopDllName));
             NotifyPropertyChanged(nameof(IsDoorstopDllNameVisible));

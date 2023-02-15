@@ -73,6 +73,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
@@ -144,8 +145,20 @@
           Content="…"
           ToolTip="Browse" />
 
-        <Grid
+        <Label
           Grid.Row="5"
+          Grid.Column="0"
+          Content="Game version:"
+          Target="{Binding ElementName=GameVersionText}" />
+        <TextBox
+          Name="GameVersionText"
+          Grid.Row="5"
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Text="{Binding GameVersion, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+
+        <Grid
+          Grid.Row="6"
           Grid.Column="0"
           Grid.ColumnSpan="3"
           d:DataContext=""

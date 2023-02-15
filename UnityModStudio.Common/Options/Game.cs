@@ -10,6 +10,7 @@ namespace UnityModStudio.Common.Options
         public string DisplayName { get; set; } = "";
         public string Path { get; set; } = "";
         public string? ModRootPath { get; set; }
+        public string? Version { get; set; }
         public DoorstopMode DoorstopMode { get; set; } = DoorstopMode.Debugging;
         public bool UseAlternateDoorstopDllName { get; set; }
 
