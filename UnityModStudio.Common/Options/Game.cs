@@ -11,7 +11,7 @@ namespace UnityModStudio.Common.Options
         public string Path { get; set; } = "";
         public string? ModRootPath { get; set; }
         public string? Version { get; set; }
-        public DoorstopMode DoorstopMode { get; set; } = DoorstopMode.Debugging;
+        public DoorstopMode DoorstopMode { get; set; } = DoorstopMode.DebuggingAndModLoading;
         public bool UseAlternateDoorstopDllName { get; set; }
 
         // Properties for search (auto-resolved):

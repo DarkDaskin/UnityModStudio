@@ -60,6 +60,8 @@
                 Command="{Binding RemoveGameCommand}"
                 CommandParameter="{Binding ElementName=GameListBox, Path=SelectedItem}"
                 Content="Remove" />
+            <Separator />
+            <Button Command="{Binding ImportFromRegistryCommand}" Content="Import from installed programs" />
         </StackPanel>
     </Grid>
 </UserControl>

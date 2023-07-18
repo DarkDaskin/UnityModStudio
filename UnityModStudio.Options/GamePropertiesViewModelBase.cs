@@ -168,24 +168,11 @@ namespace UnityModStudio.Options
             Architecture = gameInformation.Architecture.ToString();
             UnityVersion = gameInformation.UnityVersion;
             TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
-            MonoProfile = GetMonoProfileString(gameInformation);
+            MonoProfile = gameInformation.GetMonoProfileString();
             GameExecutableFileName = gameInformation.GameExecutableFile.Name;
             GameIcon = GetGameIcon(gameInformation);
 
             return true;
-        }
-
-        private static string GetMonoProfileString(GameInformation gameInformation)
-        {
-            var match = Regex.Match(gameInformation.TargetFrameworkMoniker, @"(?<NetStandard>netstandard(?<Version>\d+\.\d+))|(?<NetFull>net(?<Version>\d+))");
-
-            if (match.Groups["NetStandard"].Success)
-                return ".NET Standard " + match.Groups["Version"].Value;
-
-            if (match.Groups["NetFull"].Success)
-                return ".NET " + string.Join(".", match.Groups["Version"].Value.ToCharArray()) + (gameInformation.IsSubsetProfile ? " Subset" : "");
-
-            return "<unknown>";
         }
 
         protected virtual void RefreshProperties()

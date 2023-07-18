@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace UnityModStudio.Common
 {
@@ -18,6 +19,18 @@ namespace UnityModStudio.Common
         public DirectoryInfo GameDataDirectory { get; set; } = null!;
         public IReadOnlyCollection<FileInfo> FrameworkAssemblyFiles { get; set; } = null!;
         public IReadOnlyCollection<FileInfo> GameAssemblyFiles { get; set; } = null!;
+        
+        public string GetMonoProfileString()
+        {
+            var match = Regex.Match(TargetFrameworkMoniker, @"(?<NetStandard>netstandard(?<Version>\d+\.\d+))|(?<NetFull>net(?<Version>\d+))");
 
+            if (match.Groups["NetStandard"].Success)
+                return ".NET Standard " + match.Groups["Version"].Value;
+
+            if (match.Groups["NetFull"].Success)
+                return ".NET " + string.Join(".", match.Groups["Version"].Value.ToCharArray()) + (IsSubsetProfile ? " Subset" : "");
+
+            return "<unknown>";
+        }
     }
 }
