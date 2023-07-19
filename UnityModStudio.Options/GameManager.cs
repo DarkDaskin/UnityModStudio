@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.Composition;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Options
@@ -9,6 +11,7 @@ namespace UnityModStudio.Options
         IGameRegistry GameRegistry { get; }
         
         bool ShowEditDialog(Game game);
+        IEnumerable<Game> ShowAddGamesDialog<TViewModel>() where TViewModel : AddGamesViewModelBase, new();
     }
 
     public class GameManager : IGameManager
@@ -30,6 +33,14 @@ namespace UnityModStudio.Options
             _compositionService.SatisfyImportsOnce(viewModel);
             var window = new GamePropertiesWindow(viewModel);
             return window.ShowModal() ?? false;
+        }
+
+        public IEnumerable<Game> ShowAddGamesDialog<TViewModel>() where TViewModel : AddGamesViewModelBase, new()
+        {
+            var viewModel = new TViewModel();
+            _compositionService.SatisfyImportsOnce(viewModel);
+            var window = new AddGamesWindow(viewModel);
+            return window.ShowModal() ?? false ? viewModel.SelectedGames : Enumerable.Empty<Game>();
         }
     }
 }
