@@ -52,14 +52,14 @@ namespace UnityModStudio.ProjectWizard
 
             _game = viewModel.Game;
             
-            replacementsDictionary["$TargetFramework$"] = viewModel.TargetFrameworkMoniker;
+            replacementsDictionary["$TargetFramework$"] = viewModel.TargetFrameworkMoniker ?? "";
             replacementsDictionary["$BuildPackageVersion$"] = GetBuildPackageVersion();
             replacementsDictionary["$GameInstanceId$"] = viewModel.Game?.Id.ToString();
             replacementsDictionary["$GamePath$"] = Utils.AppendTrailingSlash(viewModel.GamePath!);
-            replacementsDictionary["$GameName$"] = viewModel.GameName;
-            replacementsDictionary["$GameVersion$"] = viewModel.GameVersion;
+            replacementsDictionary["$GameName$"] = viewModel.GameName ?? "";
+            replacementsDictionary["$GameVersion$"] = viewModel.GameVersion ?? "";
             // Must be known without running any targets to be picked up by launchSettings.json
-            replacementsDictionary["$GameExecutableFileName$"] = viewModel.GameExecutableFileName;
+            replacementsDictionary["$GameExecutableFileName$"] = viewModel.GameExecutableFileName ?? "";
             replacementsDictionary["$DoorstopMode$"] = viewModel.Game?.DoorstopMode.ToString();
 
             // In .props there is no TargetFramework, in .targets it's too late, so it has to be specified in .csproj.

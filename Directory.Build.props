@@ -10,18 +10,23 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/DarkDaskin/UnityModStudio.git</RepositoryUrl>
     <PackageIcon>UnityModStudio-32.png</PackageIcon>
-    <!-- Must correspond to one set in the templates' WizardExtension. -->
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)UnityModStudio.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.119" PrivateAssets="all" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.133" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)UnityModStudio-32.png" Pack="true" PackagePath="\" Visible="false" Condition="'$(IsPackable)' == 'true'"  />
   </ItemGroup>
+
+  <Target Name="AdjustVersion" AfterTargets="GetBuildVersion">
+    <PropertyGroup>
+      <!-- Must correspond to one set in the templates' WizardExtension. -->
+      <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    </PropertyGroup>
+  </Target>
 
 </Project>
