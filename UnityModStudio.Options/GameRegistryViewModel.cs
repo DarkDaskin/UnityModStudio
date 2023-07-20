@@ -17,6 +17,7 @@ namespace UnityModStudio.Options
         public ICommand UpdateGameCommand { get; }
         public ICommand RemoveGameCommand { get; }
         public ICommand ImportFromRegistryCommand { get; }
+        public ICommand ImportFromSteamCommand { get; }
 
         [Import]
         public IGameManager? GameManager
@@ -36,6 +37,7 @@ namespace UnityModStudio.Options
             UpdateGameCommand = new DelegateCommand<Game>(UpdateGame, IsGameSelected, ThreadHelper.JoinableTaskFactory);
             RemoveGameCommand = new DelegateCommand<Game>(RemoveGame, IsGameSelected, ThreadHelper.JoinableTaskFactory);
             ImportFromRegistryCommand = new DelegateCommand(ImportFromRegistry, null, ThreadHelper.JoinableTaskFactory);
+            ImportFromSteamCommand = new DelegateCommand(ImportFromSteam, null, ThreadHelper.JoinableTaskFactory);
         }
 
         private void AddGame()
@@ -87,6 +89,23 @@ namespace UnityModStudio.Options
                 return;
 
             var games = GameManager.ShowAddGamesDialog<AddGamesFromRegistryViewModel>();
+
+            using (Games.SuspendChangeNotification())
+            {
+                foreach (var game in games)
+                {
+                    GameManager.GameRegistry.AddGame(game);
+                    Games.Add(game);
+                }
+            }
+        }
+
+        private void ImportFromSteam()
+        {
+            if (GameManager == null)
+                return;
+
+            var games = GameManager.ShowAddGamesDialog<AddGamesFromSteamViewModel>();
 
             using (Games.SuspendChangeNotification())
             {

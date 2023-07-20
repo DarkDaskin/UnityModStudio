@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\3rdparty\Gameloop.Vdf\Gameloop.Vdf\Gameloop.Vdf.csproj" />
     <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
   </ItemGroup>
 

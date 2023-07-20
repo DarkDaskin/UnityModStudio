@@ -68,6 +68,7 @@
         Content="Remove" />
       <Separator />
       <Button Command="{Binding ImportFromRegistryCommand}" Content="Import from installed programs..." />
+      <Button Command="{Binding ImportFromSteamCommand}" Content="Import from Steam..." />
     </StackPanel>
   </Grid>
 </UserControl>
