@@ -7,6 +7,7 @@
     <IsTool>true</IsTool>
     <Description>Build tools for Unity Mod Studio projects.</Description>
     <PackageTags>unity; mod; msbuild</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
@@ -23,6 +24,7 @@
 
   <ItemGroup>
     <None Include="build\*" Pack="true" PackagePath="build\" />
+    <None Include="README.md" Pack="true" PackagePath="" />
     <!-- This is the recommended way to get rid of the NU5128 warning. -->
     <!-- See https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128 -->
     <None Include="_._" Visible="false" Pack="true" PackagePath="lib\netstandard2.0\" />
