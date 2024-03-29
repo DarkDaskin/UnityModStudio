@@ -2,7 +2,7 @@ name: .NET build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, vsix-bloat ]
   pull_request:
     branches: [ master ]
 
