@@ -42,7 +42,10 @@ namespace UnityModStudio.Common.Options
 
         public GameRegistry()
         {
-            _fsWatcher = new FileSystemWatcher(Path.GetDirectoryName(_storePath)!, Path.GetFileName(_storePath))
+            var directoryName = Path.GetDirectoryName(_storePath)!;
+            Directory.CreateDirectory(directoryName);
+
+            _fsWatcher = new FileSystemWatcher(directoryName, Path.GetFileName(_storePath))
             {
                 NotifyFilter = NotifyFilters.LastWrite,
                 EnableRaisingEvents = false,
@@ -94,7 +97,7 @@ namespace UnityModStudio.Common.Options
             try
             {
                 using var stream = File.OpenRead(_storePath);
-                foreach (var game in await JsonSerializer.DeserializeAsync<Game[]>(stream) ?? Array.Empty<Game>())
+                foreach (var game in await JsonSerializer.DeserializeAsync<Game[]>(stream) ?? [])
                     AddGame(game);
             }
             catch (Exception exception)
@@ -107,9 +110,7 @@ namespace UnityModStudio.Common.Options
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(_storePath)!);
-
-                using var stream = File.Open(_storePath, FileMode.Truncate);
+                using var stream = File.Open(_storePath, FileMode.Create);
                 await JsonSerializer.SerializeAsync(stream, Games);
             }
             catch (Exception exception)
