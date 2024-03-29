@@ -4,10 +4,17 @@
   <!-- VSSDK suppresses built-in VS assemblies from being packaged in VSIX, but some still slip by, exclude them here. -->
   <Target Name="SuppressRemainingVSAssemblies" BeforeTargets="GetVsixSourceItems">
     <ItemGroup>
-      <SuppressFromVsix Include="Microsoft.VisualStudio.Debugger.Interop.16.0.dll" />
-      <SuppressFromVsix Include="Microsoft.VisualStudio.LanguageServer.Protocol.dll" />
-      <SuppressFromVsix Include="System.Buffers.dll" />
-      <SuppressFromVsix Include="System.Threading.Tasks.Extensions.dll" />
+      <SuppressFromVsix Include="Microsoft.IO.Redist.dll" />
+      <SuppressFromVsix Include="Microsoft.NET.StringTools.dll" />
+      <SuppressFromVsix Include="Microsoft.NET.StringTools.pdb" />
+      <SuppressFromVsix Include="Microsoft.VisualStudio.ProjectSystem.Managed.dll" />
+      <SuppressFromVsix Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS.dll" />
+      <SuppressFromVsix Include="System.Configuration.ConfigurationManager.dll" />
+      <SuppressFromVsix Include="System.Numerics.Vectors.dll" />
+      <SuppressFromVsix Include="System.Resources.Extensions.dll" />
+      <SuppressFromVsix Include="System.Security.Permissions.dll" />
+      <SuppressFromVsix Include="System.Text.Encodings.Web.dll" />
+      <SuppressFromVsix Include="System.Text.Json.dll" />
     </ItemGroup>
   </Target>
 </Project>
