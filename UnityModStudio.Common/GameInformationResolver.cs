@@ -118,12 +118,16 @@ namespace UnityModStudio.Common
             var netstandardFile = GetAssemblyFile(assemblyFiles, "netstandard.dll");
             var hasSystemCore = systemCoreFile != null;
             var hasSystemXml = systemXmlFile != null;
-            var hasNetStandard = netstandardFile != null;
+            var netStandardVersion = netstandardFile is null
+                ? null
+                : Version.Parse(FileVersionInfo.GetVersionInfo(netstandardFile.FullName).FileVersion);
 
             return mscorlibVersion.Major switch
             {
+                // Unity 2021.x+ .NET Standard 2.1 profile (actually it's also .NET 4.8)
+                4 when netStandardVersion is { Major: 2, Minor: 1 } => ("netstandard2.1", false),
                 // Unity 2018.x+ .NET Standard 2.0 profile
-                4 when hasNetStandard => ("netstandard2.0", false),
+                4 when netStandardVersion is { Major: 2, Minor: 0 } => ("netstandard2.0", false),
                 // Unity 2017.x+ .NET 4.6 profile
                 4 => ("net46", false),
                 // Unity 4.x .NET 2.0 Subset profile
@@ -218,6 +222,7 @@ namespace UnityModStudio.Common
             "System.ComponentModel.Composition.dll",
             "System.Configuration.dll",
             "System.Core.dll",
+            "System.Data.DataSetExtensions.dll",
             "System.Data.dll",
             "System.Diagnostics.StackTrace.dll",
             "System.Drawing.dll",
@@ -227,8 +232,11 @@ namespace UnityModStudio.Common
             "System.IO.Compression.FileSystem.dll",
             "System.Net.Http.dll",
             "System.Numerics.dll",
+            "System.Runtime.dll",
             "System.Runtime.Serialization.dll",
             "System.Runtime.Serialization.Xml.dll",
+            "System.Security.dll",
+            "System.ServiceModel.Internals.dll",
             "System.Transactions.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",

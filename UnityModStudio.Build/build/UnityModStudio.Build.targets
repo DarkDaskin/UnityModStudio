@@ -46,7 +46,7 @@
   </Target>
 
   <Target Name="AddGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="FindGameFiles">
-    <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+    <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard'))">
       <Reference Include="@(FrameworkAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
     </ItemGroup>
     <ItemGroup>
