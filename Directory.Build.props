@@ -26,7 +26,7 @@
   <Target Name="AdjustVersion" AfterTargets="GetBuildVersion">
     <PropertyGroup>
       <!-- Must correspond to one set in the templates' WizardExtension. -->
-      <AssemblyVersion>2.0.0.0</AssemblyVersion>
+      <AssemblyVersion>3.0.0.0</AssemblyVersion>
     </PropertyGroup>
   </Target>
 

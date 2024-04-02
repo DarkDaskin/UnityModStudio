@@ -39,7 +39,7 @@
     </CustomParameters>
   </TemplateContent>
   <WizardExtension>
-    <Assembly>UnityModStudio.ProjectWizard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
+    <Assembly>UnityModStudio.ProjectWizard, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
     <FullClassName>UnityModStudio.ProjectWizard.UnityModProjectWizard</FullClassName>
   </WizardExtension>
 </VSTemplate>
