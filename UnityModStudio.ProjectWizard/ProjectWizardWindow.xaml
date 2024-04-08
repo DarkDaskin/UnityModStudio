@@ -53,6 +53,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
@@ -115,7 +116,7 @@
             Visibility="{Binding GameInformationVisibility}">
 
             <HeaderedContentControl Content="{Binding GamePath}" Header="Game path:" />
-            <HeaderedContentControl Content="{Binding ModRootPath}" Header="Mod root path:" />
+            <HeaderedContentControl Content="{Binding ModsPath}" Header="Mod root path:" />
             <HeaderedContentControl Content="{Binding GameName}" Header="Game name:" />
             <HeaderedContentControl Content="{Binding GameVersionString}" Header="Game version:" />
             <HeaderedContentControl Content="{Binding Architecture}" Header="Architecture:" />
@@ -135,6 +136,15 @@
 
     <GroupBox
       Grid.Row="1"
+      Grid.IsSharedSizeScope="True"
+      Header="Mod deployment">
+      <StackPanel>
+        <HeaderedContentControl Content="{Binding ModDeploymentModeString}" Header="Mode:" />
+      </StackPanel>
+    </GroupBox>
+
+    <GroupBox
+      Grid.Row="2"
       Grid.IsSharedSizeScope="True"
       Header="Unity Doorstop">
       <StackPanel>

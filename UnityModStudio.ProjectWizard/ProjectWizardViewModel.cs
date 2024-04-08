@@ -21,6 +21,8 @@ namespace UnityModStudio.ProjectWizard
 
         public IReadOnlyCollection<Game> Games => GameManager?.GameRegistry.Games ?? Array.Empty<Game>();
 
+        public string ModDeploymentModeString => Game?.ModDeploymentMode.ToString() ?? "";
+
         public string DoorstopModeString => Game?.DoorstopMode switch
         {
             DoorstopMode.Disabled => "Disabled",
@@ -93,7 +95,7 @@ namespace UnityModStudio.ProjectWizard
 
             // Trigger property sync.
             GamePath = Game.Path;
-            ModRootPath = Game.ModRootPath;
+            ModsPath = Game.ModsPath;
             GameVersion = Game.Version;
 
             RefreshProperties();
@@ -116,6 +118,7 @@ namespace UnityModStudio.ProjectWizard
             NotifyPropertyChanged(nameof(ErrorVisibility));
             NotifyPropertyChanged(nameof(GameInformationVisibility));
             NotifyPropertyChanged(nameof(GameVersionString));
+            NotifyPropertyChanged(nameof(ModDeploymentModeString));
             NotifyPropertyChanged(nameof(DoorstopModeString));
             NotifyPropertyChanged(nameof(DoorstopDllName));
             NotifyPropertyChanged(nameof(IsDoorstopDllNameVisible));

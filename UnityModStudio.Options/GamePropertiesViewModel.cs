@@ -11,6 +11,7 @@ namespace UnityModStudio.Options
     public class GamePropertiesViewModel : GamePropertiesViewModelBase
     {
         private string _displayName = "";
+        private ModDeploymentMode _modDeploymentMode;
         private DoorstopMode _doorstopMode;
         private bool _useAlternateDoorstopDllName;
 
@@ -27,6 +28,12 @@ namespace UnityModStudio.Options
             }
         }
 
+        public ModDeploymentMode ModDeploymentMode
+        {
+            get => _modDeploymentMode;
+            set => SetProperty(ref _modDeploymentMode, value);
+        }
+
         public DoorstopMode DoorstopMode
         {
             get => _doorstopMode;
@@ -41,7 +48,7 @@ namespace UnityModStudio.Options
 
         public ICommand BrowseForGamePathCommand { get; }
 
-        public ICommand BrowseForModRootPathCommand { get; }
+        public ICommand BrowseForModsPathCommand { get; }
 
         [Import]
         public IFolderBrowserService? FolderBrowserService { get; set; }
@@ -54,11 +61,12 @@ namespace UnityModStudio.Options
         {
             Game = game;
             DisplayName = Game.DisplayName;
+            ModDeploymentMode = Game.ModDeploymentMode;
             DoorstopMode = Game.DoorstopMode;
             UseAlternateDoorstopDllName = Game.UseAlternateDoorstopDllName;
             
             BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath, null, ThreadHelper.JoinableTaskFactory);
-            BrowseForModRootPathCommand = new DelegateCommand(BrowseForModRootPath, null, ThreadHelper.JoinableTaskFactory);
+            BrowseForModsPathCommand = new DelegateCommand(BrowseForModsPath, null, ThreadHelper.JoinableTaskFactory);
         }
 
         private void BrowseForGamePath()
@@ -72,15 +80,15 @@ namespace UnityModStudio.Options
                 GamePath = selectedPath;
         }
 
-        private void BrowseForModRootPath()
+        private void BrowseForModsPath()
         {
             Debug.Assert(FolderBrowserService != null, nameof(FolderBrowserService) + " != null");
 
-            var initialPath = Directory.Exists(ModRootPath) ? ModRootPath : Directory.Exists(GamePath) ? GamePath : null;
+            var initialPath = Directory.Exists(ModsPath) ? ModsPath : Directory.Exists(GamePath) ? GamePath : null;
             var selectedPath = ThreadHelper.JoinableTaskFactory.Run(() => 
-                FolderBrowserService!.BrowseForFolderAsync("Select the mod root folder", initialPath));
+                FolderBrowserService!.BrowseForFolderAsync("Select the mods folder", initialPath));
             if (selectedPath != null)
-                ModRootPath = selectedPath;
+                ModsPath = selectedPath;
         }
 
         private void ValidateDisplayName()
@@ -109,6 +117,7 @@ namespace UnityModStudio.Options
             base.OnConfirm();
 
             Game!.DisplayName = DisplayName;
+            Game.ModDeploymentMode = ModDeploymentMode;
             Game.DoorstopMode = DoorstopMode;
             Game.UseAlternateDoorstopDllName = UseAlternateDoorstopDllName;
         }

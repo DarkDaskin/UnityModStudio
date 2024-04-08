@@ -10,6 +10,11 @@
   <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="ConfigureDoorstop" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="CreateSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="DeleteSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="GetSymbolicLinkTarget" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
   <Target Name="FindGameFiles">
     <ItemGroup>
@@ -19,9 +24,10 @@
     </ItemGroup>
     <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
       <Output TaskParameter="GamePath" PropertyName="GamePath" />
-      <Output TaskParameter="ModRootPath" PropertyName="ModRootPath" />
+      <Output TaskParameter="GameModsPath" PropertyName="GameModsPath" />
       <Output TaskParameter="GameExecutableFileName" PropertyName="GameExecutableFileName" />
       <Output TaskParameter="GameInstanceId" PropertyName="GameInstanceId" />
+      <Output TaskParameter="ModDeploymentMode" PropertyName="ModDeploymentMode" />
       <Output TaskParameter="DoorstopMode" PropertyName="DoorstopMode" />
       <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="UseAlternateDoorstopDllName" />
     </ResolveGameProperties>
@@ -54,44 +60,102 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="CopyModToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles">
-    <PropertyGroup>
-      <ModRootPath Condition="'$(ModRootPath)' == ''">$(GamePath)</ModRootPath>
-      <ModPath Condition="'$(ModPath)' == ''">$(ModRootPath)$(ProjectName)\</ModPath>
-    </PropertyGroup>
-    <ItemGroup>
-      <ModFiles Include="$(TargetDir)**" />
-    </ItemGroup>
+  <Target Name="PrepareModPaths">
+    <CombinePath BasePath="$(GamePath)" Paths="$(GameModsPath)">
+      <Output TaskParameter="CombinedPaths" PropertyName="GameModsPath" />
+    </CombinePath>
 
-    <Copy SourceFiles="@(ModFiles)" DestinationFolder="$(ModPath)" />
+    <PropertyGroup>
+      <ModTargetPath Condition="'$(ModTargetPath)' == ''">$(GameModsPath)$(ProjectName)\</ModTargetPath>
+      <ModSourcePath Condition="'$(ModSourcePath)' == ''">$(TargetDir)</ModSourcePath>
+    </PropertyGroup>
+
+    <ConvertToAbsolutePath Paths="$(ModSourcePath)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="ModSourcePath" />
+    </ConvertToAbsolutePath>
+
+    <ItemGroup>
+      <_CompiledModAssembly Include="$(TargetDir)$(TargetFileName)" />
+    </ItemGroup>
+    <ResolveTargetPath RelativeToPath="$(ModSourcePath)" Input="@(_CompiledModAssembly)">
+      <Output TaskParameter="Output" ItemName="_ResolvedCompiledModAssembly" />
+    </ResolveTargetPath>
+    <PropertyGroup>
+      <DeployedModAssemblyPath>$(ModTargetPath)%(_ResolvedCompiledModAssembly.TargetPath)$(TargetFileName)</DeployedModAssemblyPath>
+    </PropertyGroup>
+  </Target>
+
+  <!-- Not so fun fact: formerly named CopyModToGame, that name broke MSBuild somehow -->
+  <Target Name="CopyModFilesToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
+    <ItemGroup>
+      <_ModCompiledOutput Include="$(TargetDir)**\*" />
+      <_ModContentFile Include="@(Content)" />
+      <ModExcludedFile />
+      <ModFile Include="@(_ModCompiledOutput)" />
+      <ModFile Include="@(_ModContentFile)" />
+      <ModFile Remove="@(ModExcludedFile)" />
+    </ItemGroup>
+    <ResolveTargetPath RelativeToPath="$(ModSourcePath)" Input="@(ModFile)">
+      <Output TaskParameter="Output" ItemName="_ModFileToCopy" />
+    </ResolveTargetPath>
+    
+    <GetSymbolicLinkTarget SymbolicLink="$(ModTargetPath)">
+      <Output TaskParameter="Target" PropertyName="_ModTargetPathLinkTarget" />
+    </GetSymbolicLinkTarget>
+    <DeleteSymbolicLink Path="$(ModTargetPath)" Condition="Exists('$(ModTargetPath)') and '$(_ModTargetPathLinkTarget)' != ''" />
+
+    <MakeDir Directories="$(ModTargetPath)" Condition="!Exists('$(ModTargetPath)')" />
+    <Copy SourceFiles="@(_ModFileToCopy->HasMetadata('TargetPath'))" DestinationFolder="$(ModTargetPath)%(TargetPath)" SkipUnchangedFiles="true">
+      <Output TaskParameter="CopiedFiles" ItemName="_FileCopiedToModTargetPath" />
+    </Copy>
+
+    <ItemGroup>
+      <_FileToRemoveFromModTargetPath Include="$(ModTargetPath)**\*" Exclude="@(_FileCopiedToModTargetPath)" />
+    </ItemGroup>
+    <Delete Files="@(_FileToRemoveFromModTargetPath)" />
+    <RemoveEmptyDirectories Directories="$(ModTargetPath)" />
+  </Target>
+
+  <Target Name="LinkModToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Link'">
+    <GetSymbolicLinkTarget SymbolicLink="$(ModTargetPath)">
+      <Output TaskParameter="Target" PropertyName="_ModTargetPathLinkTarget" />
+    </GetSymbolicLinkTarget>
+    <ConvertToAbsolutePath Paths="$(_ModTargetPathLinkTarget)" Condition="'$(_ModTargetPathLinkTarget)' != ''">
+      <Output TaskParameter="AbsolutePaths" PropertyName="_ModTargetPathLinkTarget" />
+    </ConvertToAbsolutePath>
+    <RemoveDir Directories="$(ModTargetPath)" Condition="Exists('$(ModTargetPath)') and '$(_ModTargetPathLinkTarget)' == ''" />
+    <DeleteSymbolicLink Path="$(ModTargetPath)" Condition="Exists('$(ModTargetPath)') and '$(_ModTargetPathLinkTarget)' != '' and '$(_ModTargetPathLinkTarget)' != '$(ModSourcePath)'" />
+
+    <CreateSymbolicLink Target="$(ModSourcePath)" SymbolicLink="$(ModTargetPath)" Condition="!Exists('$(ModTargetPath)')" />
+    
   </Target>
 
   <Target Name="DeployDoorstop" DependsOnTargets="FindGameFiles" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
     <ItemGroup>
-      <DoorstopNativeFiles Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\**" Condition="'$(GameArchitecture)' == 'X86'" />
-      <DoorstopNativeFiles Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**" Condition="'$(GameArchitecture)' == 'X64'" />
-      <DoorstopContentFiles Include="$(MSBuildThisFileDirectory)..\content\**" />
+      <DoorstopNativeFile Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\**" Condition="'$(GameArchitecture)' == 'X86'" />
+      <DoorstopNativeFile Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**" Condition="'$(GameArchitecture)' == 'X64'" />
+      <DoorstopContentFile Include="$(MSBuildThisFileDirectory)..\content\**" />
     </ItemGroup>
 
-    <Error Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFiles)' == ''" />
+    <Error Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFile)' == ''" />
 
     <PropertyGroup>
       <_PrimaryDoorstopDllPath>$(GamePath)winhttp.dll</_PrimaryDoorstopDllPath>
       <_AlternateDoorstopDllPath>$(GamePath)version.dll</_AlternateDoorstopDllPath>
     </PropertyGroup>
 
-    <Copy SourceFiles="@(DoorstopNativeFiles)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="True" Condition="!Exists('$(_PrimaryDoorstopDllPath)') and !Exists('$(_AlternateDoorstopDllPath)')" />
+    <Copy SourceFiles="@(DoorstopNativeFile)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="True" Condition="!Exists('$(_PrimaryDoorstopDllPath)') and !Exists('$(_AlternateDoorstopDllPath)')" />
     <Move SourceFiles="$(_PrimaryDoorstopDllPath)" DestinationFiles="$(_AlternateDoorstopDllPath)" Condition="Exists('$(_PrimaryDoorstopDllPath)') and '$(UseAlternateDoorstopDllName)' == 'True'" />
     <Move SourceFiles="$(_AlternateDoorstopDllPath)" DestinationFiles="$(_PrimaryDoorstopDllPath)" Condition="Exists('$(_AlternateDoorstopDllPath)') and '$(UseAlternateDoorstopDllName)' != 'True'" />
-    <Copy SourceFiles="@(DoorstopContentFiles)" DestinationFolder="$(GamePath)" Condition="!Exists('$(GamePath)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(DoorstopContentFile)" DestinationFolder="$(GamePath)" Condition="!Exists('$(GamePath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
-  <Target Name="ConfigureDoorstop" AfterTargets="PrepareForRun" DependsOnTargets="DeployDoorstop;CopyModToGame" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
+  <Target Name="ConfigureDoorstop" AfterTargets="CopyModToGame;LinkModToGame" DependsOnTargets="DeployDoorstop;PrepareModPaths" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
     <PropertyGroup>
       <DoorstopConfigFile>$(GamePath)doorstop_config.ini</DoorstopConfigFile>
     </PropertyGroup>
 
-    <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(ModPath)$(TargetFileName)" />
+    <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" />
   </Target>
 
 </Project>

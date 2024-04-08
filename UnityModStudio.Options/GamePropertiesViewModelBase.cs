@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -17,7 +16,7 @@ namespace UnityModStudio.Options
     {
         private Game? _game;
         private string? _gamePath;
-        private string? _modRootPath;
+        private string? _modsPath;
         private string? _gameVersion;
         private string? _gameName;
         private string? _architecture;
@@ -36,7 +35,7 @@ namespace UnityModStudio.Options
                 SetProperty(ref _game, value);
 
                 GamePath = Game?.Path;
-                ModRootPath = Game?.ModRootPath;
+                ModsPath = Game?.ModsPath;
                 GameVersion = Game?.Version;
 
                 RefreshProperties();
@@ -57,10 +56,10 @@ namespace UnityModStudio.Options
             }
         }
 
-        public string? ModRootPath
+        public string? ModsPath
         {
-            get => _modRootPath;
-            set => SetProperty(ref _modRootPath, value);
+            get => _modsPath;
+            set => SetProperty(ref _modsPath, value);
         }
 
         public string? GameVersion
@@ -178,7 +177,7 @@ namespace UnityModStudio.Options
         protected virtual void RefreshProperties()
         {
             NotifyPropertyChanged(nameof(GamePath));
-            NotifyPropertyChanged(nameof(ModRootPath));
+            NotifyPropertyChanged(nameof(ModsPath));
             NotifyPropertyChanged(nameof(GameVersion));
             NotifyPropertyChanged(nameof(GameName));
             NotifyPropertyChanged(nameof(GameExecutableFileName));
@@ -191,7 +190,7 @@ namespace UnityModStudio.Options
         protected virtual void OnConfirm()
         {
             Game!.Path = GamePath!;
-            Game.ModRootPath = ModRootPath;
+            Game.ModsPath = ModsPath;
             Game.Version = GameVersion;
             Game.GameName = GameName;
             Game.GameExecutableFileName = GameExecutableFileName;

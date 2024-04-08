@@ -60,6 +60,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
@@ -130,18 +131,18 @@
         <Label
           Grid.Row="4"
           Grid.Column="0"
-          Content="Mod root path:"
-          Target="{Binding ElementName=ModRootPathText}" />
+          Content="Mods path:"
+          Target="{Binding ElementName=ModsPathText}" />
         <TextBox
-          Name="ModRootPathText"
+          Name="ModsPathText"
           Grid.Row="4"
           Grid.Column="1"
-          Text="{Binding ModRootPath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+          Text="{Binding ModsPath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
         <Button
           Grid.Row="4"
           Grid.Column="2"
           Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
-          Command="{Binding BrowseForModRootPathCommand}"
+          Command="{Binding BrowseForModsPathCommand}"
           Content="…"
           ToolTip="Browse" />
 
@@ -183,7 +184,24 @@
       </Grid>
     </GroupBox>
 
-    <GroupBox Grid.Row="1" Header="Unity Doorstop">
+    <GroupBox Grid.Row="1" Header="Mod deployment">
+      <StackPanel>
+        <RadioButton
+          Content="Disabled"
+          IsChecked="{Binding ModDeploymentMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:ModDeploymentMode.Disabled}}"
+          ToolTip="Mod is not deployed into the game mods directory." />
+        <RadioButton
+          Content="Copy"
+          IsChecked="{Binding ModDeploymentMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:ModDeploymentMode.Copy}}"
+          ToolTip="Mod is copied into the game mods directory." />
+        <RadioButton
+          Content="Link"
+          IsChecked="{Binding ModDeploymentMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:ModDeploymentMode.Link}}"
+          ToolTip="A symbolic link to the mod is created in the game mods directory." />
+      </StackPanel>
+    </GroupBox>
+
+    <GroupBox Grid.Row="2" Header="Unity Doorstop">
       <StackPanel>
         <RadioButton
           Content="Disabled"
