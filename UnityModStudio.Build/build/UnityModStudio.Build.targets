@@ -15,6 +15,7 @@
   <UsingTask TaskName="GetSymbolicLinkTarget" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
   <Target Name="FindGameFiles">
     <ItemGroup>
@@ -28,6 +29,7 @@
       <Output TaskParameter="GameExecutableFileName" PropertyName="GameExecutableFileName" />
       <Output TaskParameter="GameInstanceId" PropertyName="GameInstanceId" />
       <Output TaskParameter="ModDeploymentMode" PropertyName="ModDeploymentMode" />
+      <Output TaskParameter="DeploySourceCode" PropertyName="DeploySourceCode" />
       <Output TaskParameter="DoorstopMode" PropertyName="DoorstopMode" />
       <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="UseAlternateDoorstopDllName" />
     </ResolveGameProperties>
@@ -85,15 +87,30 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="GetModSourceCodeFiles" BeforeTargets="CopyModFilesToGame" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(DeploySourceCode)' == 'true'">
+    <ItemGroup>
+      <_IgnoreListFile Include="$(ModSourcePath)**\.gitignore" />
+      <_IgnoreListFile Include="$(MSBuildThisFileDirectory)..\tools\default.gitignore" Condition="'@(_IgnoreListFile)' == ''" />
+    </ItemGroup>
+    <GetIgnoredFiles Directory="$(ModSourcePath)" IgnoreListFiles="@(_IgnoreListFile)">
+      <Output TaskParameter="IgnoredFiles" ItemName="_IgnoredFile" />
+    </GetIgnoredFiles>
+
+    <ItemGroup>
+      <ModSourceCodeFile Include="$(ModSourcePath)**\*" Exclude="@(_IgnoredFile)" />
+    </ItemGroup>
+  </Target>
+
   <!-- Not so fun fact: formerly named CopyModToGame, that name broke MSBuild somehow -->
   <Target Name="CopyModFilesToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
     <ItemGroup>
       <_ModCompiledOutput Include="$(TargetDir)**\*" />
       <_ModContentFile Include="@(Content)" />
       <ModExcludedFile />
-      <ModFile Include="@(_ModCompiledOutput)" />
-      <ModFile Include="@(_ModContentFile)" />
-      <ModFile Remove="@(ModExcludedFile)" />
+      <ModFile Include="%(_ModCompiledOutput.FullPath)" KeepDuplicates="false" />
+      <ModFile Include="%(_ModContentFile.FullPath)" KeepDuplicates="false" />
+      <ModFile Include="%(ModSourceCodeFile.FullPath)" KeepDuplicates="false" />
+      <ModFile Remove="%(ModExcludedFile.FullPath)" />
     </ItemGroup>
     <ResolveTargetPath RelativeToPath="$(ModSourcePath)" Input="@(ModFile)">
       <Output TaskParameter="Output" ItemName="_ModFileToCopy" />
@@ -110,7 +127,7 @@
     </Copy>
 
     <ItemGroup>
-      <_FileToRemoveFromModTargetPath Include="$(ModTargetPath)**\*" Exclude="@(_FileCopiedToModTargetPath)" />
+      <_FileToRemoveFromModTargetPath Include="$(ModTargetPath)**\*" Exclude="@(_FileCopiedToModTargetPath->'%(FullPath)')" />
     </ItemGroup>
     <Delete Files="@(_FileToRemoveFromModTargetPath)" />
     <RemoveEmptyDirectories Directories="$(ModTargetPath)" />

@@ -191,9 +191,15 @@
           IsChecked="{Binding ModDeploymentMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:ModDeploymentMode.Disabled}}"
           ToolTip="Mod is not deployed into the game mods directory." />
         <RadioButton
+          Name="CopyModRadioButton"
           Content="Copy"
           IsChecked="{Binding ModDeploymentMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:ModDeploymentMode.Copy}}"
           ToolTip="Mod is copied into the game mods directory." />
+        <CheckBox
+          Margin="20,0,0,0"
+          Content="Copy source code"
+          IsChecked="{Binding DeploySourceCode}"
+          IsEnabled="{Binding IsChecked, ElementName=CopyModRadioButton}" />
         <RadioButton
           Content="Link"
           IsChecked="{Binding ModDeploymentMode, Converter={StaticResource EqualityConverter}, ConverterParameter={x:Static commonOptions:ModDeploymentMode.Link}}"

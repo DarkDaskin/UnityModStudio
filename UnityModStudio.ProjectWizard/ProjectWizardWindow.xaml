@@ -140,6 +140,7 @@
       Header="Mod deployment">
       <StackPanel>
         <HeaderedContentControl Content="{Binding ModDeploymentModeString}" Header="Mode:" />
+        <HeaderedContentControl Content="{Binding DeploySourceCodeString}" Header="Deploy source code:" />
       </StackPanel>
     </GroupBox>
 

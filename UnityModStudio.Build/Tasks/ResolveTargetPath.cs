@@ -34,7 +34,8 @@ public class ResolveTargetPath : Task
             if (!outputItem.MetadataNames.Cast<string>().Contains(TargetPathMetadataName))
             {
                 var fullPath = outputItem.GetMetadata("FullPath");
-                var directoryName = Path.GetDirectoryName(fullPath) ?? "";
+                var directoryName = Path.GetDirectoryName(fullPath);
+                directoryName = directoryName is null ? "" : Utils.AppendTrailingSlash(directoryName);
                 if (directoryName.StartsWith(relativeToFullPath, StringComparison.OrdinalIgnoreCase)) 
                     targetPath = directoryName.Substring(relativeToFullPath.Length);
             }
@@ -44,6 +45,9 @@ public class ResolveTargetPath : Task
             if (!string.IsNullOrEmpty(targetPath))
                 targetPath = Utils.AppendTrailingSlash(targetPath!);
 
+            if (targetPath == "")
+                targetPath = Utils.AppendTrailingSlash(".");
+            
             if (targetPath is not null)
                 outputItem.SetMetadata(TargetPathMetadataName, targetPath);
 

@@ -12,6 +12,7 @@ namespace UnityModStudio.Common.Options
         public string? ModsPath { get; set; }
         public string? Version { get; set; }
         public ModDeploymentMode ModDeploymentMode { get; set; } = ModDeploymentMode.Copy;
+        public bool DeploySourceCode { get; set; }
         public DoorstopMode DoorstopMode { get; set; } = DoorstopMode.Debugging;
         public bool UseAlternateDoorstopDllName { get; set; }
 

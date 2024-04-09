@@ -12,6 +12,7 @@ namespace UnityModStudio.Options
     {
         private string _displayName = "";
         private ModDeploymentMode _modDeploymentMode;
+        private bool _deploySourceCode;
         private DoorstopMode _doorstopMode;
         private bool _useAlternateDoorstopDllName;
 
@@ -32,6 +33,12 @@ namespace UnityModStudio.Options
         {
             get => _modDeploymentMode;
             set => SetProperty(ref _modDeploymentMode, value);
+        }
+
+        public bool DeploySourceCode
+        {
+            get => _deploySourceCode;
+            set => SetProperty(ref _deploySourceCode, value);
         }
 
         public DoorstopMode DoorstopMode
@@ -62,6 +69,7 @@ namespace UnityModStudio.Options
             Game = game;
             DisplayName = Game.DisplayName;
             ModDeploymentMode = Game.ModDeploymentMode;
+            DeploySourceCode = game.DeploySourceCode;
             DoorstopMode = Game.DoorstopMode;
             UseAlternateDoorstopDllName = Game.UseAlternateDoorstopDllName;
             
@@ -118,6 +126,7 @@ namespace UnityModStudio.Options
 
             Game!.DisplayName = DisplayName;
             Game.ModDeploymentMode = ModDeploymentMode;
+            Game.DeploySourceCode = DeploySourceCode;
             Game.DoorstopMode = DoorstopMode;
             Game.UseAlternateDoorstopDllName = UseAlternateDoorstopDllName;
         }

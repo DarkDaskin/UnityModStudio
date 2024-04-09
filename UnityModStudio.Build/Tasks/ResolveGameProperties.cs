@@ -27,10 +27,13 @@ namespace UnityModStudio.Build.Tasks
         public string? GameInstanceId { get; private set; }
         
         [Output]
-        public string? DoorstopMode { get; private set; }
+        public string? ModDeploymentMode { get; private set; }
 
         [Output]
-        public string? ModDeploymentMode { get; private set; }
+        public bool DeploySourceCode { get; private set; }
+
+        [Output]
+        public string? DoorstopMode { get; private set; }
 
         [Output]
         public bool UseAlternateDoorstopDllName { get; private set; }
@@ -57,9 +60,10 @@ namespace UnityModStudio.Build.Tasks
                     GameModsPath = match.Game.ModsPath != null ? new TaskItem(Utils.AppendTrailingSlash(match.Game.ModsPath)) : null;
                     GameExecutableFileName = match.Game.GameExecutableFileName;
                     GameInstanceId = match.Game.Id.ToString();
+                    ModDeploymentMode = match.Game.ModDeploymentMode.ToString();
+                    DeploySourceCode = match.Game.DeploySourceCode;
                     DoorstopMode = match.Game.DoorstopMode.ToString();
                     UseAlternateDoorstopDllName = match.Game.UseAlternateDoorstopDllName;
-                    ModDeploymentMode = match.Game.ModDeploymentMode.ToString();
                     return true;
 
                 case GameMatchResult.NoMatch:

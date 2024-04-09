@@ -23,6 +23,13 @@ namespace UnityModStudio.ProjectWizard
 
         public string ModDeploymentModeString => Game?.ModDeploymentMode.ToString() ?? "";
 
+        public string DeploySourceCodeString => Game?.DeploySourceCode switch
+        {
+            true => "Yes",
+            false => "No",
+            _ => ""
+        };
+
         public string DoorstopModeString => Game?.DoorstopMode switch
         {
             DoorstopMode.Disabled => "Disabled",
@@ -119,6 +126,7 @@ namespace UnityModStudio.ProjectWizard
             NotifyPropertyChanged(nameof(GameInformationVisibility));
             NotifyPropertyChanged(nameof(GameVersionString));
             NotifyPropertyChanged(nameof(ModDeploymentModeString));
+            NotifyPropertyChanged(nameof(DeploySourceCodeString));
             NotifyPropertyChanged(nameof(DoorstopModeString));
             NotifyPropertyChanged(nameof(DoorstopDllName));
             NotifyPropertyChanged(nameof(IsDoorstopDllNameVisible));
