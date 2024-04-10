@@ -3,7 +3,41 @@
 
   <PropertyGroup>
     <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
+    <UseGameRegistry Condition="'$(UseGameRegistry)' == ''">true</UseGameRegistry>
+    <GameRegistryPath>$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
+    <ResolvedPropertiesProjectFilePath>$(IntermediateOutputPath)ResolvedGameProperties.props</ResolvedPropertiesProjectFilePath>
+    <ResolvedPropertiesProjectFilePath Condition="!$([System.IO.Path]::IsPathRooted('$(ResolvedPropertiesProjectFilePath)'))">$(MSBuildProjectDirectory)\$(ResolvedPropertiesProjectFilePath)</ResolvedPropertiesProjectFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UpToDateCheckBuilt Include="$(ResolvedPropertiesProjectFilePath)" Original="$(GameRegistryPath)" />
+  </ItemGroup>
+
+  <Import Project="$(ResolvedPropertiesProjectFilePath)" Condition="Exists('$(ResolvedPropertiesProjectFilePath)')" />
+
+  <PropertyGroup Condition="'$(UseGameRegistry)' == 'true'">
+    <_UserSpecifiedGamePath Condition="'$(GamePath)' != ''">$(GamePath)</_UserSpecifiedGamePath>
+    <_UserSpecifiedGameModsPath Condition="'$(GameModsPath)' != ''">$(GameModsPath)</_UserSpecifiedGameModsPath>
+    <_UserSpecifiedGameExecutableFileName Condition="'$(GameExecutableFileName)' != ''">$(GameExecutableFileName)</_UserSpecifiedGameExecutableFileName>
+    <_UserSpecifiedGameInstanceId Condition="'$(GameInstanceId)' != ''">$(GameInstanceId)</_UserSpecifiedGameInstanceId>
+    <_UserSpecifiedModDeploymentMode Condition="'$(ModDeploymentMode)' != ''">$(ModDeploymentMode)</_UserSpecifiedModDeploymentMode>
+    <_UserSpecifiedDeploySourceCode Condition="'$(DeploySourceCode)' != ''">$(DeploySourceCode)</_UserSpecifiedDeploySourceCode>
+    <_UserSpecifiedDoorstopMode Condition="'$(DoorstopMode)' != ''">$(DoorstopMode)</_UserSpecifiedDoorstopMode>
+    <_UserSpecifiedUseAlternateDoorstopDllName Condition="'$(UseAlternateDoorstopDllName)' != ''">$(UseAlternateDoorstopDllName)</_UserSpecifiedUseAlternateDoorstopDllName>
+
+    <GamePath Condition="'$(GamePath)' == ''">$(_ResolvedGamePath)</GamePath>
+    <GameModsPath Condition="'$(GameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
+    <GameExecutableFileName Condition="'$(GameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
+    <GameInstanceId Condition="'$(GameInstanceId)' == ''">$(_ResolvedGameInstanceId)</GameInstanceId>
+    <ModDeploymentMode Condition="'$(ModDeploymentMode)' == ''">$(_ResolvedModDeploymentMode)</ModDeploymentMode>
+    <DeploySourceCode Condition="'$(DeploySourceCode)' == ''">$(_ResolvedDeploySourceCode)</DeploySourceCode>
+    <DoorstopMode Condition="'$(DoorstopMode)' == ''">$(_ResolvedDoorstopMode)</DoorstopMode>
+    <UseAlternateDoorstopDllName Condition="'$(UseAlternateDoorstopDllName)' == ''">$(_ResolvedUseAlternateDoorstopDllName)</UseAlternateDoorstopDllName>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GamePath Condition="'$(GamePath)' != '' and !HasTrailingSlash('$(GamePath)')">$(GamePath)\</GamePath>
+    <GameModsPath Condition="'$(GameModsPath)' != '' and !HasTrailingSlash('$(GameModsPath)')">$(GameModsPath)\</GameModsPath>
   </PropertyGroup>
 
   <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
@@ -17,40 +51,54 @@
   <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
-  <Target Name="FindGameFiles">
+  <Target Name="ResolveGameProperties" BeforeTargets="FindGameFiles" Condition="'$(UseGameRegistry)' == 'true'" Inputs="$(GameRegistryPath)" Outputs="$(ResolvedPropertiesProjectFilePath)">
     <ItemGroup>
       <GameLookupProperty Include="Id" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
-    </ItemGroup>
+    </ItemGroup> 
     <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
-      <Output TaskParameter="GamePath" PropertyName="GamePath" />
-      <Output TaskParameter="GameModsPath" PropertyName="GameModsPath" />
-      <Output TaskParameter="GameExecutableFileName" PropertyName="GameExecutableFileName" />
-      <Output TaskParameter="GameInstanceId" PropertyName="GameInstanceId" />
-      <Output TaskParameter="ModDeploymentMode" PropertyName="ModDeploymentMode" />
-      <Output TaskParameter="DeploySourceCode" PropertyName="DeploySourceCode" />
-      <Output TaskParameter="DoorstopMode" PropertyName="DoorstopMode" />
-      <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="UseAlternateDoorstopDllName" />
+      <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
+      <Output TaskParameter="GameModsPath" PropertyName="_ResolvedGameModsPath" />
+      <Output TaskParameter="GameExecutableFileName" PropertyName="_ResolvedGameExecutableFileName" />
+      <Output TaskParameter="GameInstanceId" PropertyName="_ResolvedGameInstanceId" />
+      <Output TaskParameter="ModDeploymentMode" PropertyName="_ResolvedModDeploymentMode" />
+      <Output TaskParameter="DeploySourceCode" PropertyName="_ResolvedDeploySourceCode" />
+      <Output TaskParameter="DoorstopMode" PropertyName="_ResolvedDoorstopMode" />
+      <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="_ResolvedUseAlternateDoorstopDllName" />
     </ResolveGameProperties>
 
+    <ItemGroup>
+      <_ResolvedProperty Include="_ResolvedGameInstanceId" Value="$(_ResolvedGameInstanceId)" Condition="'$(_ResolvedGameInstanceId)' != ''" />
+      <_ResolvedProperty Include="_ResolvedGamePath" Value="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''" />
+      <_ResolvedProperty Include="_ResolvedGameModsPath" Value="$(_ResolvedGameModsPath)" Condition="'$(_ResolvedGameModsPath)' != ''" />
+      <_ResolvedProperty Include="_ResolvedGameExecutableFileName" Value="$(_ResolvedGameExecutableFileName)" Condition="'$(_ResolvedGameExecutableFileName)' != ''" />
+      <_ResolvedProperty Include="_ResolvedModDeploymentMode" Value="$(_ResolvedModDeploymentMode)" Condition="'$(_ResolvedModDeploymentMode)' != ''" />
+      <_ResolvedProperty Include="_ResolvedDeploySourceCode" Value="$(_ResolvedDeploySourceCode)" Condition="'$(_ResolvedDeploySourceCode)' != ''" />
+      <_ResolvedProperty Include="_ResolvedDoorstopMode" Value="$(_ResolvedDoorstopMode)" Condition="'$(_ResolvedDoorstopMode)' != ''" />
+      <_ResolvedProperty Include="_ResolvedUseAlternateDoorstopDllName" Value="$(_ResolvedUseAlternateDoorstopDllName)" Condition="'$(_ResolvedUseAlternateDoorstopDllName)' != ''" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
+
+    <PropertyGroup>
+      <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''">$(_ResolvedGamePath)</GamePath>
+      <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
+      <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
+      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == ''">$(_ResolvedGameInstanceId)</GameInstanceId>
+      <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == ''">$(_ResolvedModDeploymentMode)</ModDeploymentMode>
+      <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == ''">$(_ResolvedDeploySourceCode)</DeploySourceCode>
+      <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == ''">$(_ResolvedDoorstopMode)</DoorstopMode>
+      <UseAlternateDoorstopDllName Condition="'$(_UserSpecifiedUseAlternateDoorstopDllName)' == ''">$(_ResolvedUseAlternateDoorstopDllName)</UseAlternateDoorstopDllName>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="FindGameFiles">
     <FindGameFiles GamePath="$(GamePath)" Condition="'$(GamePath)' != ''">
       <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
       <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
       <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
       <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
     </FindGameFiles>
-
-    <PropertyGroup>
-      <ProjectUserFilePath>$(MSBuildProjectFullPath).user</ProjectUserFilePath>
-    </PropertyGroup>
-    <ItemGroup>
-      <_ProjectUserProperty Include="GameInstanceId" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
-      <_ProjectUserProperty Include="GamePath" Value="$(GamePath)" Condition="'$(GamePath)' != ''" />
-      <_ProjectUserProperty Include="GameExecutableFileName" Value="$(GameExecutableFileName)" Condition="'$(GameExecutableFileName)' != ''" />
-      <_ProjectUserProperty Include="DoorstopMode" Value="$(DoorstopMode)" Condition="'$(DoorstopMode)' != ''" />
-    </ItemGroup>
-    <UpdateProjectFile ProjectFile="$(ProjectUserFilePath)" Properties="@(_ProjectUserProperty)" />
   </Target>
 
   <Target Name="AddGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="FindGameFiles">
