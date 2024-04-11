@@ -45,10 +45,12 @@
   </ItemGroup>
 
   <Target Name="UpdateBuildOutputForPack" BeforeTargets="_GetBuildOutputFilesWithTfm" DependsOnTargets="ResolveReferences">
-    <!-- Emulate IncludeReferencedProjects switch of nuget.exe which is not suppoerted yet in MSBuild. -->
+    <!-- Emulate IncludeReferencedProjects switch of nuget.exe which is not suppoerted yet in MSBuild. -->  
     <!-- See https://stackoverflow.com/a/56990424/280778 -->
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('CopyToPublishDirectory', ''))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('CopyToPublishDirectory', ''))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'FileSystemLinks'" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Ignore'" />
     </ItemGroup>
   </Target>
 
