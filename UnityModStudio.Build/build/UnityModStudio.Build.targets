@@ -5,15 +5,21 @@
     <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
     <UseGameRegistry Condition="'$(UseGameRegistry)' == ''">true</UseGameRegistry>
     <GameRegistryPath>$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
-    <ResolvedPropertiesProjectFilePath>$(IntermediateOutputPath)ResolvedGameProperties.props</ResolvedPropertiesProjectFilePath>
-    <ResolvedPropertiesProjectFilePath Condition="!$([System.IO.Path]::IsPathRooted('$(ResolvedPropertiesProjectFilePath)'))">$(MSBuildProjectDirectory)\$(ResolvedPropertiesProjectFilePath)</ResolvedPropertiesProjectFilePath>
+    <_FullIntermediateOutputPath>$(IntermediateOutputPath)</_FullIntermediateOutputPath>
+    <_FullIntermediateOutputPath Condition="!$([System.IO.Path]::IsPathRooted('$(_FullIntermediateOutputPath)'))">$(MSBuildProjectDirectory)\$(_FullIntermediateOutputPath)</_FullIntermediateOutputPath>
+    <_ResolvedPropertiesProjectFilePath>$(_FullIntermediateOutputPath)ResolvedGameProperties.targets</_ResolvedPropertiesProjectFilePath>
+    <_ResolvedReferencesProjectFilePath>$(_FullIntermediateOutputPath)ResolvedReferences.targets</_ResolvedReferencesProjectFilePath>
+    <_GamePropertiesChangeTimestampFilePath>$(_FullIntermediateOutputPath)GamePropertiesChange.timestamp</_GamePropertiesChangeTimestampFilePath>
   </PropertyGroup>
 
   <ItemGroup>
-    <UpToDateCheckBuilt Include="$(ResolvedPropertiesProjectFilePath)" Original="$(GameRegistryPath)" />
+    <UpToDateCheckBuilt Include="$(_ResolvedPropertiesProjectFilePath)" Original="$(GameRegistryPath)" />
+    <UpToDateCheckBuilt Include="$(_ResolvedReferencesProjectFilePath)" Original="$(_GamePropertiesChangeTimestampFilePath)" />
+    <Clean Include="$(_ResolvedPropertiesProjectFilePath)" />
+    <Clean Include="$(_ResolvedReferencesProjectFilePath)" />
   </ItemGroup>
 
-  <Import Project="$(ResolvedPropertiesProjectFilePath)" Condition="Exists('$(ResolvedPropertiesProjectFilePath)')" />
+  <Import Project="$(_ResolvedPropertiesProjectFilePath)" Condition="Exists('$(_ResolvedPropertiesProjectFilePath)')" />
 
   <PropertyGroup Condition="'$(UseGameRegistry)' == 'true'">
     <_UserSpecifiedGamePath Condition="'$(GamePath)' != ''">$(GamePath)</_UserSpecifiedGamePath>
@@ -40,8 +46,10 @@
     <GameModsPath Condition="'$(GameModsPath)' != '' and !HasTrailingSlash('$(GameModsPath)')">$(GameModsPath)\</GameModsPath>
   </PropertyGroup>
 
-  <UsingTask TaskName="FindGameFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <Import Project="$(_ResolvedReferencesProjectFilePath)" Condition="Exists('$(_ResolvedReferencesProjectFilePath)')" />
+
   <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveGameAssemblyReferences" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="ConfigureDoorstop" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="CreateSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
@@ -51,7 +59,7 @@
   <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
-  <Target Name="ResolveGameProperties" BeforeTargets="FindGameFiles" Condition="'$(UseGameRegistry)' == 'true'" Inputs="$(GameRegistryPath)" Outputs="$(ResolvedPropertiesProjectFilePath)">
+  <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" Condition="'$(UseGameRegistry)' == 'true'" Inputs="$(GameRegistryPath);$(MSBuildProjectFullPath)" Outputs="$(_ResolvedPropertiesProjectFilePath)">
     <ItemGroup>
       <GameLookupProperty Include="Id" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
@@ -78,7 +86,7 @@
       <_ResolvedProperty Include="_ResolvedDoorstopMode" Value="$(_ResolvedDoorstopMode)" Condition="'$(_ResolvedDoorstopMode)' != ''" />
       <_ResolvedProperty Include="_ResolvedUseAlternateDoorstopDllName" Value="$(_ResolvedUseAlternateDoorstopDllName)" Condition="'$(_ResolvedUseAlternateDoorstopDllName)' != ''" />
     </ItemGroup>
-    <UpdateProjectFile ProjectFile="$(ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
+    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
 
     <PropertyGroup>
       <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''">$(_ResolvedGamePath)</GamePath>
@@ -92,25 +100,44 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="FindGameFiles">
-    <FindGameFiles GamePath="$(GamePath)" Condition="'$(GamePath)' != ''">
-      <Output TaskParameter="GameDataPath" PropertyName="GameDataPath" />
-      <Output TaskParameter="FrameworkAssemblies" ItemName="FrameworkAssembly" />
-      <Output TaskParameter="GameAssemblies" ItemName="GameAssembly" />
-      <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
-    </FindGameFiles>
+  <Target Name="GamePropertiesResolved" />
+
+  <Target Name="UpdateGamePropertiesChangeTimestamp" BeforeTargets="ResolveGameAssemblyReferences" Condition="'$(GamePath)' != '$(_PreviousGamePath)'">
+    <Touch Files="$(_GamePropertiesChangeTimestampFilePath)" AlwaysCreate="true" />
   </Target>
 
-  <Target Name="AddGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="FindGameFiles">
-    <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard'))">
-      <Reference Include="@(FrameworkAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
-    </ItemGroup>
+  <Target Name="ResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" 
+          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildProjectFullPath)" Outputs="$(_ResolvedReferencesProjectFilePath)">
     <ItemGroup>
-      <Reference Include="@(GameAssembly->'%(Filename)')" HintPath="%(FullPath)" Private="False" />
+      <Reference Remove="@(Reference->WithMetadataValue('IsImplicitlyDefinedGameReference', 'true'))" />
     </ItemGroup>
+
+    <ResolveGameAssemblyReferences GamePath="$(GamePath)" TargetFramework="$(TargetFramework)" ExistingReferences="@(Reference)">
+      <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
+      <Output TaskParameter="ReferencesToAdd" ItemName="_GameReferencesToAdd" />
+      <Output TaskParameter="ReferencesToUpdate" ItemName="_GameReferencesToUpdate" />
+      <Output TaskParameter="ReferencesToRemove" ItemName="_GameReferencesToRemove" />
+    </ResolveGameAssemblyReferences>
+
+    <ItemGroup>
+      <Reference Remove="@(_GameReferencesToRemove)" />
+      <Reference Update="@(_GameReferencesToUpdate)" />
+      <Reference Include="@(_GameReferencesToAdd)" Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ResolvedReferenceProperty Include="GameArchitecture" Value="$(GameArchitecture)" />
+      <_GameReferenceToSave Include="@(_GameReferencesToAdd)" ItemName="Reference" ItemAction="Include" IncludeMetadata="HintPath;Private;IsImplicitlyDefined;IsImplicitlyDefinedGameReference"
+                            Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
+      <_GameReferenceToSave Include="@(_GameReferencesToUpdate)" ItemName="Reference" ItemAction="Update" IncludeMetadata="HintPath;Private" />
+      <_GameReferenceToSave Include="@(_GameReferencesToRemove)" ItemName="Reference" ItemAction="Remove" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_ResolvedReferencesProjectFilePath)" Properties="@(_ResolvedReferenceProperty)" Items="@(_GameReferenceToSave)" ItemNames="Reference" />
   </Target>
 
-  <Target Name="PrepareModPaths">
+  <Target Name="GameAssemblyReferencesResolved" />
+
+  <Target Name="PrepareModPaths" DependsOnTargets="GamePropertiesResolved">
     <CombinePath BasePath="$(GamePath)" Paths="$(GameModsPath)">
       <Output TaskParameter="CombinedPaths" PropertyName="GameModsPath" />
     </CombinePath>
@@ -135,7 +162,7 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="GetModSourceCodeFiles" BeforeTargets="CopyModFilesToGame" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(DeploySourceCode)' == 'true'">
+  <Target Name="GetModSourceCodeFiles" BeforeTargets="CopyModFilesToGame" DependsOnTargets="PrepareModPaths" Condition="'$(DeploySourceCode)' == 'true'">
     <ItemGroup>
       <_IgnoreListFile Include="$(ModSourcePath)**\.gitignore" />
       <_IgnoreListFile Include="$(MSBuildThisFileDirectory)..\tools\default.gitignore" Condition="'@(_IgnoreListFile)' == ''" />
@@ -150,7 +177,7 @@
   </Target>
 
   <!-- Not so fun fact: formerly named CopyModToGame, that name broke MSBuild somehow -->
-  <Target Name="CopyModFilesToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
+  <Target Name="CopyModFilesToGame" AfterTargets="PrepareForRun" DependsOnTargets="PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
     <ItemGroup>
       <_ModCompiledOutput Include="$(TargetDir)**\*" />
       <_ModContentFile Include="@(Content)" />
@@ -181,7 +208,7 @@
     <RemoveEmptyDirectories Directories="$(ModTargetPath)" />
   </Target>
 
-  <Target Name="LinkModToGame" AfterTargets="PrepareForRun" DependsOnTargets="FindGameFiles;PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Link'">
+  <Target Name="LinkModToGame" AfterTargets="PrepareForRun" DependsOnTargets="PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Link'">
     <GetSymbolicLinkTarget SymbolicLink="$(ModTargetPath)">
       <Output TaskParameter="Target" PropertyName="_ModTargetPathLinkTarget" />
     </GetSymbolicLinkTarget>
@@ -195,7 +222,7 @@
     
   </Target>
 
-  <Target Name="DeployDoorstop" DependsOnTargets="FindGameFiles" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
+  <Target Name="DeployDoorstop" DependsOnTargets="GamePropertiesResolved;GameAssemblyReferencesResolved" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
     <ItemGroup>
       <DoorstopNativeFile Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\**" Condition="'$(GameArchitecture)' == 'X86'" />
       <DoorstopNativeFile Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**" Condition="'$(GameArchitecture)' == 'X64'" />
@@ -221,6 +248,13 @@
     </PropertyGroup>
 
     <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" />
+  </Target>
+
+  <Target Name="StorePreviousPropertyValues" AfterTargets="Build">
+    <ItemGroup>
+      <_PreviousProperty Include="_PreviousGamePath" Value="$(GamePath)" Condition="'$(GamePath)' != '$(_PreviousGamePath)'" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_PreviousProperty)" Condition="'@(_PreviousProperty)' != ''" />
   </Target>
 
 </Project>
