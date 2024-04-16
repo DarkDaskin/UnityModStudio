@@ -102,13 +102,24 @@
 
   <Target Name="GamePropertiesResolved" />
 
+  <Target Name="StorePreviousPropertyValues" AfterTargets="GamePropertiesResolved">
+    <ItemGroup>
+      <_PreviousProperty Include="_PreviousGamePath" Value="$(GamePath)" Condition="'$(GamePath)' != '$(_PreviousGamePath)'" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_PreviousProperty)" Condition="'@(_PreviousProperty)' != ''" />
+  </Target>
+
   <Target Name="UpdateGamePropertiesChangeTimestamp" BeforeTargets="ResolveGameAssemblyReferences" Condition="'$(GamePath)' != '$(_PreviousGamePath)'">
     <Touch Files="$(_GamePropertiesChangeTimestampFilePath)" AlwaysCreate="true" />
   </Target>
 
   <Target Name="ResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" 
           Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildProjectFullPath)" Outputs="$(_ResolvedReferencesProjectFilePath)">
-    <ItemGroup>
+    <CreateProperty Value="true">
+      <Output TaskParameter="ValueSetByTask" PropertyName="_ResolveGameAssemblyReferencesIsRunning" />
+    </CreateProperty>
+
+    <ItemGroup Condition="'$(_ResolveGameAssemblyReferencesIsRunning)' == 'true'">
       <Reference Remove="@(Reference->WithMetadataValue('IsImplicitlyDefinedGameReference', 'true'))" />
     </ItemGroup>
 
@@ -248,13 +259,6 @@
     </PropertyGroup>
 
     <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" />
-  </Target>
-
-  <Target Name="StorePreviousPropertyValues" AfterTargets="Build">
-    <ItemGroup>
-      <_PreviousProperty Include="_PreviousGamePath" Value="$(GamePath)" Condition="'$(GamePath)' != '$(_PreviousGamePath)'" />
-    </ItemGroup>
-    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_PreviousProperty)" Condition="'@(_PreviousProperty)' != ''" />
   </Target>
 
 </Project>
