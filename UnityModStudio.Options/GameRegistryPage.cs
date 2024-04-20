@@ -29,11 +29,18 @@ namespace UnityModStudio.Options
 
         private GameRegistryView CreateGameRegistryView()
         {
-            ThreadHelper.JoinableTaskFactory.Run(GameRegistry.LoadAsync);
-
             var viewModel = new GameRegistryViewModel();
             ComponentModel.DefaultCompositionService.SatisfyImportsOnce(viewModel);
             return new GameRegistryView(viewModel);
+        }
+
+        protected override void OnActivate(CancelEventArgs e)
+        {
+            base.OnActivate(e);
+
+            ThreadHelper.JoinableTaskFactory.Run(GameRegistry.LoadAsync);
+
+            _child.Value.ViewModel.LoadGames();
         }
 
         protected override void OnApply(PageApplyEventArgs e)

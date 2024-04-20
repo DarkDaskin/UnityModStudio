@@ -1,13 +1,13 @@
-﻿using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System;
+﻿using System;
 using System.Linq;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Build.Tasks
 {
-    public class ResolveGameProperties : Task
+    public class ResolveGameProperties : GameRegistryTaskBase
     {
         [Required]
         public ITaskItem[] LookupProperties { get; set; } = [];
@@ -47,13 +47,9 @@ namespace UnityModStudio.Build.Tasks
                 return false;
             }
 
-            Log.LogMessage("Looking up the game registry by the following properties:\n  " +
-                           string.Join("\n  ", properties.Select(kv => $"{kv.Key} = {kv.Value}")));
-
-            // TODO: retrieve from VS?
-            var gameRegistry = GetGameRegistry();
-
-            switch (gameRegistry.FindGameByProperties(properties))
+            LogLookupProperties(properties);
+            
+            switch (GameRegistry.FindGameByProperties(properties, false))
             {
                 case GameMatchResult.Match match:
                     GamePath = new TaskItem(Utils.AppendTrailingSlash(match.Game.Path));
@@ -67,30 +63,16 @@ namespace UnityModStudio.Build.Tasks
                     return true;
 
                 case GameMatchResult.NoMatch:
-                    LogGameRegistryError("No game registry entries match speified game properties.");
+                    LogGameRegistryError(NoMatchMessage);
                     return false;
 
                 case GameMatchResult.AmbiguousMatch match:
-                    LogGameRegistryError("Multiple game registry entries match speified game properties:\n  " +
-                                         string.Join("\n  ", match.Games.Select(game => game.DisplayName)));
+                    LogGameRegistryError(GetAmbiguousMatchMessage(match));
                     return false;
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        private IGameRegistry GetGameRegistry()
-        {
-            var gameRegistry = (IGameRegistry?) BuildEngine4.GetRegisteredTaskObject(typeof(IGameRegistry), RegisteredTaskObjectLifetime.AppDomain);
-            if (gameRegistry != null) 
-                return gameRegistry;
-
-            gameRegistry = new GameRegistry();
-            gameRegistry.LoadAsync().GetAwaiter().GetResult();
-            gameRegistry.WatchForChanges = true;
-            BuildEngine4.RegisterTaskObject(typeof(IGameRegistry), gameRegistry, RegisteredTaskObjectLifetime.AppDomain, true);
-            return gameRegistry;
         }
 
         private void LogGameRegistryError(string message)

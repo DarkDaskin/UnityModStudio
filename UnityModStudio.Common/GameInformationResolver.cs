@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace UnityModStudio.Common
@@ -12,7 +11,7 @@ namespace UnityModStudio.Common
     public static class GameInformationResolver
     {
         public static bool TryGetGameInformation(
-            string? gamePath,
+            [NotNullWhen(true)] string? gamePath,
             [NotNullWhen(true)] out GameInformation? gameInformation,
             [NotNullWhen(false)] out string? error)
         {

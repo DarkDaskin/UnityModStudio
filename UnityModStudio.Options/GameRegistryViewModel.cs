@@ -69,8 +69,8 @@ namespace UnityModStudio.Options
         }
 
         private static bool IsGameSelected(Game? game) => game != null;
-        
-        private void LoadGames()
+
+        public void LoadGames()
         {
             if (GameManager == null)
                 return;
