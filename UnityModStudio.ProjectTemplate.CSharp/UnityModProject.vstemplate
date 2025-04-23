@@ -22,7 +22,6 @@
   </TemplateData>
   <TemplateContent>
     <Project File="UnityModProject.csproj" ReplaceParameters="true">
-      <ProjectItem TargetFileName="$projectname$.csproj.user" ReplaceParameters="true">UnityModProject.csproj.user.xml</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">Class1.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" OpenInEditor="true">ModInit.cs</ProjectItem>
       <Folder Name="Properties">
@@ -31,10 +30,8 @@
     </Project>
     <CustomParameters>
       <CustomParameter Name="$TargetFramework$" Value="netstandard2.0"/>
-      <CustomParameter Name="$DisableImplicitFrameworkReferences$" Value="false"/>
       <CustomParameter Name="$GameName$" Value=""/>
-      <CustomParameter Name="$GamePath$" Value=""/>
-      <CustomParameter Name="$GameExecutableFileName$" Value=""/>
+      <CustomParameter Name="$GameVersion$" Value=""/>
       <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
     </CustomParameters>
   </TemplateContent>

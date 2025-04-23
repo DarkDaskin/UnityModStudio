@@ -61,9 +61,6 @@
     </VSTemplate>
   </ItemGroup>
   <ItemGroup>
-    <None Include="UnityModProject.csproj.user.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="UnityModProject.CSharp.ico" />
   </ItemGroup>
   <ItemGroup>

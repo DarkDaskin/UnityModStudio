@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>$TargetFramework$</TargetFramework>
-    <DisableImplicitFrameworkReferences>$DisableImplicitFrameworkReferences$</DisableImplicitFrameworkReferences>
     <GameName>$GameName$</GameName>
     <GameVersion>$GameVersion$</GameVersion>
   </PropertyGroup>
