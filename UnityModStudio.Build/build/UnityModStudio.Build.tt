@@ -1,4 +1,47 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".targets" #>
+<#  
+    string[] gameProperties = [
+        "GamePath",
+        "GameModsPath",
+        "GameExecutableFileName",
+        "GameInstanceId",
+        "ModDeploymentMode",
+        "DeploySourceCode",
+        "DoorstopMode",
+        "UseAlternateDoorstopDllName",
+    ];
+    string[] gamePropertiesToClean = [
+        ..gameProperties,
+        "GameArchitecture"
+    ];
+    string[] userSpecifiedProperties = [
+        "GameDisplayName",
+        "GameName",
+        "GameVersion",
+        ..gameProperties
+    ];
+    string[] tasks = [
+        "ResolveGameProperties",
+        "ResolveGameAssemblyReferences",
+        "UpdateProjectFile",
+        "ConfigureDoorstop",
+        "CreateSymbolicLink",
+        "DeleteSymbolicLink",
+        "GetSymbolicLinkTarget",
+        "ResolveTargetPath",
+        "RemoveEmptyDirectories",
+        "GetIgnoredFiles",
+        "AddGameToRegistry",
+        "UpdateGameRegistry",
+        "RemoveGameFromRegistry",
+    ];
+#>
+<?xml version="1.0" encoding="utf-8" ?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
@@ -51,17 +94,9 @@
   <Import Project="$(_ResolvedPropertiesProjectFilePath)" Condition="Exists('$(_ResolvedPropertiesProjectFilePath)')" />
 
   <PropertyGroup>
-    <_UserSpecifiedGameDisplayName Condition="'$(GameDisplayName)' != ''">$(GameDisplayName)</_UserSpecifiedGameDisplayName>
-    <_UserSpecifiedGameName Condition="'$(GameName)' != ''">$(GameName)</_UserSpecifiedGameName>
-    <_UserSpecifiedGameVersion Condition="'$(GameVersion)' != ''">$(GameVersion)</_UserSpecifiedGameVersion>
-    <_UserSpecifiedGamePath Condition="'$(GamePath)' != ''">$(GamePath)</_UserSpecifiedGamePath>
-    <_UserSpecifiedGameModsPath Condition="'$(GameModsPath)' != ''">$(GameModsPath)</_UserSpecifiedGameModsPath>
-    <_UserSpecifiedGameExecutableFileName Condition="'$(GameExecutableFileName)' != ''">$(GameExecutableFileName)</_UserSpecifiedGameExecutableFileName>
-    <_UserSpecifiedGameInstanceId Condition="'$(GameInstanceId)' != ''">$(GameInstanceId)</_UserSpecifiedGameInstanceId>
-    <_UserSpecifiedModDeploymentMode Condition="'$(ModDeploymentMode)' != ''">$(ModDeploymentMode)</_UserSpecifiedModDeploymentMode>
-    <_UserSpecifiedDeploySourceCode Condition="'$(DeploySourceCode)' != ''">$(DeploySourceCode)</_UserSpecifiedDeploySourceCode>
-    <_UserSpecifiedDoorstopMode Condition="'$(DoorstopMode)' != ''">$(DoorstopMode)</_UserSpecifiedDoorstopMode>
-    <_UserSpecifiedUseAlternateDoorstopDllName Condition="'$(UseAlternateDoorstopDllName)' != ''">$(UseAlternateDoorstopDllName)</_UserSpecifiedUseAlternateDoorstopDllName>
+<# foreach (var property in userSpecifiedProperties) { #>
+    <_UserSpecified<#= property #> Condition="'$(<#= property #>)' != ''">$(<#= property #>)</_UserSpecified<#= property #>>
+<# } #>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -69,14 +104,9 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseGameRegistry)' == 'true'">
-    <GamePath Condition="'$(GamePath)' == ''">$(_ResolvedGamePath)</GamePath>
-    <GameModsPath Condition="'$(GameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
-    <GameExecutableFileName Condition="'$(GameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
-    <GameInstanceId Condition="'$(GameInstanceId)' == ''">$(_ResolvedGameInstanceId)</GameInstanceId>
-    <ModDeploymentMode Condition="'$(ModDeploymentMode)' == ''">$(_ResolvedModDeploymentMode)</ModDeploymentMode>
-    <DeploySourceCode Condition="'$(DeploySourceCode)' == ''">$(_ResolvedDeploySourceCode)</DeploySourceCode>
-    <DoorstopMode Condition="'$(DoorstopMode)' == ''">$(_ResolvedDoorstopMode)</DoorstopMode>
-    <UseAlternateDoorstopDllName Condition="'$(UseAlternateDoorstopDllName)' == ''">$(_ResolvedUseAlternateDoorstopDllName)</UseAlternateDoorstopDllName>
+<# foreach (var property in gameProperties) { #>
+    <<#= property #> Condition="'$(<#= property #>)' == ''">$(_Resolved<#= property #>)</<#= property #>>
+<# } #>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -92,31 +122,15 @@
 
   <Import Project="$(_ResolvedReferencesProjectFilePath)" Condition="Exists('$(_ResolvedReferencesProjectFilePath)')" />
 
-  <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ResolveGameAssemblyReferences" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ConfigureDoorstop" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="CreateSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="DeleteSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="GetSymbolicLinkTarget" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="AddGameToRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="UpdateGameRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="RemoveGameFromRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+<# foreach (var task in tasks) { #>
+  <UsingTask TaskName="<#= task #>" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+<# } #>
 
   <Target Name="CleanResolvedData" AfterTargets="CoreClean" Condition="'$(IsSpecificGameVersionBuild)' != 'true'">
     <PropertyGroup>
-      <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''" />
-      <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == ''" />
-      <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == ''" />
-      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == ''" />
-      <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == ''" />
-      <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == ''" />
-      <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == ''" />
-      <UseAlternateDoorstopDllName Condition="'$(_UserSpecifiedUseAlternateDoorstopDllName)' == ''" />
-      <GameArchitecture Condition="'$(_UserSpecifiedGameArchitecture)' == ''" />
+<# foreach (var property in gamePropertiesToClean) { #>
+      <<#= property #> Condition="'$(_UserSpecified<#= property #>)' == ''" />
+<# } #>
     </PropertyGroup>
     <ItemGroup>
       <Reference Remove="@(Reference)" Condition="'%(Reference.IsImplicitlyDefinedGameReference)' == 'true'" />
@@ -185,14 +199,9 @@
     <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
 
     <PropertyGroup>
-      <GamePath Condition="'$(_UserSpecifiedGamePath)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGamePath'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GamePath>
-      <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGameModsPath'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GameModsPath>
-      <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGameExecutableFileName'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GameExecutableFileName>
-      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGameInstanceId'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GameInstanceId>
-      <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedModDeploymentMode'">%(_ResolvedPropertyForDefaultGameVersion.Value)</ModDeploymentMode>
-      <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedDeploySourceCode'">%(_ResolvedPropertyForDefaultGameVersion.Value)</DeploySourceCode>
-      <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedDoorstopMode'">%(_ResolvedPropertyForDefaultGameVersion.Value)</DoorstopMode>
-      <UseAlternateDoorstopDllName Condition="'$(_UserSpecifiedUseAlternateDoorstopDllName)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedUseAlternateDoorstopDllName'">%(_ResolvedPropertyForDefaultGameVersion.Value)</UseAlternateDoorstopDllName>
+<# foreach (var property in gameProperties) { #>
+      <<#= property #> Condition="'$(_UserSpecified<#= property #>)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_Resolved<#= property #>'">%(_ResolvedPropertyForDefaultGameVersion.Value)</<#= property #>>
+<# } #>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -217,24 +226,14 @@
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
     <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
-      <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
-      <Output TaskParameter="GameModsPath" PropertyName="_ResolvedGameModsPath" />
-      <Output TaskParameter="GameExecutableFileName" PropertyName="_ResolvedGameExecutableFileName" />
-      <Output TaskParameter="GameInstanceId" PropertyName="_ResolvedGameInstanceId" />
-      <Output TaskParameter="ModDeploymentMode" PropertyName="_ResolvedModDeploymentMode" />
-      <Output TaskParameter="DeploySourceCode" PropertyName="_ResolvedDeploySourceCode" />
-      <Output TaskParameter="DoorstopMode" PropertyName="_ResolvedDoorstopMode" />
-      <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="_ResolvedUseAlternateDoorstopDllName" />
+<# foreach (var property in gameProperties) { #>
+      <Output TaskParameter="<#= property #>" PropertyName="_Resolved<#= property #>" />
+<# } #>
     </ResolveGameProperties>
     <ItemGroup>
-      <_ResolvedProperty Include="_ResolvedGamePath" Value="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''" />
-      <_ResolvedProperty Include="_ResolvedGameModsPath" Value="$(_ResolvedGameModsPath)" Condition="'$(_ResolvedGameModsPath)' != ''" />
-      <_ResolvedProperty Include="_ResolvedGameExecutableFileName" Value="$(_ResolvedGameExecutableFileName)" Condition="'$(_ResolvedGameExecutableFileName)' != ''" />
-      <_ResolvedProperty Include="_ResolvedGameInstanceId" Value="$(_ResolvedGameInstanceId)" Condition="'$(_ResolvedGameInstanceId)' != ''" />
-      <_ResolvedProperty Include="_ResolvedModDeploymentMode" Value="$(_ResolvedModDeploymentMode)" Condition="'$(_ResolvedModDeploymentMode)' != ''" />
-      <_ResolvedProperty Include="_ResolvedDeploySourceCode" Value="$(_ResolvedDeploySourceCode)" Condition="'$(_ResolvedDeploySourceCode)' != ''" />
-      <_ResolvedProperty Include="_ResolvedDoorstopMode" Value="$(_ResolvedDoorstopMode)" Condition="'$(_ResolvedDoorstopMode)' != ''" />
-      <_ResolvedProperty Include="_ResolvedUseAlternateDoorstopDllName" Value="$(_ResolvedUseAlternateDoorstopDllName)" Condition="'$(_ResolvedUseAlternateDoorstopDllName)' != ''" />
+<# foreach (var property in gameProperties) { #>
+      <_ResolvedProperty Include="_Resolved<#= property #>" Value="$(_Resolved<#= property #>)" Condition="'$(_Resolved<#= property #>)' != ''" />
+<# } #>
       <_ResolvedProperty ConditionExpression="'%24(GameVersion)' == '$(GameVersion)'" GameVersion="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
       <_ResolvedProperty Include="_GamePathChanged" IsTemporary="true" GameVersion="$(GameVersion)" Condition="'$(_ResolvedGamePath)' != '$(_PreviousGamePath)'" />
     </ItemGroup>
@@ -242,7 +241,7 @@
 
   <Target Name="GamePropertiesResolved" />
 
-  <Target Name="UpdateGamePropertiesChangeTimestamp" BeforeTargets="ResolveGameAssemblyReferences" Condition="'$(_GamePathChanged)' == 'true'">
+  <Target Name="UpdateGamePropertiesChangeTimestamp" BeforeTargets="ResolveGameAssemblyReferences" Condition="'$(GamePath)' != '$(_PreviousGamePath)'">
     <Touch Files="$(_GamePropertiesChangeTimestampFilePath)" AlwaysCreate="true" />
   </Target>
 

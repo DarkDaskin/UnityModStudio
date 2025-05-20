@@ -25,7 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="build\*" Pack="true" PackagePath="build\" />
+    <None Include="build\*.props" Pack="true" PackagePath="build\" />
+    <None Include="build\*.targets" Pack="true" PackagePath="build\" />
     <None Include="tools\*" Pack="true" PackagePath="tools\" />
     <None Include="README.md" Pack="true" PackagePath="" />
     <!-- This is the recommended way to get rid of the NU5128 warning. -->
@@ -42,6 +43,22 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="build\UnityModStudio.Build.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UnityModStudio.Build.targets</LastGenOutput>
+    </None>
+    <None Update="build\UnityModStudio.Build.targets">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UnityModStudio.Build.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
   <Target Name="UpdateBuildOutputForPack" BeforeTargets="_GetBuildOutputFilesWithTfm" DependsOnTargets="ResolveReferences">
