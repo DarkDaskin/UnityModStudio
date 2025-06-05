@@ -1,9 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using EnvDTE;
+using Microsoft.IO;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
+using Microsoft.VisualStudio.Threading;
 using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 
@@ -24,7 +30,13 @@ namespace UnityModStudio.ProjectWizard
                 throw new WizardBackoutException();
         }
 
-        void IWizard.ProjectFinishedGenerating(Project project) { }
+        public void ProjectFinishedGenerating(Project project)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var projectPath = project.FullName;
+            ThreadHelper.JoinableTaskFactory.Run(() => CleanUpProjectAsync(projectPath));
+        }
 
         void IWizard.RunFinished() { }
 
@@ -51,13 +63,37 @@ namespace UnityModStudio.ProjectWizard
                 return false;
 
             _game = viewModel.Game;
+            var selectedGameVersions = viewModel.GameVersions
+                .Where(vm => vm.IsSelected)
+                .Select(vm => vm.Version)
+                .ToArray();
             
             replacementsDictionary["$TargetFramework$"] = viewModel.TargetFrameworkMoniker ?? "";
             replacementsDictionary["$BuildPackageVersion$"] = Utils.GetPackageVersion();
             replacementsDictionary["$GameName$"] = viewModel.GameName ?? "";
-            replacementsDictionary["$GameVersion$"] = viewModel.GameVersion ?? "";
+            replacementsDictionary["$GameVersion$"] = selectedGameVersions.Length <= 1 ? viewModel.GameVersion ?? "" : "";
+            replacementsDictionary["$GameVersions$"] = selectedGameVersions.Length > 1 ? string.Join(";", selectedGameVersions) : "";
 
             return true;
+        }
+
+        private static async Task CleanUpProjectAsync(string projectPath)
+        {
+            await TaskScheduler.Default;
+
+            var document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace);
+            document.Descendants()
+                .Where(element => !element.HasAttributes && !element.HasElements && string.IsNullOrEmpty(element.Value))
+                .SelectMany(IncludeWhitespace)
+                .Remove();
+            document.Save(projectPath);
+        }
+
+        private static IEnumerable<XNode> IncludeWhitespace(XElement element)
+        {
+            yield return element;
+            if (element.PreviousNode is XText textNode && string.IsNullOrWhiteSpace(textNode.Value))
+                yield return textNode;
         }
     }
 }

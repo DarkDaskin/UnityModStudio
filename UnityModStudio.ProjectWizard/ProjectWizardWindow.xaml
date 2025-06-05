@@ -54,6 +54,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
@@ -157,8 +158,25 @@
       </StackPanel>
     </GroupBox>
 
-    <StackPanel
+    <GroupBox
       Grid.Row="3"
+      Grid.IsSharedSizeScope="True"
+      Header="Multi-version support"
+      Visibility="{Binding IsMultiVersionPanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+      <ItemsControl ItemsSource="{Binding GameVersions}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="{x:Type local:ProjectWizardViewModel+GameVersionViewModel}">
+            <CheckBox
+              Content="{Binding Version}"
+              IsChecked="{Binding IsSelected}"
+              IsEnabled="{Binding IsEnabled}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </GroupBox>
+
+    <StackPanel
+      Grid.Row="4"
       Grid.Column="0"
       HorizontalAlignment="Right"
       Orientation="Horizontal">

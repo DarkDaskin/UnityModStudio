@@ -1,145 +1,176 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Options;
 
-namespace UnityModStudio.ProjectWizard
+namespace UnityModStudio.ProjectWizard;
+
+public class ProjectWizardViewModel : GamePropertiesViewModelBase
 {
-    public class ProjectWizardViewModel : GamePropertiesViewModelBase
+    private IGameManager? _gameManager;
+    private Game? _previousGame;
+
+    public string? Error => string.Join("\n", GetErrors(nameof(GamePath)));
+    public Visibility ErrorVisibility => HasValidGamePath ? Visibility.Collapsed : Visibility.Visible;
+    public Visibility GameInformationVisibility => HasValidGamePath ? Visibility.Visible : Visibility.Hidden;
+
+    public IReadOnlyCollection<Game> Games => GameManager?.GameRegistry.Games ?? [];
+
+    public string ModDeploymentModeString => Game?.ModDeploymentMode.ToString() ?? "";
+
+    public string DeploySourceCodeString => Game?.DeploySourceCode switch
     {
-        private IGameManager? _gameManager;
+        true => "Yes",
+        false => "No",
+        _ => ""
+    };
 
-        public string? Error => string.Join("\n", GetErrors(nameof(GamePath)));
-        public Visibility ErrorVisibility => HasValidGamePath ? Visibility.Collapsed : Visibility.Visible;
-        public Visibility GameInformationVisibility => HasValidGamePath ? Visibility.Visible : Visibility.Hidden;
+    public string DoorstopModeString => Game?.DoorstopMode switch
+    {
+        DoorstopMode.Disabled => "Disabled",
+        DoorstopMode.Debugging => "Use for debugging",
+        DoorstopMode.DebuggingAndModLoading => "Use for debugging and mod loading",
+        _ => ""
+    };
 
-        public IReadOnlyCollection<Game> Games => GameManager?.GameRegistry.Games ?? Array.Empty<Game>();
+    public string DoorstopDllName => Game?.UseAlternateDoorstopDllName switch
+    {
+        false => "winhttp.dll",
+        true => "version.dll",
+        _ => ""
+    };
 
-        public string ModDeploymentModeString => Game?.ModDeploymentMode.ToString() ?? "";
+    public bool IsDoorstopDllNameVisible => Game != null && Game.DoorstopMode != DoorstopMode.Disabled;
 
-        public string DeploySourceCodeString => Game?.DeploySourceCode switch
+    public IReadOnlyList<GameVersionViewModel> GameVersions { get; private set; } = [];
+
+    public bool IsMultiVersionPanelVisible => GameVersions.Count > 1;
+
+    public string? GameVersionString => string.IsNullOrWhiteSpace(GameVersion) ? "<default>" : GameVersion;
+
+    public ICommand NewGameCommand { get; }
+    public ICommand UpdateGameCommand { get; }
+
+    [Import]
+    public IGameManager? GameManager
+    {
+        get => _gameManager;
+        set
         {
-            true => "Yes",
-            false => "No",
-            _ => ""
-        };
+            SetProperty(ref _gameManager, value);
 
-        public string DoorstopModeString => Game?.DoorstopMode switch
-        {
-            DoorstopMode.Disabled => "Disabled",
-            DoorstopMode.Debugging => "Use for debugging",
-            DoorstopMode.DebuggingAndModLoading => "Use for debugging and mod loading",
-            _ => ""
-        };
+            if (_gameManager != null)
+                ThreadHelper.JoinableTaskFactory.Run(_gameManager.GameRegistry.LoadAsync);
 
-        public string DoorstopDllName => Game?.UseAlternateDoorstopDllName switch
-        {
-            false => "winhttp.dll",
-            true => "version.dll",
-            _ => ""
-        };
-
-        public bool IsDoorstopDllNameVisible => Game != null && Game.DoorstopMode != DoorstopMode.Disabled;
-
-        public string? GameVersionString => string.IsNullOrWhiteSpace(GameVersion) ? "<default>" : GameVersion;
-
-        public ICommand NewGameCommand { get; }
-        public ICommand UpdateGameCommand { get; }
-
-        [Import]
-        public IGameManager? GameManager
-        {
-            get => _gameManager;
-            set
-            {
-                SetProperty(ref _gameManager, value);
-
-                if (_gameManager != null)
-                    ThreadHelper.JoinableTaskFactory.Run(_gameManager.GameRegistry.LoadAsync);
-
-                NotifyPropertyChanged(nameof(Games));
-            }
+            NotifyPropertyChanged(nameof(Games));
         }
+    }
 
 
-        public ProjectWizardViewModel()
-        {
-            NewGameCommand = new DelegateCommand(NewGame, null, ThreadHelper.JoinableTaskFactory);
-            UpdateGameCommand = new DelegateCommand(UpdateGame, () => Game != null, ThreadHelper.JoinableTaskFactory);
-        }
+    public ProjectWizardViewModel()
+    {
+        NewGameCommand = new DelegateCommand(NewGame, null, ThreadHelper.JoinableTaskFactory);
+        UpdateGameCommand = new DelegateCommand(UpdateGame, () => Game != null, ThreadHelper.JoinableTaskFactory);
+    }
 
-        private void NewGame()
-        {
-            if (GameManager == null)
-                return;
+    private void NewGame()
+    {
+        if (GameManager == null)
+            return;
 
-            var game = new Game();
-            if (!GameManager.ShowEditDialog(game))
-                return;
+        var game = new Game();
+        if (!GameManager.ShowEditDialog(game))
+            return;
 
-            GameManager.GameRegistry.AddGame(game);
+        GameManager.GameRegistry.AddGame(game);
 
-            CollectionViewSource.GetDefaultView(Games).Refresh();
+        CollectionViewSource.GetDefaultView(Games).Refresh();
 
-            Game = game;
-        }
+        Game = game;
+    }
 
-        private void UpdateGame()
-        {
-            if (GameManager == null || Game == null)
-                return;
+    private void UpdateGame()
+    {
+        if (GameManager == null || Game == null)
+            return;
             
-            if (!GameManager.ShowEditDialog(Game))
-                return;
+        if (!GameManager.ShowEditDialog(Game))
+            return;
 
-            CollectionViewSource.GetDefaultView(Games).Refresh();
+        CollectionViewSource.GetDefaultView(Games).Refresh();
 
-            // Trigger property sync.
-            GamePath = Game.Path;
-            ModsPath = Game.ModsPath;
-            GameVersion = Game.Version;
+        // Trigger property sync.
+        GamePath = Game.Path;
+        ModsPath = Game.ModsPath;
+        GameVersion = Game.Version;
 
-            RefreshProperties();
-        }
+        RefreshProperties();
+    }
 
-        protected override bool ValidateGamePath()
-        {
-            var result = base.ValidateGamePath();
+    protected override bool ValidateGamePath()
+    {
+        var result = base.ValidateGamePath();
 
-            RefreshProperties();
+        RefreshProperties();
 
-            return result;
-        }
+        return result;
+    }
 
-        protected override void RefreshProperties()
-        {
-            base.RefreshProperties();
+    protected override void RefreshProperties()
+    {
+        base.RefreshProperties();
 
-            NotifyPropertyChanged(nameof(Error));
-            NotifyPropertyChanged(nameof(ErrorVisibility));
-            NotifyPropertyChanged(nameof(GameInformationVisibility));
-            NotifyPropertyChanged(nameof(GameVersionString));
-            NotifyPropertyChanged(nameof(ModDeploymentModeString));
-            NotifyPropertyChanged(nameof(DeploySourceCodeString));
-            NotifyPropertyChanged(nameof(DoorstopModeString));
-            NotifyPropertyChanged(nameof(DoorstopDllName));
-            NotifyPropertyChanged(nameof(IsDoorstopDllNameVisible));
-        }
+        NotifyPropertyChanged(nameof(Error));
+        NotifyPropertyChanged(nameof(ErrorVisibility));
+        NotifyPropertyChanged(nameof(GameInformationVisibility));
+        NotifyPropertyChanged(nameof(GameVersionString));
+        NotifyPropertyChanged(nameof(ModDeploymentModeString));
+        NotifyPropertyChanged(nameof(DeploySourceCodeString));
+        NotifyPropertyChanged(nameof(DoorstopModeString));
+        NotifyPropertyChanged(nameof(DoorstopDllName));
+        NotifyPropertyChanged(nameof(IsDoorstopDllNameVisible));
 
-        protected override void OnConfirm()
-        {
-            base.OnConfirm();
+        FillVersions();
+    }
 
-            if (GameManager == null)
-                return;
+    private void FillVersions()
+    {
+        if (Game == _previousGame)
+            return;
 
-            ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveAsync);
-        }
+        GameVersions = Games
+            .Where(game => game.GameName == GameName && game.Version is not null)
+            .Select(game => new GameVersionViewModel(game.Version!, game == Game))
+            .OrderBy(vm => vm.Version, new GameVersionComparer())
+            .ToList();
+        NotifyPropertyChanged(nameof(GameVersions));
+        NotifyPropertyChanged(nameof(IsMultiVersionPanelVisible));
+
+        _previousGame = Game;
+    }
+
+    protected override void OnConfirm()
+    {
+        base.OnConfirm();
+
+        if (GameManager == null)
+            return;
+
+        ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveAsync);
+    }
+
+
+    public class GameVersionViewModel(string version, bool isDefault)
+    {
+        public string Version { get; } = version;
+        public bool IsEnabled { get; } = !isDefault;
+        public bool IsSelected { get; set; } = isDefault;
     }
 }

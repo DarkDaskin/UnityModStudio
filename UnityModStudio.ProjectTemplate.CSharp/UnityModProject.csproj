@@ -4,6 +4,7 @@
     <TargetFramework>$TargetFramework$</TargetFramework>
     <GameName>$GameName$</GameName>
     <GameVersion>$GameVersion$</GameVersion>
+    <GameVersions>$GameVersions$</GameVersions>
   </PropertyGroup>
 
   <ItemGroup>
