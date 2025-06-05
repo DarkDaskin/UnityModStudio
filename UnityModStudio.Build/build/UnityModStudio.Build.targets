@@ -462,9 +462,11 @@
   <Target Name="ConfigureDoorstop" AfterTargets="CopyModFilesToGame;LinkModToGame" DependsOnTargets="DeployDoorstop;PrepareModPaths" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
     <PropertyGroup>
       <DoorstopConfigFile>$(GamePath)doorstop_config.ini</DoorstopConfigFile>
+      <_UseDoorstopForModLoading>false</_UseDoorstopForModLoading>
+      <_UseDoorstopForModLoading Condition="'$(DoorstopMode)' == 'DebuggingAndModLoading'">true</_UseDoorstopForModLoading>
     </PropertyGroup>
 
-    <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" />
+    <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
   </Target>
 
   <Target Name="AddGameToRegistry">
