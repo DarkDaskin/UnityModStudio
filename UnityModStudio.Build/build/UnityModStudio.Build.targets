@@ -106,6 +106,37 @@
   <UsingTask TaskName="UpdateGameRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="RemoveGameFromRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
+  <Target Name="PrepareForUpToDateCheck" BeforeTargets="CollectUpToDateCheckBuiltDesignTime" DependsOnTargets="ResolveGameVersions" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'">
+    <PropertyGroup>
+      <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
+      <_DocumentationFileProduced>false</_DocumentationFileProduced>
+      <_DebugSymbolsProduced>false</_DebugSymbolsProduced>
+    </PropertyGroup>
+    <ItemGroup>
+      <IntermediateAssembly Remove="@(IntermediateAssembly)" />
+    </ItemGroup>
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_PrepareForUpToDateCheckInner" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true">
+      <Output TaskParameter="TargetOutputs" ItemName="UpToDateCheckBuilt" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="_PrepareForUpToDateCheckInner" Returns="@(_UpToDateCheckBuilt)" DependsOnTargets="CompileDesignTime">
+    <!-- Copied from https://github.com/dotnet/project-system/blob/77f6d69c2105929bcbbfe3532e851c41802ce802/src/Microsoft.VisualStudio.ProjectSystem.Managed/ProjectSystem/DesignTimeTargets/Microsoft.Managed.DesignTime.targets#L426-L443 -->
+    <ItemGroup>
+      <!-- Assembly output, bin and obj -->
+      <_UpToDateCheckBuilt Condition="'$(CopyBuildOutputToOutputDirectory)' != 'false' and '$(SkipCopyBuildProduct)' != 'true'" Include="$(TargetPath)"/>
+      <_UpToDateCheckBuilt Include="@(IntermediateAssembly)"/>
+
+      <!-- Documentation file, bin and obj -->
+      <_UpToDateCheckBuilt Condition="'$(_DocumentationFileProduced)'=='true'" Include="@(FinalDocFile)"/>
+      <_UpToDateCheckBuilt Condition="'$(_DocumentationFileProduced)'=='true'" Include="@(DocFileItem)"/>
+
+      <!-- Symbols, bin and obj -->
+      <_UpToDateCheckBuilt Condition="'$(_DebugSymbolsProduced)'=='true'" Include="@(_DebugSymbolsIntermediatePath)"/>
+      <_UpToDateCheckBuilt Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)' != 'false'" Include="@(_DebugSymbolsOutputPath)"/>
+    </ItemGroup>
+  </Target>
+
   <Target Name="CleanResolvedData" AfterTargets="CoreClean" Condition="'$(IsSpecificGameVersionBuild)' != 'true'">
     <PropertyGroup>
       <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''" />
