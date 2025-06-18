@@ -190,8 +190,14 @@ namespace UnityModStudio.Common
             };
         }
 
-        private static string GetUnityVersion(FileInfo gameExecutableFile) =>
-            FileVersionInfo.GetVersionInfo(gameExecutableFile.FullName).FileVersion;
+        private static string GetUnityVersion(FileInfo gameExecutableFile)
+        {
+            var unityVersion = VersionInfo.GetStringFileInfo(gameExecutableFile.FullName, "Unity Version");
+            if (unityVersion != null)
+                return unityVersion.Split('_').First();
+
+            return FileVersionInfo.GetVersionInfo(gameExecutableFile.FullName).ProductVersion.Split(' ').First();
+        }
 
         private static (string? gameName, string? company) GetAppInfo(DirectoryInfo gameDataDirectory)
         {
