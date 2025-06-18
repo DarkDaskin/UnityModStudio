@@ -14,6 +14,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7BF079FE-B1DF-45B2-B3C1-4AA160B6E336}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		GameTest.targets = GameTest.targets
 		README.md = README.md
 		UnityModStudio.snk = UnityModStudio.snk
 		version.json = version.json
@@ -24,6 +25,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio", "UnityModStudio\UnityModStudio.csproj", "{1089A657-6DF7-41E5-8872-D1C5C60130F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityModStudio.ProjectSystem", "UnityModStudio.ProjectSystem\UnityModStudio.ProjectSystem.csproj", "{8DDAEC60-0999-4CE8-B57E-D328C0EF6A4C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.Common.Tests", "UnityModStudio.Common.Tests\UnityModStudio.Common.Tests.csproj", "{19C5F701-1D47-4790-B370-FCD90EC33F57}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,9 +64,16 @@ Global
 		{8DDAEC60-0999-4CE8-B57E-D328C0EF6A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DDAEC60-0999-4CE8-B57E-D328C0EF6A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DDAEC60-0999-4CE8-B57E-D328C0EF6A4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19C5F701-1D47-4790-B370-FCD90EC33F57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19C5F701-1D47-4790-B370-FCD90EC33F57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19C5F701-1D47-4790-B370-FCD90EC33F57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19C5F701-1D47-4790-B370-FCD90EC33F57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{19C5F701-1D47-4790-B370-FCD90EC33F57} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2F1C7D6-4B1F-46DA-BFD9-C45A049B562E}

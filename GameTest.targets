@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <SampleGameRepositoryUrl Condition="'$(SampleGameRepositoryUrl)' == ''">https://github.com/DarkDaskin/Unity-Game-Samples/</SampleGameRepositoryUrl>
+    <SampleGameRepositoryTag Condition="'$(SampleGameRepositoryTag)' == ''">v1</SampleGameRepositoryTag>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseDefaultSampleGames)' != 'false'">
+    <SampleGameType Include="357-net20" />
+    <SampleGameType Include="357-net20-subset" />
+    <SampleGameType Include="472-net20" />
+    <SampleGameType Include="472-net20-subset" />
+    <SampleGameType Include="567-net20" />
+    <SampleGameType Include="567-net20-subset" />
+    <SampleGameType Include="2017-net20" />
+    <SampleGameType Include="2017-net20-subset" />
+    <SampleGameType Include="2017-net46" />
+    <SampleGameType Include="2018-net20" />
+    <SampleGameType Include="2018-net20-subset" />
+    <SampleGameType Include="2018-net4" />
+    <SampleGameType Include="2018-netstandard20" />
+    <SampleGameType Include="2022-net4" />
+    <SampleGameType Include="2022-netstandard21" />
+  </ItemGroup>
+
+  <Target Name="_ResolveSampleGameDownloadPath">
+    <PropertyGroup>
+      <SampleGameDownloadPath Condition="'$(SampleGameDownloadPath)' == ''">$(BaseIntermediateOutputPath)SampleUnityGames\</SampleGameDownloadPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="DownloadSampleGames" DependsOnTargets="_ResolveSampleGameDownloadPath" Inputs="@(SampleGameType)" Outputs="@(SampleGameType->'$(SampleGameDownloadPath)%(Identity)\%(Identity).exe')">
+    <ItemGroup>
+      <_SampleGameZipFileName Include="@(SampleGameType->'UnityGame-%(Identity).zip')" />
+      <_SampleGameZipUrl Include="@(_SampleGameZipFileName->'$(SampleGameRepositoryUrl)releases/download/$(SampleGameRepositoryTag)/%(Identity)')" />
+    </ItemGroup>
+    <DownloadFile SourceUrl="%(_SampleGameZipUrl.Identity)" DestinationFolder="$(SampleGameDownloadPath)" />
+    <Unzip SourceFiles="$(SampleGameDownloadPath)UnityGame-%(SampleGameType.Identity).zip" DestinationFolder="$(SampleGameDownloadPath)%(SampleGameType.Identity)" />
+  </Target>
+
+  <Target Name="GenerateSampleGameInfo" DependsOnTargets="_ResolveSampleGameDownloadPath">
+    <PropertyGroup>
+      <_SampleGameInfoText><![CDATA[
+namespace $(RootNamespace)%3B
+
+internal static class SampleGameInfo
+{
+    public const string DownloadPath = @"$(SampleGameDownloadPath)"%3B
+}
+      ]]></_SampleGameInfoText>
+      <_SampleGameInfoFilePath>$(IntermediateOutputPath)SampleGameInfo.cs</_SampleGameInfoFilePath>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_SampleGameInfoFilePath)" Lines="$(_SampleGameInfoText)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+    <ItemGroup>
+      <Compile Include="$(_SampleGameInfoFilePath)" />
+      <FileWrites Include="$(_SampleGameInfoFilePath)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

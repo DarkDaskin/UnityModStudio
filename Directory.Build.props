@@ -12,6 +12,7 @@
     <PackageIcon>UnityModStudio-32.png</PackageIcon>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)UnityModStudio.snk</AssemblyOriginatorKeyFile>
+    <PublicKey>0024000004800000940000000602000000240000525341310004000001000100a5a5a4f45312b057695513f15b12dc1760a4555960e732c7f8f9584854ede100be8bd0b48079de8a764504e1e91f011623e0639fbd1d2d5ab56ab628b06e1b57b0b7e97bb0749226ee6ae2188a8c457bb552cbcb53d322c19d5874d5cf030d14c7d66e3131ce1cfe7833de2fee9d16c1360de69b22362abf41ab4dfe44e2b5cb</PublicKey>
   </PropertyGroup>
 
   <ItemGroup>

@@ -28,9 +28,7 @@ public interface IGameRegistry
 
 public class GameRegistry : IGameRegistry
 {
-    private readonly string _storePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        @"UnityModStudio\GameRegistry.json");
+    private readonly string _storePath;
     private readonly Dictionary<Guid, Game> _games = new();
     private readonly FileSystemWatcher _fsWatcher;
 
@@ -40,8 +38,14 @@ public class GameRegistry : IGameRegistry
         set => _fsWatcher.EnableRaisingEvents = value;
     }
 
-    public GameRegistry()
+    public GameRegistry() : this(Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        @"UnityModStudio\GameRegistry.json")) { }
+
+    internal GameRegistry(string storePath)
     {
+        _storePath = storePath;
+
         var directoryName = Path.GetDirectoryName(_storePath)!;
         Directory.CreateDirectory(directoryName);
 
@@ -50,7 +54,7 @@ public class GameRegistry : IGameRegistry
             NotifyFilter = NotifyFilters.LastWrite,
             EnableRaisingEvents = false,
         };
-        _fsWatcher.Changed += OnStoreChanged;
+        _fsWatcher.Changed += OnStoreChanged;        
     }
 
     private async void OnStoreChanged(object sender, FileSystemEventArgs e) => await LoadAsync();

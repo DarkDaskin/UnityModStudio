@@ -1,0 +1,50 @@
+[
+  {
+    "Id": "91eda532-02c2-441c-808d-07a474692ede",
+    "DisplayName": "Game 1",
+    "Path": "C:\\Games\\Game1",
+    "ModsPath": null,
+    "Version": null,
+    "ModDeploymentMode": 1,
+    "DeploySourceCode": false,
+    "DoorstopMode": 2,
+    "UseAlternateDoorstopDllName": false,
+    "GameName": "Game1",
+    "GameExecutableFileName": "Game1.exe",
+    "Architecture": "X64",
+    "UnityVersion": "2022.3.22f1",
+    "MonoProfile": ".NET Standard 2.1"
+  },
+  {
+    "Id": "01144589-1c88-4c52-91a4-e6cc2998f35c",
+    "DisplayName": "Game 2 v1.0",
+    "Path": "C:\\Games\\Game2_1",
+    "ModsPath": "Mods",
+    "Version": "1.0",
+    "ModDeploymentMode": 1,
+    "DeploySourceCode": true,
+    "DoorstopMode": 1,
+    "UseAlternateDoorstopDllName": true,
+    "GameName": "Game2",
+    "GameExecutableFileName": "Game2.exe",
+    "Architecture": "X64",
+    "UnityVersion": "2018.4.36f1",
+    "MonoProfile": ".NET 4.6"
+  },
+  {
+    "Id": "84d1866f-c4db-4d27-ad31-3b1fc9f34fd4",
+    "DisplayName": "Game 2 v2.0",
+    "Path": "C:\\Games\\Game2_2",
+    "ModsPath": "Mods",
+    "Version": "2.0",
+    "ModDeploymentMode": 1,
+    "DeploySourceCode": true,
+    "DoorstopMode": 1,
+    "UseAlternateDoorstopDllName": true,
+    "GameName": "Game2",
+    "GameExecutableFileName": "Game2.exe",
+    "Architecture": "X64",
+    "UnityVersion": "2018.4.36f1",
+    "MonoProfile": ".NET 4.6"
+  }
+]
