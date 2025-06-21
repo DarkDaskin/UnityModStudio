@@ -15,6 +15,7 @@ namespace UnityModStudio.Options
         private bool _deploySourceCode;
         private DoorstopMode _doorstopMode;
         private bool _useAlternateDoorstopDllName;
+        private IGameManager? _gameManager;
 
         public string DisplayName
         {
@@ -61,8 +62,17 @@ namespace UnityModStudio.Options
         public IFolderBrowserService? FolderBrowserService { get; set; }
 
         [Import]
-        public IGameManager? GameManager { get; set; }
-        
+        public IGameManager? GameManager
+        {
+            get => _gameManager;
+            set
+            {
+                SetProperty(ref _gameManager, value);
+
+                ValidateDisplayName();
+            }
+        }
+
 
         public GamePropertiesViewModel(Game game)
         {
