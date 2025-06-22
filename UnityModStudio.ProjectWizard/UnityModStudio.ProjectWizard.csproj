@@ -21,4 +21,8 @@
     <ProjectReference Include="..\UnityModStudio.Options\UnityModStudio.Options.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
 </Project>

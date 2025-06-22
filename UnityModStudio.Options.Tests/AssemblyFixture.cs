@@ -3,7 +3,7 @@
 namespace UnityModStudio.Options.Tests;
 
 [TestClass]
-public sealed class AssemblyFixture
+public static class AssemblyFixture
 {
     internal static GlobalServiceProvider MockServiceProvider { get; private set; } = null!;
 

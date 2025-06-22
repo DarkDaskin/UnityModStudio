@@ -121,7 +121,7 @@ namespace UnityModStudio.Options
 
         protected GamePropertiesViewModelBase()
         {
-            ConfirmCommand = new DelegateCommand(Confirm, () => !HasErrors, ThreadHelper.JoinableTaskFactory);
+            ConfirmCommand = new DelegateCommand(Confirm, () => Game != null && !HasErrors, ThreadHelper.JoinableTaskFactory);
             CancelCommand = new DelegateCommand(Cancel, null, ThreadHelper.JoinableTaskFactory);
         }
 
