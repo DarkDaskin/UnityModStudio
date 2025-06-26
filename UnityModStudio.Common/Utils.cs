@@ -14,7 +14,7 @@ namespace UnityModStudio.Common
         public static string GetPackageVersion() =>
             ThisAssembly.IsPublicRelease
                 ? ThisAssembly.AssemblyInformationalVersion.Split('+')[0]
-                : ThisAssembly.AssemblyInformationalVersion.Replace('+', '-');
+                : ThisAssembly.AssemblyInformationalVersion.Replace("+", "-g");
 
         /// <summary>
         /// Appends trailing slash to a path if missing.
