@@ -6,14 +6,16 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.PlatformUI;
 
-namespace UnityModStudio.Options
-{
+namespace UnityModStudio.Options;
+
     public class ObservableObjectWithValidation : ObservableObject, INotifyDataErrorInfo
     {
-        private readonly Dictionary<string, List<object>> _errors = new Dictionary<string, List<object>>();
+    private readonly Dictionary<string, List<object>> _errors = new();
 
-        public IEnumerable<object> GetErrors(string propertyName) => 
-            _errors.TryGetValue(propertyName, out var errors) ? errors : Enumerable.Empty<object>();
+    public IEnumerable<object> GetErrors(string? propertyName) =>
+        string.IsNullOrEmpty(propertyName) ?
+            _errors.Values.SelectMany(list => list) :
+            _errors.TryGetValue(propertyName!, out var errors) ? errors : Enumerable.Empty<object>();
 
         IEnumerable INotifyDataErrorInfo.GetErrors(string propertyName) => GetErrors(propertyName);
 
@@ -45,7 +47,7 @@ namespace UnityModStudio.Options
         protected void AddError(object error, [CallerMemberName] string propertyName = "")
         {
             if (!_errors.TryGetValue(propertyName, out var errors))
-                _errors[propertyName] = errors = new List<object>();
+            _errors[propertyName] = errors = [];
 
             errors.Add(error);
         }
@@ -53,4 +55,3 @@ namespace UnityModStudio.Options
         protected bool HasPropertyErrors([CallerMemberName] string propertyName = "") =>
             _errors.TryGetValue(propertyName, out var errors) && errors.Count > 0;
     }
-}
