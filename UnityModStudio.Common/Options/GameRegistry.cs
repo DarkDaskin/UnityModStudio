@@ -44,7 +44,7 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         @"UnityModStudio\GameRegistry.json")) { }
 
-    internal GameRegistry(string storePath)
+    public GameRegistry(string storePath)
     {
         _storePath = storePath;
 

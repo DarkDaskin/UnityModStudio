@@ -4,7 +4,7 @@
   <PropertyGroup>
     <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
     <UseGameRegistry Condition="'$(UseGameRegistry)' == ''">true</UseGameRegistry>
-    <GameRegistryPath>$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
+    <GameRegistryPath Condition="'$(GameRegistryPath)' == ''">$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
     <_SpecifiedGameVersionType>None</_SpecifiedGameVersionType>
     <_SpecifiedGameVersionType Condition="'$(GameVersion)' != '' and $(IsSpecificGameVersionBuild) != 'true'">Single</_SpecifiedGameVersionType>
     <_SpecifiedGameVersionType Condition="'$(GameVersions)' != '' and '$(_SpecifiedGameVersionType)' != 'Single'">Multiple</_SpecifiedGameVersionType>
@@ -247,7 +247,7 @@
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
-    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)">
+    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" GameRegistryPath="$(GameRegistryPath)">
       <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
       <Output TaskParameter="GameModsPath" PropertyName="_ResolvedGameModsPath" />
       <Output TaskParameter="GameExecutableFileName" PropertyName="_ResolvedGameExecutableFileName" />
@@ -472,17 +472,18 @@
   <Target Name="AddGameToRegistry">
     <AddGameToRegistry Path="$(_UserSpecifiedGamePath)" DisplayName="$(_UserSpecifiedGameDisplayName)" ModsPath="$(_UserSpecifiedGameModsPath)" Version="$(_UserSpecifiedGameVersion)" 
                        ModDeploymentMode="$(_UserSpecifiedModDeploymentMode)" DeploySourceCode="$(_UserSpecifiedDeploySourceCode)" DoorstopMode="$(_UserSpecifiedDoorstopMode)" 
-                       UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" />
+                       UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" GameRegistryPath="$(GameRegistryPath)" />
   </Target>
 
   <Target Name="UpdateGameRegistry">
     <UpdateGameRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)" 
                         Path="$(_UserSpecifiedGamePath)" ModsPath="$(_UserSpecifiedGameModsPath)" ModDeploymentMode="$(_UserSpecifiedModDeploymentMode)" DeploySourceCode="$(_UserSpecifiedDeploySourceCode)"
-                        DoorstopMode="$(_UserSpecifiedDoorstopMode)" UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" />
+                        DoorstopMode="$(_UserSpecifiedDoorstopMode)" UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" GameRegistryPath="$(GameRegistryPath)" />
   </Target>
 
   <Target Name="RemoveGameFromRegistry">
-    <RemoveGameFromRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)" />
+    <RemoveGameFromRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)"
+                            GameRegistryPath="$(GameRegistryPath)"/>
   </Target>
 
 </Project>

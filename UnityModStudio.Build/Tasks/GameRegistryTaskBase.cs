@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -13,6 +14,8 @@ public abstract class GameRegistryTaskBase : Task
 
     protected IGameRegistry GameRegistry => _gameRegistry.Value;
 
+    public string? GameRegistryPath { get; set; }
+
     protected GameRegistryTaskBase()
     {
         _gameRegistry = new Lazy<IGameRegistry>(GetGameRegistry);
@@ -21,14 +24,21 @@ public abstract class GameRegistryTaskBase : Task
     // TODO: retrieve from VS?
     private IGameRegistry GetGameRegistry()
     {
-        var gameRegistry = (IGameRegistry?)BuildEngine4.GetRegisteredTaskObject(typeof(IGameRegistry), RegisteredTaskObjectLifetime.AppDomain);
-        if (gameRegistry != null)
-            return gameRegistry;
+        var holder = (GameRegistryHolder?)BuildEngine4.GetRegisteredTaskObject(typeof(GameRegistryHolder), RegisteredTaskObjectLifetime.AppDomain);
+        if (holder != null)
+        {
+            if (holder.GameRegistryPath == GameRegistryPath) 
+                return holder.GameRegistry;
 
-        gameRegistry = new GameRegistry();
+            BuildEngine4.UnregisterTaskObject(typeof(GameRegistryHolder), RegisteredTaskObjectLifetime.AppDomain);
+            holder.Dispose();
+        }
+
+        var gameRegistry = File.Exists(GameRegistryPath) ? new GameRegistry(GameRegistryPath!) : new GameRegistry();
         gameRegistry.Load();
         gameRegistry.WatchForChanges = true;
-        BuildEngine4.RegisterTaskObject(typeof(IGameRegistry), gameRegistry, RegisteredTaskObjectLifetime.AppDomain, true);
+        holder = new GameRegistryHolder(gameRegistry, GameRegistryPath);
+        BuildEngine4.RegisterTaskObject(typeof(GameRegistryHolder), holder, RegisteredTaskObjectLifetime.AppDomain, true);
         return gameRegistry;
     }
 
@@ -68,5 +78,17 @@ public abstract class GameRegistryTaskBase : Task
             Log.LogWarning(ParameterHasInvalidValueMessageFormat, parameterName, value);
 
         return false;
+    }
+
+    private class GameRegistryHolder(IGameRegistry gameRegistry, string? gameRegistryPath) : IDisposable
+    {
+        public readonly IGameRegistry GameRegistry = gameRegistry;
+        public readonly string? GameRegistryPath = gameRegistryPath;
+
+        public void Dispose()
+        {
+            if (GameRegistry is IDisposable disposable)
+                disposable.Dispose();
+        }
     }
 }
