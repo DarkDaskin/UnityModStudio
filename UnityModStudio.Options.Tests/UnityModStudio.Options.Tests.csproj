@@ -1,7 +1,7 @@
-﻿<Project Sdk="MSTest.Sdk/3.6.4">
+<Project Sdk="MSTest.Sdk/3.6.4">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,15 +10,22 @@
       For more information, visit https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-integration-dotnet-test#show-failure-per-test
       -->
     <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <UseWPF>true</UseWPF>
+    <UseDefaultSampleGames>false</UseDefaultSampleGames>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\GameRegistry_SingleGameSaved.json" />
-    <EmbeddedResource Include="Resources\GameRegistry_Initial.json" />
+    <PackageReference Include="Microsoft.VisualStudio.Sdk.TestFramework" Version="17.11.53" />
+    <PackageReference Include="Moq" Version="4.20.72" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
+    <ProjectReference Include="..\UnityModStudio.Options\UnityModStudio.Options.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SampleGameType Include="2018-net4" />
+    <SampleGameType Include="2018-netstandard20" />
   </ItemGroup>
 
   <Import Project="..\GameTest.targets" />
