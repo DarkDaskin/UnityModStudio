@@ -8,8 +8,8 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace UnityModStudio.Options;
 
-    public class ObservableObjectWithValidation : ObservableObject, INotifyDataErrorInfo
-    {
+public class ObservableObjectWithValidation : ObservableObject, INotifyDataErrorInfo
+{
     private readonly Dictionary<string, List<object>> _errors = new();
 
     public IEnumerable<object> GetErrors(string? propertyName) =>
@@ -17,41 +17,43 @@ namespace UnityModStudio.Options;
             _errors.Values.SelectMany(list => list) :
             _errors.TryGetValue(propertyName!, out var errors) ? errors : Enumerable.Empty<object>();
 
-        IEnumerable INotifyDataErrorInfo.GetErrors(string propertyName) => GetErrors(propertyName);
+    IEnumerable INotifyDataErrorInfo.GetErrors(string propertyName) => GetErrors(propertyName);
 
-        public bool HasErrors => _errors.Values.Any(errors => errors.Count > 0);
+    public bool HasErrors => _errors.Values.Any(errors => errors.Count > 0);
 
-        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
-        protected void NotifyErrorsChanged([CallerMemberName] string propertyName = "")
-        {
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
-            NotifyPropertyChanged(nameof(HasErrors));
-        }
+    protected void NotifyErrorsChanged([CallerMemberName] string propertyName = "")
+    {
+        ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+        NotifyPropertyChanged(nameof(HasErrors));
+    }
 
-        protected bool SetPropertyWithValidation<T>(ref T field, T newValue, Func<T, IEnumerable<object>> validator, [CallerMemberName] string propertyName = "")
-        {
-            if (!SetProperty(ref field, newValue, propertyName))
-                return false;
+    protected bool SetPropertyWithValidation<T>(ref T field, T newValue, Func<T, IEnumerable<object>> validator, [CallerMemberName] string propertyName = "")
+    {
+        if (!SetProperty(ref field, newValue, propertyName))
+            return false;
 
-            _errors[propertyName] = validator(newValue).ToList();
+        var oldErrors = GetErrors(propertyName);
+        _errors[propertyName] = validator(newValue).ToList();
+        if (!oldErrors.SequenceEqual(GetErrors(propertyName)))
             NotifyErrorsChanged(propertyName);
 
-            return true;
-        }
+        return true;
+    }
 
-        protected void ClearAllErrors() => _errors.Clear();
+    protected void ClearAllErrors() => _errors.Clear();
 
-        protected void ClearErrors([CallerMemberName] string propertyName = "") => _errors.Remove(propertyName);
+    protected void ClearErrors([CallerMemberName] string propertyName = "") => _errors.Remove(propertyName);
 
-        protected void AddError(object error, [CallerMemberName] string propertyName = "")
-        {
-            if (!_errors.TryGetValue(propertyName, out var errors))
+    protected void AddError(object error, [CallerMemberName] string propertyName = "")
+    {
+        if (!_errors.TryGetValue(propertyName, out var errors))
             _errors[propertyName] = errors = [];
 
-            errors.Add(error);
-        }
-
-        protected bool HasPropertyErrors([CallerMemberName] string propertyName = "") =>
-            _errors.TryGetValue(propertyName, out var errors) && errors.Count > 0;
+        errors.Add(error);
     }
+
+    protected bool HasPropertyErrors([CallerMemberName] string propertyName = "") =>
+        _errors.TryGetValue(propertyName, out var errors) && errors.Count > 0;
+}
