@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Directory = System.IO.Directory;
 
@@ -26,11 +27,12 @@ public interface IGameRegistry
     Task SaveAsync();
 }
 
-public class GameRegistry : IGameRegistry
+public sealed class GameRegistry : IGameRegistry, IDisposable
 {
     private readonly string _storePath;
     private readonly Dictionary<Guid, Game> _games = new();
     private readonly FileSystemWatcher _fsWatcher;
+    private readonly SemaphoreSlim _loadLock = new(1, 1);
 
     public bool WatchForChanges
     {
@@ -110,6 +112,8 @@ public class GameRegistry : IGameRegistry
 
     public async Task LoadAsync()
     {
+        await _loadLock.WaitAsync();
+
         _games.Clear();
 
         try
@@ -121,6 +125,10 @@ public class GameRegistry : IGameRegistry
         catch (Exception exception)
         {
             Debug.WriteLine($"Failed to load game registry: {exception.Message}");
+        }
+        finally
+        {
+            _loadLock.Release();
         }
     }
 
@@ -142,6 +150,12 @@ public class GameRegistry : IGameRegistry
         {
             WatchForChanges = oldWatchForChanges;
         }
+    }
+
+    public void Dispose()
+    {
+        _fsWatcher.Dispose();
+        _loadLock.Dispose();
     }
 }
 
