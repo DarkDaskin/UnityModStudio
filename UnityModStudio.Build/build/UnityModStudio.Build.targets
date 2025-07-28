@@ -477,22 +477,17 @@
   <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" Condition="'$(IsInnerBuild)' != 'true'">
     <ItemGroup>
       <_AllTargetDirs Include="@(SpecificGameVersionOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
-      <_AllGameVersionsXAllTargetDirs Include="@(_AllGameVersions)" OtherTargetDir="%(_AllTargetDirs.Identity)" />
+      <_AllModTargetPaths Include="@(SpecificGameVersionOutput->'%(ModTargetPath)')" KeepDuplicates="false" Condition="'%(SpecificGameVersionOutput.ModDeploymentMode)' == 'Copy'" />
+      <_AllModTargetPathsXAllTargetDirs Include="@(_AllModTargetPaths)" OtherTargetDir="%(_AllTargetDirs.Identity)" OtherGameVersion="%(_AllTargetDirs.GameVersion)" />
+      <_AllModTargetPathsXAllTargetDirs Remove="@(_AllModTargetPathsXAllTargetDirs)" Condition="'%(GameVersion)' == '%(OtherGameVersion)'" />
     </ItemGroup>
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_CopyOtherGameVersionsCompiledOutputInner" 
-             Properties="GameVersion=%(_AllGameVersionsXAllTargetDirs.Identity);IsSpecificGameVersionBuild=true;BypassCache=1;OtherTargetDir=%(_AllGameVersionsXAllTargetDirs.OtherTargetDir)" Condition="@(_AllTargetDirs->Count()) &gt; 1"/>
-  </Target>
-
-  <Target Name="_CopyOtherGameVersionsCompiledOutputInner" DependsOnTargets="PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
-    <ItemGroup>
-      <_OtherGameVersionCompiledOutput Include="$(OtherTargetDir)**" Exclude="$(TargetDir)**" MatchOnMetadata="FullPath" />
-    </ItemGroup>
-    <ResolveTargetPath RelativeToPath="$(ModSourcePath)" Input="@(_OtherGameVersionCompiledOutput)">
-      <Output TaskParameter="Output" ItemName="_ResolvedOtherGameVersionCompiledOutput" />
+    <ResolveTargetPath RelativeToPath="%(_AllModTargetPathsXAllTargetDirs.ModSourcePath)" Input="@(_AllModTargetPathsXAllTargetDirs->'%(OtherTargetDir)')">
+      <Output TaskParameter="Output" ItemName="_ResolvedModOtherVersionPaths" />
     </ResolveTargetPath>
-    <Copy SourceFiles="@(_ResolvedOtherGameVersionCompiledOutput)" 
-          DestinationFolder="$(ModTargetPath)%(_ResolvedOtherGameVersionCompiledOutput.TargetPath)" 
-          Condition="'@(_ResolvedOtherGameVersionCompiledOutput)' != ''" />
+    <ItemGroup>
+      <_ResolvedModOtherVersionFiles Include="%(_ResolvedModOtherVersionPaths.Identity)**" DestinationFolder="%(_ResolvedModOtherVersionPaths.ModTargetPath)%(_ResolvedModOtherVersionPaths.TargetPath)" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_ResolvedModOtherVersionFiles)" DestinationFolder="%(_ResolvedModOtherVersionFiles.DestinationFolder)" />
   </Target>
 
   <Target Name="_AddGameSpecificMetadata" AfterTargets="AfterBuild" DependsOnTargets="PrepareModPaths">
