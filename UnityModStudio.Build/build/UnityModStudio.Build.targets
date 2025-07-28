@@ -341,10 +341,10 @@
 
   <Target Name="GameAssemblyReferencesResolved" />
 
-  <Target Name="BuildSpecificGameVersions" Returns="@(InnerOutput)">
+  <Target Name="BuildSpecificGameVersions" Returns="@(SpecificGameVersionOutput)">
     <!-- BypassCache=1 is here so Resolved*.targets are re-read during build. The properties just have to be different from earlier MSBuild invocations. -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true;BypassCache=1">
-      <Output TaskParameter="TargetOutputs" ItemName="InnerOutput" />
+      <Output TaskParameter="TargetOutputs" ItemName="SpecificGameVersionOutput" />
     </MSBuild>
   </Target>
   
@@ -471,6 +471,27 @@
     </PropertyGroup>
 
     <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
+  </Target>
+
+  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" Condition="'$(IsInnerBuild)' != 'true'">
+    <ItemGroup>
+      <_AllTargetDirs Include="@(SpecificGameVersionOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
+      <_AllGameVersionsXAllTargetDirs Include="@(_AllGameVersions)" OtherTargetDir="%(_AllTargetDirs.Identity)" />
+    </ItemGroup>
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_CopyOtherGameVersionsCompiledOutputInner" 
+             Properties="GameVersion=%(_AllGameVersionsXAllTargetDirs.Identity);IsSpecificGameVersionBuild=true;BypassCache=1;OtherTargetDir=%(_AllGameVersionsXAllTargetDirs.OtherTargetDir)" Condition="@(_AllTargetDirs->Count()) &gt; 1"/>
+  </Target>
+
+  <Target Name="_CopyOtherGameVersionsCompiledOutputInner" DependsOnTargets="PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
+    <ItemGroup>
+      <_OtherGameVersionCompiledOutput Include="$(OtherTargetDir)**" Exclude="$(TargetDir)**" MatchOnMetadata="FullPath" />
+    </ItemGroup>
+    <ResolveTargetPath RelativeToPath="$(ModSourcePath)" Input="@(_OtherGameVersionCompiledOutput)">
+      <Output TaskParameter="Output" ItemName="_ResolvedOtherGameVersionCompiledOutput" />
+    </ResolveTargetPath>
+    <Copy SourceFiles="@(_ResolvedOtherGameVersionCompiledOutput)" 
+          DestinationFolder="$(ModTargetPath)%(_ResolvedOtherGameVersionCompiledOutput.TargetPath)" 
+          Condition="'@(_ResolvedOtherGameVersionCompiledOutput)' != ''" />
   </Target>
 
   <Target Name="AddGameToRegistry">
