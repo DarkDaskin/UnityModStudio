@@ -344,6 +344,7 @@
     <!-- BypassCache=1 is here so Resolved*.targets are re-read during build. The properties just have to be different from earlier MSBuild invocations. -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true;BypassCache=1">
       <Output TaskParameter="TargetOutputs" ItemName="SpecificGameVersionOutput" />
+      <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
     </MSBuild>
   </Target>
   
@@ -491,6 +492,12 @@
     <Copy SourceFiles="@(_ResolvedOtherGameVersionCompiledOutput)" 
           DestinationFolder="$(ModTargetPath)%(_ResolvedOtherGameVersionCompiledOutput.TargetPath)" 
           Condition="'@(_ResolvedOtherGameVersionCompiledOutput)' != ''" />
+  </Target>
+
+  <Target Name="_AddGameSpecificMetadata" AfterTargets="AfterBuild" DependsOnTargets="PrepareModPaths">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker GameVersion="$(GameVersion)" ModDeploymentMode="$(ModDeploymentMode)" ModSourcePath="$(ModSourcePath)" ModTargetPath="$(ModTargetPath)" />
+    </ItemGroup>
   </Target>
 
   <Target Name="AddGameToRegistry">

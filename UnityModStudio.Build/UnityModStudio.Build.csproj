@@ -27,6 +27,7 @@
   <ItemGroup>
     <None Include="build\*.props" Pack="true" PackagePath="build\" />
     <None Include="build\*.targets" Pack="true" PackagePath="build\" />
+    <None Include="buildMultiTargeting\*.targets" Pack="true" PackagePath="buildMultiTargeting\" />
     <None Include="tools\*" Pack="true" PackagePath="tools\" />
     <None Include="README.md" Pack="true" PackagePath="" />
     <!-- This is the recommended way to get rid of the NU5128 warning. -->
