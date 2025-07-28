@@ -390,7 +390,7 @@
     </GetIgnoredFiles>
 
     <ItemGroup>
-      <ModSourceCodeFile Include="$(ModSourcePath)**\*" Exclude="@(_IgnoredFile)" />
+      <ModSourceCodeFile Include="$(ModSourcePath)**\*" Exclude="@(_IgnoredFile);$(TargetDir)**" />
     </ItemGroup>
 
     <Warning Code="UMS0004" Text="No source code files found." Condition="'@(ModSourceCodeFile)' == ''" />
