@@ -236,6 +236,8 @@
       <_AllGameVersions GamePath="@(_AllGameVersionsWithPaths->'%(GamePath)')" Condition="'%(Identity)' != '' and '@(_AllGameVersions)' != '' and '@(_AllGameVersionsWithPaths)' != ''" />
       <_OtherGameVersions GamePath="@(_AllGameVersionsWithPaths->'%(GamePath)')" Condition="'%(Identity)' != '' and '@(_OtherGameVersions)' != '' and '@(_AllGameVersionsWithPaths)' != ''" />
     </ItemGroup>
+
+    <MakeDir Directories="$(IntermediateOutputPath)" />
   </Target>
 
   <Target Name="_ResolveGamePropertiesInner" Returns="@(_ResolvedProperty)">
@@ -390,6 +392,8 @@
     <ItemGroup>
       <ModSourceCodeFile Include="$(ModSourcePath)**\*" Exclude="@(_IgnoredFile)" />
     </ItemGroup>
+
+    <Warning Code="UMS0004" Text="No source code files found." Condition="'@(ModSourceCodeFile)' == ''" />
   </Target>
 
   <!-- Not so fun fact: formerly named CopyModToGame, that name broke MSBuild somehow -->
