@@ -25,7 +25,9 @@ jobs:
     - name: Restore packages
       run: msbuild /t:Restore
     - name: Build
-      run: msbuild /p:Configuration=Release
+      run: msbuild /p:Configuration=Release /p:SampleGameDownloadPath="${{ runner.temp }}/SampleUnityGames/"
+    - name: Test
+      run: dotnet test --no-build
     - name: Upload NuGet artifacts
       uses: actions/upload-artifact@v4
       with:
