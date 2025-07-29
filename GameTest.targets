@@ -29,6 +29,7 @@
   <Target Name="_ResolveSampleGameDownloadPath">
     <PropertyGroup>
       <SampleGameDownloadPath Condition="'$(SampleGameDownloadPath)' == ''">$(BaseIntermediateOutputPath)SampleUnityGames\</SampleGameDownloadPath>
+      <SampleGameDownloadPath>$([MSBuild]::EnsureTrailingSlash($([MSBuild]::NormalizePath('$(SampleGameDownloadPath)'))))</SampleGameDownloadPath>
     </PropertyGroup>
   </Target>
 
