@@ -20,6 +20,7 @@ public class TestBinaryLogger : ILogger, IEventSource
 
     private void ReplaceLogger(string? suffix)
     {
+#if DEBUG
         _innerLogger?.Shutdown();
 
         _innerLogger = new BinaryLogger
@@ -28,10 +29,12 @@ public class TestBinaryLogger : ILogger, IEventSource
             Parameters = $"{_testName}{suffix}.binlog",
         };
         _innerLogger.Initialize(this);
+#endif
     }
 
     public void Initialize(IEventSource eventSource)
     {
+#if DEBUG
         _eventSource = eventSource;
 
         _eventSource.MessageRaised += OnMessageRaised;
@@ -50,15 +53,18 @@ public class TestBinaryLogger : ILogger, IEventSource
         _eventSource.AnyEventRaised += OnAnyEventRaised;
 
         _initCount++;
+#endif
     }
 
     public void Shutdown()
     {
+#if DEBUG
         if (_initCount == 0)
             return;
 
         if (--_initCount == 0)
             _innerLogger?.Shutdown();
+#endif
     }
 
     public LoggerVerbosity Verbosity { get; set; }

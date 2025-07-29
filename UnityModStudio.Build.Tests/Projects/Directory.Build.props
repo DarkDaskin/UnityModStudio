@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <RestoreAdditionalProjectSources>
-      $(MSBuildThisFileDirectory)..\..\..\..\..\UnityModStudio.Build\bin\Debug\
+      $(MSBuildThisFileDirectory)..\..\..\..\..\UnityModStudio.Build\bin\$(Configuration)\
     </RestoreAdditionalProjectSources>
   </PropertyGroup>
 </Project>

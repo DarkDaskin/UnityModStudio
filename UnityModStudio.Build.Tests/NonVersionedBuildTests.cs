@@ -127,7 +127,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"NonVersioned\NonVersioned.dll")));
         var linkTarget = File.ResolveLinkTarget(Path.Combine(game.Path, "NonVersioned"), false);
         Assert.IsNotNull(linkTarget);
-        Assert.AreEqual(Path.GetFullPath(@"Projects\Correct\NonVersioned\bin\Debug\net46\"), linkTarget.FullName);
+        Assert.AreEqual(Path.GetFullPath($@"Projects\Correct\NonVersioned\bin\{Configuration}\net46\"), linkTarget.FullName);
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
         Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
         var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
@@ -319,7 +319,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"NonVersioned\NonVersioned.dll")));
         var linkTarget = File.ResolveLinkTarget(Path.Combine(game.Path, "NonVersioned"), false);
         Assert.IsNotNull(linkTarget);
-        Assert.AreEqual(Path.GetFullPath(@"Projects\Correct\NonVersioned\bin\Debug\net46\"), linkTarget.FullName);
+        Assert.AreEqual(Path.GetFullPath($@"Projects\Correct\NonVersioned\bin\{Configuration}\net46\"), linkTarget.FullName);
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
         Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
         var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
@@ -341,7 +341,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"NonVersioned\NonVersioned.dll")));
         var linkTarget = File.ResolveLinkTarget(Path.Combine(game.Path, "NonVersioned"), false);
         Assert.IsNotNull(linkTarget);
-        Assert.AreEqual(Path.GetFullPath(@"Projects\Correct\NonVersioned\bin\Debug\net46\"), linkTarget.FullName);
+        Assert.AreEqual(Path.GetFullPath($@"Projects\Correct\NonVersioned\bin\{Configuration}\net46\"), linkTarget.FullName);
 
         // Project must be reloaded, so resolved data files are imported.
         game.ModDeploymentMode = ModDeploymentMode.Copy;

@@ -1,8 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Build.Definition;
+﻿using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Logging;
 using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Common.Tests;
@@ -13,17 +11,24 @@ public abstract class BuildTestsBase
 {
     private static readonly string[] ProjectSubDirectoriesToRemove = ["bin", "obj"];
 
+#if DEBUG
+    protected const string Configuration = "Debug";
+#else
+    protected const string Configuration = "Release";
+#endif
+
     protected readonly ProjectOptions ProjectOptions = new()
     {
         GlobalProperties = new Dictionary<string, string>
         {
             ["BuildPackageVersion"] = Utils.GetPackageVersion(),
+            ["Configuration"] = Configuration,
         }
     };
 
     private string _gameRegistryPath = null!;
 
-    private DirectoryInfo? _scratchDir;
+    private List<DirectoryInfo> _scratchDirs = [];
 
     public TestContext TestContext { get; set; } = null!;
 
@@ -48,8 +53,9 @@ public abstract class BuildTestsBase
         if (File.Exists(_gameRegistryPath))
             File.Delete(_gameRegistryPath);
 
-        if (_scratchDir?.Exists ?? false)
-            _scratchDir.Delete(true);
+        foreach (var scratchDir in _scratchDirs)
+            if (scratchDir.Exists)
+                scratchDir.Delete(true);
     }
 
     protected (ProjectInstance, TestLogger) GetProjectWithRestore(string projectPath, 
@@ -96,16 +102,17 @@ public abstract class BuildTestsBase
 
     protected string MakeGameCopy(string gameType)
     {
-        CreateScratchDir();
-        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, gameType), _scratchDir.FullName);
-        return _scratchDir.FullName;
+        var scratchDir = CreateScratchDir();
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, gameType), scratchDir.FullName);
+        return scratchDir.FullName;
     }
 
-    [MemberNotNull(nameof(_scratchDir))]
-    private void CreateScratchDir()
+    private DirectoryInfo CreateScratchDir()
     {
-        _scratchDir = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
-        _scratchDir.Create();
+        var scratchDir = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
+        _scratchDirs.Add(scratchDir);
+        scratchDir.Create();
+        return scratchDir;
     }
 
     protected static void ResolveGameProperties(Game game)
