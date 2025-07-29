@@ -26,8 +26,14 @@ jobs:
       run: msbuild /t:Restore
     - name: Build
       run: msbuild /p:Configuration=Release /p:SampleGameDownloadPath="${{ runner.temp }}/SampleUnityGames/"
-    - name: Test
-      run: dotnet test --no-build
+    - name: Test UnityModStudio.Common
+      run: dotnet test --no-build -c Release ./UnityModStudio.Common.Tests/
+    - name: Test UnityModStudio.Options
+      run: dotnet test --no-build -c Release ./UnityModStudio.Options.Tests/
+    - name: Test UnityModStudio.ProjectWizard
+      run: dotnet test --no-build -c Release ./UnityModStudio.ProjectWizard.Tests/
+    - name: Test UnityModStudio.Build
+      run: dotnet test --no-build -c Release ./UnityModStudio.Build.Tests/
     - name: Upload NuGet artifacts
       uses: actions/upload-artifact@v4
       with:
