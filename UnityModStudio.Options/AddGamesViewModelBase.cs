@@ -36,8 +36,8 @@ public abstract class AddGamesViewModelBase : ObservableObject
         set => SetProperty(ref _isLoading, value);
     }
 
-    public SuspendableObservableCollection<Game> Games { get; } = new();
-    public SuspendableObservableCollection<Game> SelectedGames { get; } = new();
+    public SuspendableObservableCollection<Game> Games { get; } = [];
+    public SuspendableObservableCollection<Game> SelectedGames { get; } = [];
 
     public ICommand SelectAllCommand { get; }
     public ICommand ConfirmCommand { get; }
@@ -56,6 +56,12 @@ public abstract class AddGamesViewModelBase : ObservableObject
     {
         IsLoading = true;
 
+        await InitializeCoreAsync();
+    }
+
+    // A separate method to facilitate unit testing.
+    private protected virtual async Task InitializeCoreAsync()
+    {
         using (Games.SuspendChangeNotification())
         {
             await TaskScheduler.Default;
@@ -122,15 +128,9 @@ public abstract class AddGamesViewModelBase : ObservableObject
     private void Cancel() => Closed?.Invoke(false);
 
 
-    protected readonly struct GameEntry
+    protected readonly struct GameEntry(string name, string path)
     {
-        public string Name { get; }
-        public string Path { get; }
-
-        public GameEntry(string name, string path)
-        {
-            Name = name;
-            Path = path;
-        }
+        public string Name { get; } = name;
+        public string Path { get; } = path;
     }
 }

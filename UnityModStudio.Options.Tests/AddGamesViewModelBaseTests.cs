@@ -32,11 +32,12 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
 
         vm.GameManager = SetupGameManager();
 
-        await Task.Delay(50);
+        await WaitNoWarningAsync(vm.LoadingStarted);
 
         Assert.IsTrue(vm.IsLoading);
 
-        await Task.Delay(300);
+        vm.Finish();
+        await WaitNoWarningAsync(vm.LoadingFinished);
 
         Assert.IsFalse(vm.IsLoading);
         Assert.AreEqual(2, vm.Games.Count);
@@ -57,7 +58,7 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
         vm.SelectedGames.CollectionChanged += (sender, args) => selectedGamesNotifications.Add(args);
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         vm.GameManager = SetupGameManager();
-        await Task.Delay(200);
+        await WaitNoWarningAsync(vm.LoadingFinished);
 
         vm.SelectAllCommand.Execute(null);
 
@@ -83,23 +84,46 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
         });
-        await Task.Delay(200);
+        await WaitNoWarningAsync(vm.LoadingFinished);
 
         Assert.AreEqual(1, vm.Games.Count);
         Assert.AreEqual("Unity2018Test (1)", vm.Games[0].DisplayName);
     }
 
+#pragma warning disable VSTHRD003
+    private static async Task WaitNoWarningAsync(Task task) => await task;
+#pragma warning restore VSTHRD003
+
 
     private class TestViewModel(bool withDelay = false) : AddGamesViewModelBase
     {
+        private readonly ManualResetEventSlim _event = new();
+        private readonly TaskCompletionSource<bool> _loadingStartedCompletionSource = new();
+        private readonly TaskCompletionSource<bool> _loadingFinishedCompletionSource = new();
+
+        public void Finish() => _event.Set();
+
+        public Task LoadingStarted => _loadingStartedCompletionSource.Task;
+
+        public Task LoadingFinished => _loadingFinishedCompletionSource.Task;
+
         protected override IEnumerable<GameEntry> FindGames()
         {
             if (withDelay)
-                Thread.Sleep(200);
+                _event.Wait();
 
             yield return new GameEntry("Unity2018Test", Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"));
             yield return new GameEntry("Unity2018Test", Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"));
             yield return new GameEntry("NotAGame", @"C:\Program Files\Windows Mail");
+        }
+
+        private protected override async Task InitializeCoreAsync()
+        {
+            _loadingStartedCompletionSource.SetResult(true);
+
+            await base.InitializeCoreAsync();
+
+            _loadingFinishedCompletionSource.SetResult(true);
         }
     }
 }
