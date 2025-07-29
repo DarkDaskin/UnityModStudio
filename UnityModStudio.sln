@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.Options.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.ProjectWizard.Tests", "UnityModStudio.ProjectWizard.Tests\UnityModStudio.ProjectWizard.Tests.csproj", "{FAF96F50-ACE4-410B-9FCF-166D1307D7A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.Build.Tests", "UnityModStudio.Build.Tests\UnityModStudio.Build.Tests.csproj", "{816B4146-E3EF-4142-8F74-06EE546388F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +84,10 @@ Global
 		{FAF96F50-ACE4-410B-9FCF-166D1307D7A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAF96F50-ACE4-410B-9FCF-166D1307D7A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAF96F50-ACE4-410B-9FCF-166D1307D7A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{816B4146-E3EF-4142-8F74-06EE546388F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{816B4146-E3EF-4142-8F74-06EE546388F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{816B4146-E3EF-4142-8F74-06EE546388F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{816B4146-E3EF-4142-8F74-06EE546388F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +96,7 @@ Global
 		{19C5F701-1D47-4790-B370-FCD90EC33F57} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{A06406FD-3B98-4C3C-ACE4-F6B2C6DC2FB6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FAF96F50-ACE4-410B-9FCF-166D1307D7A5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{816B4146-E3EF-4142-8F74-06EE546388F7} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2F1C7D6-4B1F-46DA-BFD9-C45A049B562E}

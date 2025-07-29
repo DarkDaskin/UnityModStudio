@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(MSBuildThisFileDirectory)GameTest.user" Condition="Exists('$(MSBuildThisFileDirectory)GameTest.user')" />
+
   <PropertyGroup>
     <SampleGameRepositoryUrl Condition="'$(SampleGameRepositoryUrl)' == ''">https://github.com/DarkDaskin/Unity-Game-Samples/</SampleGameRepositoryUrl>
     <SampleGameRepositoryTag Condition="'$(SampleGameRepositoryTag)' == ''">v1</SampleGameRepositoryTag>

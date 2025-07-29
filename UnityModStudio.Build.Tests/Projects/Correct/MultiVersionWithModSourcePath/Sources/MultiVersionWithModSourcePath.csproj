@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+    <GameName>Unity2018Test</GameName>
+    <GameVersions>1.0;1.1</GameVersions>
+    <ModSourcePath>..\</ModSourcePath>
+    <OutDir>$(ModSourcePath)\$(GameVersion)\Assemblies\</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(ModSourcePath)Defs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnityModStudio.Build" Version="$(BuildPackageVersion)" />
+  </ItemGroup>
+
+</Project>

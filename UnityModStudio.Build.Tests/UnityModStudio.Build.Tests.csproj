@@ -1,0 +1,47 @@
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      Displays error on console in addition to the log file. Note that this feature comes with a performance impact.
+      For more information, visit https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-integration-dotnet-test#show-failure-per-test
+      -->
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Projects\**\*" />
+    <Compile Remove="Projects\Correct\SingleVersionWithModSourcePath\NewFolder\**" />
+    <EmbeddedResource Remove="Projects\Correct\SingleVersionWithModSourcePath\NewFolder\**" />
+    <None Remove="Projects\Correct\SingleVersionWithModSourcePath\NewFolder\**" />
+    <None Update="Projects\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="17.11.31" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.9.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UnityModStudio.Build\UnityModStudio.Build.csproj" ExcludeAssets="all" />
+    <ProjectReference Include="..\UnityModStudio.Common.Tests\UnityModStudio.Common.Tests.csproj" />
+    <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Projects\Correct\MultiVersionMultiTargetWithModSourcePath\1.0\Assemblies\" />
+    <Folder Include="Projects\Correct\MultiVersionMultiTargetWithModSourcePath\1.1\Assemblies\" />
+    <Folder Include="Projects\Correct\MultiVersionWithModSourcePath\1.1\Assemblies\" />
+    <Folder Include="Projects\Correct\MultiVersionWithModSourcePath\1.0\Assemblies\" />
+    <Folder Include="Projects\Correct\SingleVersionWithModSourcePath\1.0\" />
+    <Folder Include="Projects\Correct\SingleVersionWithModSourcePath\1.0\Assemblies\" />
+    <Folder Include="Projects\Correct\NonVersionedWithModSourcePath\Assemblies\" />
+  </ItemGroup>
+
+  <Import Project="..\GameTest.targets" />
+
+</Project>

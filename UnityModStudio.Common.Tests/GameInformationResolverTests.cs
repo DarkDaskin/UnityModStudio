@@ -60,8 +60,8 @@ public sealed class GameInformationResolverTests
     public void WhenMultipleGameDataDirectoriesExist_ReturnError()
     {
         CreateScratchDir();
-        CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName);
-        CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "2017-net46"), _scratchDir.FullName);
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName);
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "2017-net46"), _scratchDir.FullName);
 
         var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
 
@@ -74,7 +74,7 @@ public sealed class GameInformationResolverTests
     public void WhenManagedDirectoryDoesNotExist_ReturnError()
     {
         CreateScratchDir();
-        CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(path) != "Managed");
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(path) != "Managed");
 
         var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
 
@@ -87,7 +87,7 @@ public sealed class GameInformationResolverTests
     public void WhenManagedDirectoryIsEmpty_ReturnError()
     {
         CreateScratchDir();
-        CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(Path.GetDirectoryName(path)) != "Managed");
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(Path.GetDirectoryName(path)) != "Managed");
 
         var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
 
@@ -100,7 +100,7 @@ public sealed class GameInformationResolverTests
     public void WhenCorLibHasUnknownVersion_ReturnError()
     {
         CreateScratchDir();
-        CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(Path.GetDirectoryName(path)) != "Managed");
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(Path.GetDirectoryName(path)) != "Managed");
         File.Copy(Path.Combine(SampleGameInfo.DownloadPath, @"567-net20\567-net20.exe"), Path.Combine(_scratchDir.FullName, @"567-net20_Data\Managed\mscorlib.dll"));
 
         var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
@@ -114,7 +114,7 @@ public sealed class GameInformationResolverTests
     public void WhenGameExecutableIsNotExecutable_ReturnError()
     {
         CreateScratchDir();
-        CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetExtension(path) != ".exe");
+        TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetExtension(path) != ".exe");
         File.WriteAllText(Path.Combine(_scratchDir.FullName, "567-net20.exe"), "");
 
         var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
@@ -309,19 +309,5 @@ public sealed class GameInformationResolverTests
     {
         _scratchDir = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
         _scratchDir.Create();
-    }
-
-    private static void CopyDirectory(string sourcePath, string destinationPath, Func<string, bool>? predicate = null)
-    {
-        if (!Directory.Exists(destinationPath))
-            Directory.CreateDirectory(destinationPath);
-
-        foreach (var sourceFilePath in Directory.EnumerateFiles(sourcePath))
-            if (predicate?.Invoke(sourceFilePath) ?? true)
-                File.Copy(sourceFilePath, Path.Combine(destinationPath, Path.GetFileName(sourceFilePath)));
-
-        foreach (var sourceSubDirectoryPath in Directory.EnumerateDirectories(sourcePath))
-            if (predicate?.Invoke(sourceSubDirectoryPath) ?? true)
-                CopyDirectory(sourceSubDirectoryPath, Path.Combine(destinationPath, Path.GetFileName(sourceSubDirectoryPath)), predicate);
     }
 }
