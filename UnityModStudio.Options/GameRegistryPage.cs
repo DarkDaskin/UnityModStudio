@@ -38,7 +38,7 @@ namespace UnityModStudio.Options
         {
             base.OnActivate(e);
 
-            ThreadHelper.JoinableTaskFactory.Run(GameRegistry.LoadAsync);
+            ThreadHelper.JoinableTaskFactory.Run(GameRegistry.LoadSafeAsync);
 
             _child.Value.ViewModel.LoadGames();
         }
@@ -47,7 +47,7 @@ namespace UnityModStudio.Options
         {
             base.OnApply(e);
 
-            ThreadHelper.JoinableTaskFactory.Run(GameRegistry.SaveAsync);
+            ThreadHelper.JoinableTaskFactory.Run(GameRegistry.SaveSafeAsync);
         }
     }
 }

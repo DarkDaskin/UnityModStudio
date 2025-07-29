@@ -1,4 +1,5 @@
-﻿using UnityModStudio.Common.Options;
+﻿using System.Text.Json;
+using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Common.Tests;
 
@@ -30,7 +31,7 @@ public sealed class GameRegistryTests
     }
 
     [TestMethod]
-    public async Task WhenLoadedFromMalformedFile_BeEmpty()
+    public async Task WhenLoadedFromEmptyFile_BeEmpty()
     {
         IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
 
@@ -50,6 +51,15 @@ public sealed class GameRegistryTests
 
         Assert.AreEqual(0, gameRegistry.Games.Count);
         Assert.IsFalse(gameRegistry.WatchForChanges);
+    }
+
+    [TestMethod, ExpectedException(typeof(JsonException))]
+    public async Task WhenLoadedFromMalformedFile_Throw()
+    {
+        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        await File.WriteAllTextAsync(_gameRegistryPath, "!@$%^&*()");
+
+        await gameRegistry.LoadAsync();
     }
 
     [TestMethod]

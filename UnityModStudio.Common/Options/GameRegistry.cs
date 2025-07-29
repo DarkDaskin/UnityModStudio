@@ -48,7 +48,9 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
     {
         _storePath = storePath;
 
-        var directoryName = Path.GetDirectoryName(_storePath)!;
+        var directoryName = Path.GetDirectoryName(_storePath);
+        if (string.IsNullOrEmpty(directoryName))
+            directoryName = ".";
         Directory.CreateDirectory(directoryName);
 
         _fsWatcher = new FileSystemWatcher(directoryName, Path.GetFileName(_storePath))
@@ -59,7 +61,17 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
         _fsWatcher.Changed += OnStoreChanged;        
     }
 
-    private async void OnStoreChanged(object sender, FileSystemEventArgs e) => await LoadAsync();
+    private async void OnStoreChanged(object sender, FileSystemEventArgs e)
+    {
+        try
+        {
+            await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"Failed to load game registry: {exception.Message}");
+        }
+    }
 
     public IReadOnlyCollection<Game> Games => _games.Values;
 
@@ -119,12 +131,16 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
         try
         {
             using var stream = File.OpenRead(_storePath);
+
+            if (stream.Length == 0)
+                return;
+
             foreach (var game in await JsonSerializer.DeserializeAsync<Game[]>(stream) ?? [])
                 AddGame(game);
         }
-        catch (Exception exception)
+        catch (FileNotFoundException)
         {
-            Debug.WriteLine($"Failed to load game registry: {exception.Message}");
+            // Remain empty.
         }
         finally
         {
@@ -141,10 +157,6 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
         {
             using var stream = File.Open(_storePath, FileMode.Create);
             await JsonSerializer.SerializeAsync(stream, Games);
-        }
-        catch (Exception exception)
-        {
-            Debug.WriteLine($"Failed to save game registry: {exception.Message}");
         }
         finally
         {

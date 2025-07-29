@@ -67,7 +67,7 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
             SetProperty(ref _gameManager, value);
 
             if (_gameManager != null)
-                ThreadHelper.JoinableTaskFactory.Run(_gameManager.GameRegistry.LoadAsync);
+                ThreadHelper.JoinableTaskFactory.Run(_gameManager.GameRegistry.LoadSafeAsync);
 
             NotifyPropertyChanged(nameof(Games));
         }
@@ -163,7 +163,7 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
         if (GameManager == null)
             return;
 
-        ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveAsync);
+        ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveSafeAsync);
     }
 
 
