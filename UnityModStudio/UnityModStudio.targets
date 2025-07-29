@@ -4,6 +4,7 @@
   <!-- VSSDK suppresses built-in VS assemblies from being packaged in VSIX, but some still slip by, exclude them here. -->
   <Target Name="SuppressRemainingVSAssemblies" BeforeTargets="GetVsixSourceItems">
     <ItemGroup>
+      <SuppressFromVsix Include="Microsoft.VisualStudio.Extensibility.Editor.Contracts.dll" />
       <SuppressFromVsix Include="Microsoft.VisualStudio.Linux.ConnectionManager.Store.dll" />
       <SuppressFromVsix Include="Microsoft.VisualStudio.ProjectSystem.Managed.dll" />
       <SuppressFromVsix Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS.dll" />
