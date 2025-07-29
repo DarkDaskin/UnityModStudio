@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
+using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Build.Tasks;
@@ -29,6 +30,9 @@ public class UpdateGameRegistry : GameRegistryTaskBase
 
     public override bool Execute()
     {
+        if (!base.Execute())
+            return false;
+
         var properties = new Dictionary<string, string>();
         if (!string.IsNullOrWhiteSpace(Id))
             properties[nameof(Game.Id)] = Id!;
@@ -41,15 +45,25 @@ public class UpdateGameRegistry : GameRegistryTaskBase
 
         LogLookupProperties(properties);
 
-        switch (GameRegistry.FindGameByProperties(properties, true))
+        switch (GameRegistry.FindGameByProperties(properties, false))
         {
             case GameMatchResult.Match match:
                 if (!string.IsNullOrWhiteSpace(DisplayName))
                     match.Game.DisplayName = DisplayName!;
                 if (!string.IsNullOrWhiteSpace(Version))
                     match.Game.Version = Version!;
-                if (!string.IsNullOrWhiteSpace(Path))
+                if (!string.IsNullOrWhiteSpace(Path) && match.Game.Path != Path)
+                {
                     match.Game.Path = Path!;
+                    if (GameInformationResolver.TryGetGameInformation(Path, out var gameInformation, out _))
+                    {
+                        match.Game.GameName = gameInformation.Name;
+                        match.Game.GameExecutableFileName = gameInformation.GameExecutableFile.Name;
+                        match.Game.Architecture = gameInformation.Architecture.ToString();
+                        match.Game.UnityVersion = gameInformation.UnityVersion;
+                        match.Game.MonoProfile = gameInformation.GetMonoProfileString();
+                    }
+                }
                 if (!string.IsNullOrWhiteSpace(ModsPath))
                     match.Game.ModsPath = ModsPath!;
                 if (TryParseEnum(ModDeploymentMode, nameof(ModDeploymentMode), out ModDeploymentMode modDeploymentMode))

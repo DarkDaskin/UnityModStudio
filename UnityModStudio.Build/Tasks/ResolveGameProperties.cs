@@ -40,6 +40,9 @@ namespace UnityModStudio.Build.Tasks
 
         public override bool Execute()
         {
+            if (!base.Execute())
+                return false;
+
             var properties = LookupProperties.ToDictionary(item => item.ItemSpec, item => item.GetMetadata("Value"));
             if (properties.Count == 0)
             {

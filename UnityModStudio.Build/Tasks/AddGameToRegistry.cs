@@ -27,6 +27,9 @@ public class AddGameToRegistry : GameRegistryTaskBase
     
     public override bool Execute()
     {
+        if (!base.Execute())
+            return false;
+
         if (!GameInformationResolver.TryGetGameInformation(Path, out var gameInformation, out var error))
         {
             Log.LogError(error);
@@ -67,9 +70,9 @@ public class AddGameToRegistry : GameRegistryTaskBase
     private string GetUniqueDisplayName(GameInformation gameInformation)
     {
         var baseDisplayName = string.IsNullOrWhiteSpace(DisplayName) ? gameInformation.Name ?? "Game" : DisplayName!.Trim();
-        if (!string.IsNullOrWhiteSpace(Version))
+        if (string.IsNullOrWhiteSpace(DisplayName) && !string.IsNullOrWhiteSpace(Version))
             baseDisplayName = $"{baseDisplayName} [{Version}]";
-        if (GameRegistry.FindGameByDisplayName(baseDisplayName) is null)
+        if (GameRegistry!.FindGameByDisplayName(baseDisplayName) is null)
             return baseDisplayName;
 
         for (var i = 1; i < int.MaxValue; i++)

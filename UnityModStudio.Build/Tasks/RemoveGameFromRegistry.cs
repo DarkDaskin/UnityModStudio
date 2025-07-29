@@ -16,6 +16,9 @@ public class RemoveGameFromRegistry : GameRegistryTaskBase
     public string? Version { get; set; }
     public override bool Execute()
     {
+        if (!base.Execute())
+            return false;
+
         var properties = new Dictionary<string, string>();
         if (!string.IsNullOrWhiteSpace(Id))
             properties[nameof(Game.Id)] = Id!;

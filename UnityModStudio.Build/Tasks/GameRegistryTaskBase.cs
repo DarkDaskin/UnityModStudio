@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -10,15 +10,24 @@ namespace UnityModStudio.Build.Tasks;
 
 public abstract class GameRegistryTaskBase : Task
 {
-    private readonly Lazy<IGameRegistry> _gameRegistry;
+    protected IGameRegistry? GameRegistry { get; private set; }
 
-    protected IGameRegistry GameRegistry => _gameRegistry.Value;
-
-    public string? GameRegistryPath { get; set; }
-
-    protected GameRegistryTaskBase()
+    [Required] 
+    public string GameRegistryPath { get; set; } = "";
+    
+    [MemberNotNullWhen(true, nameof(GameRegistry))]
+    public override bool Execute()
     {
-        _gameRegistry = new Lazy<IGameRegistry>(GetGameRegistry);
+        try
+        {
+            GameRegistry = GetGameRegistry();
+            return true;
+        }
+        catch (Exception exception)
+        {
+            Log.LogError($"Unable to initialize game registry: {exception.Message}");
+            return false;
+        }
     }
 
     // TODO: retrieve from VS?
@@ -34,7 +43,7 @@ public abstract class GameRegistryTaskBase : Task
             holder.Dispose();
         }
 
-        var gameRegistry = File.Exists(GameRegistryPath) ? new GameRegistry(GameRegistryPath!) : new GameRegistry();
+        var gameRegistry = new GameRegistry(GameRegistryPath);
         gameRegistry.Load();
         gameRegistry.WatchForChanges = true;
         holder = new GameRegistryHolder(gameRegistry, GameRegistryPath);
