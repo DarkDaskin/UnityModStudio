@@ -14,9 +14,6 @@
 
   <ItemGroup>
     <None Include="Projects\**\*" />
-    <Compile Remove="Projects\Correct\SingleVersionWithModSourcePath\NewFolder\**" />
-    <EmbeddedResource Remove="Projects\Correct\SingleVersionWithModSourcePath\NewFolder\**" />
-    <None Remove="Projects\Correct\SingleVersionWithModSourcePath\NewFolder\**" />
     <None Update="Projects\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
