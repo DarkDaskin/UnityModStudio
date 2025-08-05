@@ -113,7 +113,11 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
 
             // Only match by empty version if ambiguous, so old projects which miss GameVersion won't fail.
             if (matches.Count > 1 && string.IsNullOrEmpty(version) && !strictMatch)
-                matches = matches.FindAll(game => string.IsNullOrEmpty(game.Version));
+            {
+                var matchesWithEmptyVersion = matches.FindAll(game => string.IsNullOrEmpty(game.Version));
+                if (matchesWithEmptyVersion.Count > 0)
+                    matches = matchesWithEmptyVersion;
+            }
 
             if (matches.Count > 0)
                 return GameMatchResult.Create(matches, "");

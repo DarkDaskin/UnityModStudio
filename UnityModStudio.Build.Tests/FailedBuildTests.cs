@@ -123,6 +123,33 @@ public class FailedBuildTests : BuildTestsBase
     }
 
     [TestMethod]
+    public void WhenMultipleGamesWithVersionAreDefinedAndNoVersionIsSpecified_ProduceError()
+    {
+        SetupGameRegistry(new Game
+            {
+                DisplayName = "Unity2018Test [1.0]",
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+                GameName = "Unity2018Test",
+                Version = "1.0",
+            },
+            new Game
+            {
+                DisplayName = "Unity2018Test [1.1]",
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+                GameName = "Unity2018Test",
+                Version = "1.1",
+            });
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsFalse(success);
+        Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("Multiple game registry entries match speified game properties:\n  'Unity2018Test [1.0]'\n  'Unity2018Test [1.1]'", logger.BuildErrors[0].Message);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+    }
+
+    [TestMethod]
     public void WhenGamePathPointsToNonExistentDir_ProduceError()
     {
         SetupGameRegistry(new Game
