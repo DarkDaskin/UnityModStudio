@@ -82,7 +82,7 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
         vm.GameManager = SetupGameManager(new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         });
         await WaitNoWarningAsync(vm.LoadingFinished);
 
@@ -112,8 +112,8 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
             if (withDelay)
                 _event.Wait();
 
-            yield return new GameEntry("Unity2018Test", Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"));
-            yield return new GameEntry("Unity2018Test", Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"));
+            yield return new GameEntry("Unity2018Test", Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"));
+            yield return new GameEntry("Unity2018Test", Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"));
             yield return new GameEntry("NotAGame", @"C:\Program Files\Windows Mail");
         }
 

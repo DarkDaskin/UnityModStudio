@@ -3,13 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <GameName>Unity2018Test</GameName>
-    <ModSourcePath>..\</ModSourcePath>
-    <OutDir>$(ModSourcePath)Assemblies\</OutDir>
+    <GameVersion>1.1</GameVersion>
+    <GameVersions>1.0</GameVersions>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="$(ModSourcePath)Defs\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="UnityModStudio.Build" Version="$(BuildPackageVersion)" />

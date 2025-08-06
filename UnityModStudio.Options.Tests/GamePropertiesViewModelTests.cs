@@ -13,7 +13,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new GamePropertiesViewModel(game);
 
@@ -91,7 +91,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         vm.PropertyChanged += (sender, args) => changedProperties.Add(args.PropertyName);
         vm.ErrorsChanged += (sender, args) => changedErrorProperties.Add(args.PropertyName);
 
-        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
         vm.GamePath = newPath;
 
         Assert.AreEqual(game, vm.Game);
@@ -137,7 +137,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     {
         var game = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
 
@@ -151,12 +151,12 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var game1 = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var game2 = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
         };
         var vm = new GamePropertiesViewModel(game1) { GameManager = SetupGameManagerWithFind(game2) };
 
@@ -167,8 +167,8 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenBrowseForGamePathIsInvoked_UpdateGamePath()
     {
-        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
-        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20");
+        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
+        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
         var game = new Game { Path = oldPath };
         var vm = new GamePropertiesViewModel(game)
         {
@@ -188,7 +188,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenBrowseForGamePathIsInvokedAndCancelled_DoNotUpdateGamePath()
     {
-        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
         var game = new Game { Path = oldPath };
         var vm = new GamePropertiesViewModel(game)
         {
@@ -207,7 +207,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenBrowseForModsPathIsInvoked_UpdateModsPath()
     {
-        var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4") };
+        var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
         var vm = new GamePropertiesViewModel(game)
         {
             GameManager = SetupGameManager(),
@@ -225,7 +225,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenBrowseForModsPathIsInvokedAndCancelled_DoNotUpdateModsPath()
     {
-        var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4") };
+        var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
         var vm = new GamePropertiesViewModel(game)
         {
             GameManager = SetupGameManager(),
@@ -244,8 +244,8 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     public void WhenConfirmIsInvoked_UpdateGameAndCloseWindow()
     {
         var closedInvocations = new List<bool>();
-        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
-        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20");
+        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
+        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
         var game = new Game
         {
             DisplayName = "Unity2018Test", 
@@ -293,8 +293,8 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     public void WhenCancelIsInvoked_DoNotUpdateGameAndCloseWindow()
     {
         var closedInvocations = new List<bool>();
-        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
-        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20");
+        var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
+        var newPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
         var game = new Game
         {
             DisplayName = "Unity2018Test",

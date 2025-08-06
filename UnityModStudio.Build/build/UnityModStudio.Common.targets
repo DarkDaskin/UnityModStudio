@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
+    <GameRegistryPath Condition="'$(GameRegistryPath)' == ''">$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_UserSpecifiedGameDisplayName Condition="'$(GameDisplayName)' != ''">$(GameDisplayName)</_UserSpecifiedGameDisplayName>
+    <_UserSpecifiedGameName Condition="'$(GameName)' != ''">$(GameName)</_UserSpecifiedGameName>
+    <_UserSpecifiedGameVersion Condition="'$(GameVersion)' != ''">$(GameVersion)</_UserSpecifiedGameVersion>
+    <_UserSpecifiedGamePath Condition="'$(GamePath)' != ''">$(GamePath)</_UserSpecifiedGamePath>
+    <_UserSpecifiedGameModsPath Condition="'$(GameModsPath)' != ''">$(GameModsPath)</_UserSpecifiedGameModsPath>
+    <_UserSpecifiedGameExecutableFileName Condition="'$(GameExecutableFileName)' != ''">$(GameExecutableFileName)</_UserSpecifiedGameExecutableFileName>
+    <_UserSpecifiedGameInstanceId Condition="'$(GameInstanceId)' != ''">$(GameInstanceId)</_UserSpecifiedGameInstanceId>
+    <_UserSpecifiedModDeploymentMode Condition="'$(ModDeploymentMode)' != ''">$(ModDeploymentMode)</_UserSpecifiedModDeploymentMode>
+    <_UserSpecifiedDeploySourceCode Condition="'$(DeploySourceCode)' != ''">$(DeploySourceCode)</_UserSpecifiedDeploySourceCode>
+    <_UserSpecifiedDoorstopMode Condition="'$(DoorstopMode)' != ''">$(DoorstopMode)</_UserSpecifiedDoorstopMode>
+    <_UserSpecifiedUseAlternateDoorstopDllName Condition="'$(UseAlternateDoorstopDllName)' != ''">$(UseAlternateDoorstopDllName)</_UserSpecifiedUseAlternateDoorstopDllName>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveGameAssemblyReferences" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ConfigureDoorstop" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="CreateSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="DeleteSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="GetSymbolicLinkTarget" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="AddGameToRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="UpdateGameRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="RemoveGameFromRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+
+  <Target Name="_CopyOtherGameVersionsCompiledOutput">
+    <ItemGroup>
+      <_AllModTargetPathsXAllTargetDirs Include="@(_AllModTargetPaths)" OtherTargetDir="%(_AllTargetDirs.Identity)" OtherGameVersion="%(_AllTargetDirs.GameVersion)" />
+    </ItemGroup>
+    <ResolveTargetPath RelativeToPath="%(_AllModTargetPathsXAllTargetDirs.ModSourcePath)" Input="@(_AllModTargetPathsXAllTargetDirs->'%(OtherTargetDir)')">
+      <Output TaskParameter="Output" ItemName="_ResolvedModOtherVersionPaths" />
+    </ResolveTargetPath>
+    <ItemGroup>
+      <_ResolvedModOtherVersionFiles Include="%(_ResolvedModOtherVersionPaths.Identity)**" DestinationFolder="$([MSBuild]::NormalizePath('%(_ResolvedModOtherVersionPaths.ModTargetPath)%(_ResolvedModOtherVersionPaths.TargetPath)'))"
+                                     GameVersion="%(_ResolvedModOtherVersionPaths.GameVersion)" OtherGameVersion="%(_ResolvedModOtherVersionPaths.OtherGameVersion)" />
+      <_ModFilesWithTargetPaths Include="@(_ResolvedModOtherVersionFiles->'%(DestinationFolder)%(Filename)%(Extension)')" RemoveMetadata="DestinationFolder;GameVersion;OtherGameVersion" KeepDuplicates="false" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_HasModFileClash Condition="@(_ResolvedModOtherVersionFiles->Count()) > @(_ModFilesWithTargetPaths->Count())">true</_HasModFileClash>
+    </PropertyGroup>
+    <Copy SourceFiles="@(_ResolvedModOtherVersionFiles)" DestinationFolder="%(_ResolvedModOtherVersionFiles.DestinationFolder)" 
+          Condition="'$(_HasModFileClash)' != 'true' and '%(_ResolvedModOtherVersionFiles.GameVersion)' != '%(_ResolvedModOtherVersionFiles.OtherGameVersion)'" />
+  </Target>
+
+  <Target Name="AddGameToRegistry">
+    <Error Code="UMS0005" Text="GamePath property is not set." Condition="'$(_UserSpecifiedGamePath)' == ''" />
+
+    <AddGameToRegistry Path="$(_UserSpecifiedGamePath)" DisplayName="$(_UserSpecifiedGameDisplayName)" ModsPath="$(_UserSpecifiedGameModsPath)" Version="$(_UserSpecifiedGameVersion)"
+                       ModDeploymentMode="$(_UserSpecifiedModDeploymentMode)" DeploySourceCode="$(_UserSpecifiedDeploySourceCode)" DoorstopMode="$(_UserSpecifiedDoorstopMode)"
+                       UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" GameRegistryPath="$(GameRegistryPath)" />
+  </Target>
+
+  <Target Name="UpdateGameRegistry">
+    <UpdateGameRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)"
+                        Path="$(_UserSpecifiedGamePath)" ModsPath="$(_UserSpecifiedGameModsPath)" ModDeploymentMode="$(_UserSpecifiedModDeploymentMode)" DeploySourceCode="$(_UserSpecifiedDeploySourceCode)"
+                        DoorstopMode="$(_UserSpecifiedDoorstopMode)" UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" GameRegistryPath="$(GameRegistryPath)" />
+  </Target>
+
+  <Target Name="RemoveGameFromRegistry">
+    <RemoveGameFromRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)"
+                            GameRegistryPath="$(GameRegistryPath)"/>
+  </Target>
+
+</Project>

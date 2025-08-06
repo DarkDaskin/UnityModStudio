@@ -5,7 +5,7 @@
     <GameName>Unity2018Test</GameName>
     <GameVersions>1.0;1.1</GameVersions>
     <ModSourcePath>..\</ModSourcePath>
-    <OutDir>$(ModSourcePath)\$(GameVersion)\Assemblies\</OutDir>
+    <OutDir>$(ModSourcePath)$(GameVersion)\Assemblies\</OutDir>
   </PropertyGroup>
 
   <ItemGroup>

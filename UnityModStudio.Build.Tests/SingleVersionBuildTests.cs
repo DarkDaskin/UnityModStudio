@@ -8,8 +8,8 @@ public class SingleVersionBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasDefaultSettings_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), Version = "1.0" };
-        var game11 = new Game { Path = MakeGameCopy("2018-net4"), Version = "1.1" };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), Version = "1.0" };
+        var game11 = new Game { Path = MakeGameCopy("2018-net4-v1.1"), Version = "1.1" };
         ResolveGameProperties(game);
         ResolveGameProperties(game11);
         SetupGameRegistry(game, game11);
@@ -36,7 +36,7 @@ public class SingleVersionBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenProjectHasModSourcePath_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), Version = "1.0" };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), Version = "1.0" };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersionWithModSourcePath\Sources\SingleVersionWithModSourcePath.csproj");
@@ -60,7 +60,7 @@ public class SingleVersionBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenProjectHasModSourcePathAndGameHasDeploySourceCode_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), Version = "1.0", DeploySourceCode = true };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), Version = "1.0", DeploySourceCode = true };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersionWithModSourcePath\Sources\SingleVersionWithModSourcePath.csproj");

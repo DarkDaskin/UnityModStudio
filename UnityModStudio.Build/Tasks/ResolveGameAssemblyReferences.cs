@@ -41,8 +41,7 @@ public class ResolveGameAssemblyReferences : Task
         Architecture = gameInformation.Architecture.ToString();
 
         IEnumerable<FileInfo> assemblyFiles = gameInformation.GameAssemblyFiles;
-        if (!(TargetFramework?.StartsWith("netstandard", StringComparison.OrdinalIgnoreCase) ?? false))
-            assemblyFiles = assemblyFiles.Concat(gameInformation.FrameworkAssemblyFiles);
+        assemblyFiles = assemblyFiles.Concat(gameInformation.FrameworkAssemblyFiles);
         var resolvedReferences = assemblyFiles.ToDictionary(file => Path.GetFileNameWithoutExtension(file.Name), file => file.FullName,
             StringComparer.OrdinalIgnoreCase);
         
@@ -56,7 +55,7 @@ public class ResolveGameAssemblyReferences : Task
                 reference.SetMetadata("Private", "false");
                 referencesToUpdate.Add(reference);
             }
-            else //if (string.Equals(reference.GetMetadata("IsImplicitlyDefined"), "true", StringComparison.OrdinalIgnoreCase))
+            else
                 referencesToRemove.Add(reference);
         }
 

@@ -56,6 +56,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>UnityModStudio.Build.tt</DependentUpon>
     </None>
+    <None Update="build\UnityModStudio.Common.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UnityModStudio.Common.targets</LastGenOutput>
+    </None>
+    <None Update="build\UnityModStudio.Common.targets">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UnityModStudio.Common.tt</DependentUpon>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

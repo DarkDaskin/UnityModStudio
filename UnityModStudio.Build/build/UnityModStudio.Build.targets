@@ -1,29 +1,79 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(MSBuildThisFileDirectory)UnityModStudio.Common.targets" />
+
   <PropertyGroup>
-    <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
     <UseGameRegistry Condition="'$(UseGameRegistry)' == ''">true</UseGameRegistry>
-    <GameRegistryPath Condition="'$(GameRegistryPath)' == ''">$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
     <_SpecifiedGameVersionType>None</_SpecifiedGameVersionType>
-    <_SpecifiedGameVersionType Condition="'$(GameVersion)' != '' and $(IsSpecificGameVersionBuild) != 'true'">Single</_SpecifiedGameVersionType>
-    <_SpecifiedGameVersionType Condition="'$(GameVersions)' != '' and '$(_SpecifiedGameVersionType)' != 'Single'">Multiple</_SpecifiedGameVersionType>
-    <_SpecifiedGameVersionType Condition="'$(GameVersions)' != '' and '$(_SpecifiedGameVersionType)' == 'Single'">Error</_SpecifiedGameVersionType>
+    <_SpecifiedGameVersionType Condition="'$(GameVersions)' != ''">Multiple</_SpecifiedGameVersionType>
+    <_SpecifiedGameVersionType Condition="'$(GameVersion)' != '' and $(_SpecifiedGameVersionType) != 'Multiple'">Single</_SpecifiedGameVersionType>
     <_FullIntermediateOutputPath>$(IntermediateOutputPath)</_FullIntermediateOutputPath>
     <_FullIntermediateOutputPath Condition="!$([System.IO.Path]::IsPathRooted('$(_FullIntermediateOutputPath)'))">$(MSBuildProjectDirectory)\$(_FullIntermediateOutputPath)</_FullIntermediateOutputPath>
-    <_ResolvedPropertiesProjectFilePath>$(_FullIntermediateOutputPath)ResolvedGameProperties.targets</_ResolvedPropertiesProjectFilePath>
-    <_ResolvedReferencesProjectFilePath>$(_FullIntermediateOutputPath)ResolvedReferences.targets</_ResolvedReferencesProjectFilePath>
-    <_GamePropertiesChangeTimestampFilePath>$(_FullIntermediateOutputPath)GamePropertiesChange.timestamp</_GamePropertiesChangeTimestampFilePath>
+    <_OutputPathsCheckResultProjectFilePath>$(_FullIntermediateOutputPath)$(MSBuildProjectName).OutputPathsCheckResult.targets</_OutputPathsCheckResultProjectFilePath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(IsSpecificGameVersionBuild)' != 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'">
+  <ItemGroup>
+    <_AllGameVersions Include="$(GameVersion)" KeepDuplicates="false" Condition="'$(_SpecifiedGameVersionType)' == 'Single'" />
+    <_AllGameVersions Include="$(GameVersions)" KeepDuplicates="false" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <_EffectiveGameVersionType>None</_EffectiveGameVersionType>
+    <_EffectiveGameVersionType Condition="'$(GameVersion)' != '' and ('$(_SpecifiedGameVersionType)' != 'Multiple' or '$(IsSpecificGameVersionBuild)' == 'true')">Single</_EffectiveGameVersionType>
+    <_EffectiveGameVersionType Condition="'$(_EffectiveGameVersionType)' != 'Single' and '$(_SpecifiedGameVersionType)' == 'Multiple'">Multiple</_EffectiveGameVersionType>
+    <GameVersion Condition="'$(GameVersion)' == '' and '$(_EffectiveGameVersionType)' == 'Single'">$(GameVersions)</GameVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(_EffectiveGameVersionType)' == 'Multiple'">
+    <_DefaultGameVersionProjectFilePath>$(_FullIntermediateOutputPath)$(MSBuildProjectName).DefaultGameVersion.targets</_DefaultGameVersionProjectFilePath>
+  </PropertyGroup>
+
+  <Import Project="$(_DefaultGameVersionProjectFilePath)" Condition="'$(DesignTimeBuild)' == 'true' and Exists('$(_DefaultGameVersionProjectFilePath)')" />
+
+  <PropertyGroup Condition="'$(DesignTimeBuild)' == 'true'">
+    <_UserSpecifiedDefaultGameVersion Condition="'$(DefaultGameVersion)' != ''">$(DefaultGameVersion)</_UserSpecifiedDefaultGameVersion>
+    <DefaultGameVersion Condition="'$(DefaultGameVersion)' == ''">$(_ResolvedDefaultGameVersion)</DefaultGameVersion>
+    <GameVersion Condition="'$(_EffectiveGameVersionType)' == 'Multiple'">$(DefaultGameVersion)</GameVersion>
+  </PropertyGroup>
+
+  <Import Project="$(_OutputPathsCheckResultProjectFilePath)" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple' and Exists('$(_OutputPathsCheckResultProjectFilePath)')" />
+
+  <PropertyGroup>
+    <IntermediateOutputPath Condition="'$(HasIntermediateOutputPathClash)' == 'true'">$(IntermediateOutputPath)$(GameVersion)\</IntermediateOutputPath>
+    <OutDir Condition="'$(HasOutDirClash)' == 'true'">$(OutDir)$(GameVersion)\</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_ResolvedDataProjectsFileNameSuffix Condition="'$(_EffectiveGameVersionType)' == 'None'" />
+    <_ResolvedDataProjectsFileNameSuffix Condition="'$(_EffectiveGameVersionType)' == 'Single'">.$(GameVersion)</_ResolvedDataProjectsFileNameSuffix>
+    <_ResolvedDataProjectsFileNameSuffix Condition="'$(_EffectiveGameVersionType)' == 'Multiple'">.$(DefaultGameVersion)</_ResolvedDataProjectsFileNameSuffix>
+    <_ResolvedPropertiesProjectFilePath>$(_FullIntermediateOutputPath)$(MSBuildProjectName).ResolvedGameProperties$(_ResolvedDataProjectsFileNameSuffix).targets</_ResolvedPropertiesProjectFilePath>
+    <_ResolvedReferencesProjectFilePath>$(_FullIntermediateOutputPath)$(MSBuildProjectName).ResolvedReferences$(_ResolvedDataProjectsFileNameSuffix).targets</_ResolvedReferencesProjectFilePath>
+    <_GamePropertiesChangeTimestampFilePath>$(_FullIntermediateOutputPath)$(MSBuildProjectName).GamePropertiesChange$(_ResolvedDataProjectsFileNameSuffix).timestamp</_GamePropertiesChangeTimestampFilePath>
+    <_ShouldLoadResolvedGameData Condition="'$(_EffectiveGameVersionType)' != 'Multiple' or ('$(DesignTimeBuild)' == 'true' and '$(DefaultGameVersion)' != '')">true</_ShouldLoadResolvedGameData>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_PreExistingReference Include="@(Reference)" />
+  </ItemGroup>
+
+  <ImportGroup Condition="'$(_ShouldLoadResolvedGameData)' == 'true'">
+    <Import Project="$(_ResolvedPropertiesProjectFilePath)" Condition="Exists('$(_ResolvedPropertiesProjectFilePath)')" />
+    <Import Project="$(_ResolvedReferencesProjectFilePath)" Condition="Exists('$(_ResolvedReferencesProjectFilePath)')" />
+  </ImportGroup>
+
+  <PropertyGroup Condition="'$(_EffectiveGameVersionType)' == 'Multiple'">  
+    <_BuildSpecificGameVersionsTarget Condition="'$(DesignTimeBuild)' == 'true'">GetGamePropertiesAndReferences</_BuildSpecificGameVersionsTarget>
+    <_BuildSpecificGameVersionsTarget Condition="'$(DesignTimeBuild)' != 'true'">Build</_BuildSpecificGameVersionsTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(_EffectiveGameVersionType)' == 'Multiple'">
     <BuildDependsOn>
       CoreBuild
-    </BuildDependsOn>    
+    </BuildDependsOn>
     <CoreBuildDependsOn>
-      BuildOnlySettings;
-      PrepareForBuild;
-      ResolveReferences;
+      _ErrorOnInconsistentGameVersion;
       BuildSpecificGameVersions
     </CoreBuildDependsOn>
     <RebuildDependsOn>
@@ -37,38 +87,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <_AllGameVersions Include="$(GameVersion)" Condition="'$(_SpecifiedGameVersionType)' == 'Single'" />
-    <_AllGameVersions Include="$(GameVersions)" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(IsSpecificGameVersionBuild)' != 'true'">
     <UpToDateCheckBuilt Include="$(_ResolvedPropertiesProjectFilePath)" Original="$(GameRegistryPath)" />
     <UpToDateCheckBuilt Include="$(_ResolvedReferencesProjectFilePath)" Original="$(_GamePropertiesChangeTimestampFilePath)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(_EffectiveGameVersionType)' != 'Multiple'">
     <Clean Include="$(_ResolvedPropertiesProjectFilePath)" />
     <Clean Include="$(_ResolvedReferencesProjectFilePath)" />
   </ItemGroup>
 
-  <Import Project="$(_ResolvedPropertiesProjectFilePath)" Condition="Exists('$(_ResolvedPropertiesProjectFilePath)')" />
-
-  <PropertyGroup>
-    <_UserSpecifiedGameDisplayName Condition="'$(GameDisplayName)' != ''">$(GameDisplayName)</_UserSpecifiedGameDisplayName>
-    <_UserSpecifiedGameName Condition="'$(GameName)' != ''">$(GameName)</_UserSpecifiedGameName>
-    <_UserSpecifiedGameVersion Condition="'$(GameVersion)' != ''">$(GameVersion)</_UserSpecifiedGameVersion>
-    <_UserSpecifiedGamePath Condition="'$(GamePath)' != ''">$(GamePath)</_UserSpecifiedGamePath>
-    <_UserSpecifiedGameModsPath Condition="'$(GameModsPath)' != ''">$(GameModsPath)</_UserSpecifiedGameModsPath>
-    <_UserSpecifiedGameExecutableFileName Condition="'$(GameExecutableFileName)' != ''">$(GameExecutableFileName)</_UserSpecifiedGameExecutableFileName>
-    <_UserSpecifiedGameInstanceId Condition="'$(GameInstanceId)' != ''">$(GameInstanceId)</_UserSpecifiedGameInstanceId>
-    <_UserSpecifiedModDeploymentMode Condition="'$(ModDeploymentMode)' != ''">$(ModDeploymentMode)</_UserSpecifiedModDeploymentMode>
-    <_UserSpecifiedDeploySourceCode Condition="'$(DeploySourceCode)' != ''">$(DeploySourceCode)</_UserSpecifiedDeploySourceCode>
-    <_UserSpecifiedDoorstopMode Condition="'$(DoorstopMode)' != ''">$(DoorstopMode)</_UserSpecifiedDoorstopMode>
-    <_UserSpecifiedUseAlternateDoorstopDllName Condition="'$(UseAlternateDoorstopDllName)' != ''">$(UseAlternateDoorstopDllName)</_UserSpecifiedUseAlternateDoorstopDllName>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <GameVersion Condition="'$(GameVersion)' == ''">$(_DefaultGameVersion)</GameVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(UseGameRegistry)' == 'true'">
+  <PropertyGroup Condition="'$(_ShouldLoadResolvedGameData)' == 'true'">
     <GamePath Condition="'$(GamePath)' == ''">$(_ResolvedGamePath)</GamePath>
     <GameModsPath Condition="'$(GameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
     <GameExecutableFileName Condition="'$(GameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
@@ -80,8 +108,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <GamePath Condition="'$(GamePath)' != '' and !HasTrailingSlash('$(GamePath)')">$(GamePath)\</GamePath>
-    <GameModsPath Condition="'$(GameModsPath)' != '' and !HasTrailingSlash('$(GameModsPath)')">$(GameModsPath)\</GameModsPath>
+    <GamePath>$([MSBuild]::EnsureTrailingSlash('$(GamePath)'))</GamePath>
+    <GameModsPath>$([MSBuild]::EnsureTrailingSlash('$(GameModsPath)'))</GameModsPath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -90,23 +118,13 @@
     <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
   </PropertyGroup>
 
-  <Import Project="$(_ResolvedReferencesProjectFilePath)" Condition="Exists('$(_ResolvedReferencesProjectFilePath)')" />
+  <Target Name="_RemoveNetStandardReferences" BeforeTargets="BeforeBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'NETStandard.Library'" />
+    </ItemGroup>
+  </Target>
 
-  <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ResolveGameAssemblyReferences" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ConfigureDoorstop" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="CreateSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="DeleteSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="GetSymbolicLinkTarget" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="AddGameToRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="UpdateGameRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-  <UsingTask TaskName="RemoveGameFromRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-
-  <Target Name="PrepareForUpToDateCheck" BeforeTargets="CollectUpToDateCheckBuiltDesignTime" DependsOnTargets="ResolveGameVersions" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'">
+  <Target Name="PrepareForUpToDateCheckBuilt" BeforeTargets="CollectUpToDateCheckBuiltDesignTime" DependsOnTargets="_GetSpecificGameVersionBuildProperties" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'">
     <PropertyGroup>
       <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
       <_DocumentationFileProduced>false</_DocumentationFileProduced>
@@ -115,25 +133,26 @@
     <ItemGroup>
       <IntermediateAssembly Remove="@(IntermediateAssembly)" />
     </ItemGroup>
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_PrepareForUpToDateCheckInner" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_PrepareForUpToDateCheckBuiltInner" Properties="GameVersion=%(_AllGameVersions.Identity);$(_SpecificGameVersionBuildProperties)">
       <Output TaskParameter="TargetOutputs" ItemName="UpToDateCheckBuilt" />
     </MSBuild>
+    <Message Text="@(UpToDateCheckBuilt)" />
   </Target>
 
-  <Target Name="_PrepareForUpToDateCheckInner" Returns="@(_UpToDateCheckBuilt)" DependsOnTargets="CompileDesignTime">
+  <Target Name="_PrepareForUpToDateCheckBuiltInner" Returns="@(UpToDateCheckBuilt)" DependsOnTargets="CompileDesignTime">
     <!-- Copied from https://github.com/dotnet/project-system/blob/77f6d69c2105929bcbbfe3532e851c41802ce802/src/Microsoft.VisualStudio.ProjectSystem.Managed/ProjectSystem/DesignTimeTargets/Microsoft.Managed.DesignTime.targets#L426-L443 -->
     <ItemGroup>
       <!-- Assembly output, bin and obj -->
-      <_UpToDateCheckBuilt Condition="'$(CopyBuildOutputToOutputDirectory)' != 'false' and '$(SkipCopyBuildProduct)' != 'true'" Include="$(TargetPath)"/>
-      <_UpToDateCheckBuilt Include="@(IntermediateAssembly)"/>
+      <UpToDateCheckBuilt Condition="'$(CopyBuildOutputToOutputDirectory)' != 'false' and '$(SkipCopyBuildProduct)' != 'true'" Include="$(TargetPath)"/>
+      <UpToDateCheckBuilt Include="@(IntermediateAssembly)"/>
 
       <!-- Documentation file, bin and obj -->
-      <_UpToDateCheckBuilt Condition="'$(_DocumentationFileProduced)'=='true'" Include="@(FinalDocFile)"/>
-      <_UpToDateCheckBuilt Condition="'$(_DocumentationFileProduced)'=='true'" Include="@(DocFileItem)"/>
+      <UpToDateCheckBuilt Condition="'$(_DocumentationFileProduced)'=='true'" Include="@(FinalDocFile)"/>
+      <UpToDateCheckBuilt Condition="'$(_DocumentationFileProduced)'=='true'" Include="@(DocFileItem)"/>
 
       <!-- Symbols, bin and obj -->
-      <_UpToDateCheckBuilt Condition="'$(_DebugSymbolsProduced)'=='true'" Include="@(_DebugSymbolsIntermediatePath)"/>
-      <_UpToDateCheckBuilt Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)' != 'false'" Include="@(_DebugSymbolsOutputPath)"/>
+      <UpToDateCheckBuilt Condition="'$(_DebugSymbolsProduced)'=='true'" Include="@(_DebugSymbolsIntermediatePath)"/>
+      <UpToDateCheckBuilt Condition="'$(_DebugSymbolsProduced)'=='true' and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)' != 'false'" Include="@(_DebugSymbolsOutputPath)"/>
     </ItemGroup>
   </Target>
 
@@ -154,20 +173,28 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="_ErrorOnWrongGameVersionType" BeforeTargets="PrepareForBuild" Condition="'$(_SpecifiedGameVersionType)' == 'Error'">
-    <Error Code="UMS0001" Text="Both GameVersion and GameVersions properties are specified, but they are mutually exclusive." />
+  <Target Name="_ErrorOnInconsistentGameVersion" BeforeTargets="PrepareForBuild" Condition="'$(GameVersions)' != ''">
+    <ItemGroup>
+      <_AllGameVersionsIncludingCurrent Include="@(_AllGameVersions)" />
+      <_AllGameVersionsIncludingCurrent Include="$(GameVersion)" KeepDuplicates="false" Condition="'$(GameVersion)' != ''" />
+      <_AllGameVersionsIncludingDefault Include="@(_AllGameVersions)" />
+      <_AllGameVersionsIncludingDefault Include="$(DefaultGameVersion)" KeepDuplicates="false" Condition="'$(DefaultGameVersion)' != ''" />
+    </ItemGroup>
+    <Error Code="UMS0001" Text="Specified GameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingCurrent->Count()) > @(_AllGameVersions->Count())" />
+    <Error Code="UMS0001" Text="Specified DefaultGameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingDefault->Count()) > @(_AllGameVersions->Count())" />
   </Target>
 
-  <Target Name="ResolveGameVersions" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'">
+  <Target Name="ResolveDefaultGameVersion" Condition="'$(_UserSpecifiedDefaultGameVersion)' == ''" Inputs="$(MSBuildAllProjects)" Outputs="$(_DefaultGameVersionProjectFilePath)">
     <PropertyGroup>
-      <_DefaultGameVersion>%(_AllGameVersions.Identity)</_DefaultGameVersion>
+      <DefaultGameVersion>%(_AllGameVersions.Identity)</DefaultGameVersion>
     </PropertyGroup>
     <ItemGroup>
-      <_OtherGameVersions Include="@(_AllGameVersions)" Exclude="$(_DefaultGameVersion)" />
+      <_ResolvedDefaultGameVersionProperty Include="_ResolvedDefaultGameVersion" Value="$(DefaultGameVersion)" />
     </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_DefaultGameVersionProjectFilePath)" Properties="@(_ResolvedDefaultGameVersionProperty)" />
   </Target>
 
-  <Target Name="_CheckOutputPaths" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'">
+  <Target Name="CheckOutputPaths" BeforeTargets="PrepareForBuild" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'" Inputs="$(MSBuildAllProjects)" Outputs="$(_OutputPathsCheckResultProjectFilePath)">
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_GetIntermediateOutputPathForGameVersion" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true">
       <Output TaskParameter="TargetOutputs" ItemName="_AllIntermediateOutputPaths" />
     </MSBuild>
@@ -175,72 +202,57 @@
       <Output TaskParameter="TargetOutputs" ItemName="_AllOutDirs" />
     </MSBuild>
     <PropertyGroup>
-      <_HasIntermediateOutputPathClash Condition="@(_AllGameVersions->Count()) != @(_AllIntermediateOutputPaths->Distinct()->Count())">true</_HasIntermediateOutputPathClash>
-      <_HasOutDirClash Condition="@(_AllGameVersions->Count()) != @(_AllOutDirs->Distinct()->Count())">true</_HasOutDirClash>
+      <HasIntermediateOutputPathClash Condition="'$(HasIntermediateOutputPathClash)' == ''">false</HasIntermediateOutputPathClash>
+      <HasIntermediateOutputPathClash Condition="@(_AllGameVersions->Count()) != @(_AllIntermediateOutputPaths->Distinct()->Count())">true</HasIntermediateOutputPathClash>
+      <HasOutDirClash Condition="'$(HasOutDirClash)' == ''">false</HasOutDirClash>
+      <HasOutDirClash Condition="@(_AllGameVersions->Count()) != @(_AllOutDirs->Distinct()->Count())">true</HasOutDirClash>
     </PropertyGroup>
+    <ItemGroup>
+      <_OutputPathsCheckResult Include="HasIntermediateOutputPathClash" Value="$(HasIntermediateOutputPathClash)" />
+      <_OutputPathsCheckResult Include="HasOutDirClash" Value="$(HasOutDirClash)" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_OutputPathsCheckResultProjectFilePath)" Properties="@(_OutputPathsCheckResult)" />
   </Target>
 
   <Target Name="_GetIntermediateOutputPathForGameVersion" Returns="$(IntermediateOutputPath)" />
 
   <Target Name="_GetOutDirForGameVersion" Returns="$(OutDir)" />
 
-  <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" DependsOnTargets="ResolveGameVersions;_CheckOutputPaths" Condition="'$(UseGameRegistry)' == 'true' and '$(IsSpecificGameVersionBuild)' != 'true'" 
-          Inputs="$(GameRegistryPath);$(MSBuildProjectFullPath)" Outputs="$(_ResolvedPropertiesProjectFilePath)">
-    <ItemGroup>
-      <_ResolvedProperty Include="_DefaultGameVersion" Value="$(_DefaultGameVersion)" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'" />
-    </ItemGroup>
-
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_ResolveGamePropertiesInner" Properties="GameVersion=$(GameVersion);IsSpecificGameVersionBuild=true" Condition="'$(_SpecifiedGameVersionType)' != 'Multiple'">
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedPropertyForDefaultGameVersion" />
-    </MSBuild>    
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_ResolveGamePropertiesInner" Properties="GameVersion=$(_DefaultGameVersion);IsSpecificGameVersionBuild=true" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple' and '$(_DefaultGameVersion)' != ''">
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedPropertyForDefaultGameVersion" />
-    </MSBuild>
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_ResolveGamePropertiesInner" Properties="GameVersion=%(_OtherGameVersions.Identity);IsSpecificGameVersionBuild=true" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple' and '@(_OtherGameVersions)' != ''">
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProperty" />
-    </MSBuild>
-
-    <ItemGroup>
-      <_ResolvedProperty Include="@(_ResolvedPropertyForDefaultGameVersion)" />
-    </ItemGroup>
-
+  <Target Name="_GetSpecificGameVersionBuildProperties" DependsOnTargets="CheckOutputPaths">
     <PropertyGroup>
-      <_GamePathChanged Condition="'%(_ResolvedProperty.Identity)' == '_GamePathChanged'">true</_GamePathChanged>
+      <_SpecificGameVersionBuildProperties>
+        IsSpecificGameVersionBuild=true;
+        HasIntermediateOutputPathClash=$(HasIntermediateOutputPathClash);
+        HasOutDirClash=$(HasOutDirClash)
+      </_SpecificGameVersionBuildProperties>
+      <_SpecificGameVersionBuildProperties Condition="'$(DesignTimeBuild)' == 'true'">
+        $(_SpecificGameVersionBuildProperties);
+        SkipCompilerExecution=true;
+        ProvideCommandLineArgs=true
+      </_SpecificGameVersionBuildProperties>
     </PropertyGroup>
-
-    <ItemGroup>
-      <_ResolvedProperty Include="IntermediateOutputPath" Value="$(IntermediateOutputPath)%(_AllGameVersions.Identity)\" GameVersion="%(_AllGameVersions.Identity)" ConditionExpression="'%24(GameVersion)' == '%(_AllGameVersions.Identity)'" Condition="'$(_HasIntermediateOutputPathClash)' == 'true'" />
-      <_ResolvedProperty Include="OutDir" Value="$(OutDir)%(_AllGameVersions.Identity)\" GameVersion="%(_AllGameVersions.Identity)" ConditionExpression="'%24(GameVersion)' == '%(_AllGameVersions.Identity)'" Condition="'$(_HasOutDirClash)' == 'true'" />
-      <_ResolvedProperty Remove="@(_ResolvedProperty)" Condition="'%(_ResolvedProperty.IsTemporary)' == 'true'" />
-    </ItemGroup>
-    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
-
-    <PropertyGroup>
-      <GamePath Condition="'$(_UserSpecifiedGamePath)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGamePath'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GamePath>
-      <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGameModsPath'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GameModsPath>
-      <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGameExecutableFileName'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GameExecutableFileName>
-      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedGameInstanceId'">%(_ResolvedPropertyForDefaultGameVersion.Value)</GameInstanceId>
-      <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedModDeploymentMode'">%(_ResolvedPropertyForDefaultGameVersion.Value)</ModDeploymentMode>
-      <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedDeploySourceCode'">%(_ResolvedPropertyForDefaultGameVersion.Value)</DeploySourceCode>
-      <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedDoorstopMode'">%(_ResolvedPropertyForDefaultGameVersion.Value)</DoorstopMode>
-      <UseAlternateDoorstopDllName Condition="'$(_UserSpecifiedUseAlternateDoorstopDllName)' == '' and '%(_ResolvedPropertyForDefaultGameVersion.Identity)' == '_ResolvedUseAlternateDoorstopDllName'">%(_ResolvedPropertyForDefaultGameVersion.Value)</UseAlternateDoorstopDllName>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <IntermediateOutputPath Condition="'$(_HasIntermediateOutputPathClash)' == 'true'">$(IntermediateOutputPath)$(_DefaultGameVersion)\</IntermediateOutputPath>
-      <OutDir Condition="'$(_HasOutDirClash)' == 'true'">$(OutDir)$(_DefaultGameVersion)\</OutDir>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <_AllGameVersionsWithPaths Include="%(_ResolvedProperty.GameVersion)" GamePath="%(_ResolvedProperty.Value)" Condition="'%(_ResolvedProperty.Identity)' == '_ResolvedGamePath'" />
-      <_AllGameVersions GamePath="@(_AllGameVersionsWithPaths->'%(GamePath)')" Condition="'%(Identity)' != '' and '@(_AllGameVersions)' != '' and '@(_AllGameVersionsWithPaths)' != ''" />
-      <_OtherGameVersions GamePath="@(_AllGameVersionsWithPaths->'%(GamePath)')" Condition="'%(Identity)' != '' and '@(_OtherGameVersions)' != '' and '@(_AllGameVersionsWithPaths)' != ''" />
-    </ItemGroup>
-
-    <MakeDir Directories="$(IntermediateOutputPath)" />
   </Target>
 
-  <Target Name="_ResolveGamePropertiesInner" Returns="@(_ResolvedProperty)">
+  <Target Name="BuildSpecificGameVersions" DependsOnTargets="_GetSpecificGameVersionBuildProperties;ResolveDefaultGameVersion" Returns="@(SpecificGameVersionOutput)">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="$(_BuildSpecificGameVersionsTarget)" Condition="'$(GameVersion)' == ''"
+             Properties="GameVersion=%(_AllGameVersions.Identity);$(_SpecificGameVersionBuildProperties)">
+      <Output TaskParameter="TargetOutputs" ItemName="SpecificGameVersionOutput" />
+    </MSBuild>
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="$(_BuildSpecificGameVersionsTarget)" Condition="'$(GameVersion)' != ''"
+             Properties="GameVersion=$(GameVersion);$(_SpecificGameVersionBuildProperties)">
+      <Output TaskParameter="TargetOutputs" ItemName="SpecificGameVersionOutput" />
+    </MSBuild>
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="@(SpecificGameVersionOutput)" />
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="CleanSpecificGameVersions">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Clean" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true" />
+  </Target>
+
+  <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" Condition="'$(UseGameRegistry)' == 'true' and '$(_EffectiveGameVersionType)' != 'Multiple'" 
+          Inputs="$(GameRegistryPath);$(MSBuildAllProjects)" Outputs="$(_ResolvedPropertiesProjectFilePath)">
     <PropertyGroup>
       <_PreviousGamePath>$(_ResolvedGamePath)</_PreviousGamePath>
     </PropertyGroup>
@@ -268,59 +280,44 @@
       <_ResolvedProperty Include="_ResolvedDeploySourceCode" Value="$(_ResolvedDeploySourceCode)" Condition="'$(_ResolvedDeploySourceCode)' != ''" />
       <_ResolvedProperty Include="_ResolvedDoorstopMode" Value="$(_ResolvedDoorstopMode)" Condition="'$(_ResolvedDoorstopMode)' != ''" />
       <_ResolvedProperty Include="_ResolvedUseAlternateDoorstopDllName" Value="$(_ResolvedUseAlternateDoorstopDllName)" Condition="'$(_ResolvedUseAlternateDoorstopDllName)' != ''" />
-      <_ResolvedProperty ConditionExpression="'%24(GameVersion)' == '$(GameVersion)'" GameVersion="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
-      <_ResolvedProperty Include="_GamePathChanged" IsTemporary="true" GameVersion="$(GameVersion)" Condition="'$(_ResolvedGamePath)' != '$(_PreviousGamePath)'" />
     </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
+    <Touch Files="$(_ResolvedPropertiesProjectFilePath)" />
+
+    <PropertyGroup>
+      <_GamePathChanged Condition="'$(_ResolvedGamePath)' != '$(_PreviousGamePath)'">true</_GamePathChanged>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''">$(_ResolvedGamePath)</GamePath>
+      <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
+      <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
+      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == ''">$(_ResolvedGameInstanceId)</GameInstanceId>
+      <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == ''">$(_ResolvedModDeploymentMode)</ModDeploymentMode>
+      <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == ''">$(_ResolvedDeploySourceCode)</DeploySourceCode>
+      <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == ''">$(_ResolvedDoorstopMode)</DoorstopMode>
+      <UseAlternateDoorstopDllName Condition="'$(_UserSpecifiedUseAlternateDoorstopDllName)' == ''">$(_ResolvedUseAlternateDoorstopDllName)</UseAlternateDoorstopDllName>
+    </PropertyGroup>
   </Target>
 
   <Target Name="GamePropertiesResolved" />
 
-  <Target Name="UpdateGamePropertiesChangeTimestamp" BeforeTargets="ResolveGameAssemblyReferences" Condition="'$(_GamePathChanged)' == 'true'">
+  <Target Name="UpdateGamePropertiesChangeTimestamp" BeforeTargets="ResolveGameAssemblyReferences" 
+          Condition="'$(_EffectiveGameVersionType)' != 'Multiple' and ('$(_GamePathChanged)' == 'true' or !Exists('$(_GamePropertiesChangeTimestampFilePath)'))">
     <Touch Files="$(_GamePropertiesChangeTimestampFilePath)" AlwaysCreate="true" />
   </Target>
 
   <Target Name="ResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" 
-          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildProjectFullPath)" Outputs="$(_ResolvedReferencesProjectFilePath)" Condition="'$(IsSpecificGameVersionBuild)' != 'true'">
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_ResolveGameAssemblyReferencesInner" Properties="GameVersion=$(_DefaultGameVersion);GamePath=$(GamePath);IsSpecificGameVersionBuild=true">
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedReferenceItemForDefaultGameVersion" />
-    </MSBuild>
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_ResolveGameAssemblyReferencesInner" Properties="GameVersion=%(_OtherGameVersions.Identity);GamePath=%(_OtherGameVersions.GamePath);IsSpecificGameVersionBuild=true" Condition="'@(_OtherGameVersions)' != ''">
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedReferenceItem" />
-    </MSBuild>
+          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildAllProjects)" Outputs="$(_ResolvedReferencesProjectFilePath)" Condition="'$(_EffectiveGameVersionType)' != 'Multiple'">
+    <CreateProperty Value="true">
+      <Output TaskParameter="ValueSetByTask" PropertyName="_ResolveGameAssemblyReferencesIsRunning" />
+    </CreateProperty>
 
-    <ItemGroup>
-      <_ResolvedReferenceItemForDefaultGameVersion IsDefault="true" />
-      <_ResolvedReferenceItem Include="@(_ResolvedReferenceItemForDefaultGameVersion)" />
-      <_ResolvedReferenceProperty Include="@(_ResolvedReferenceItem)" Condition="'%(OutputGroup)' == '_ResolvedReferenceProperty'" />
-      <_GameReferenceToSave Include="@(_ResolvedReferenceItem)" Condition="'%(OutputGroup)' == '_GameReferenceToSave'" />
-      <_GameReferencesToAdd Include="@(_GameReferenceToSave)" Condition="'%(ItemAction)' == 'Include' and '%(_GameReferenceToSave.IsDefault)' == 'true'" />
-      <_GameReferencesToUpdate Include="@(_GameReferenceToSave)" Condition="'%(ItemAction)' == 'Update' and '%(_GameReferenceToSave.IsDefault)' == 'true'" />
-      <_GameReferencesToRemove Include="@(_GameReferenceToSave)" Condition="'%(ItemAction)' == 'Remove' and '%(_GameReferenceToSave.IsDefault)' == 'true'" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <GameArchitecture Condition="'%(_ResolvedReferenceItemForDefaultGameVersion.Identity)' == 'GameArchitecture'">%(_ResolvedReferenceItemForDefaultGameVersion.Value)</GameArchitecture>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <Reference Remove="@(_GameReferencesToRemove)" />
-      <Reference Update="@(_GameReferencesToUpdate)" />
-      <Reference Include="@(_GameReferencesToAdd)" Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
-    </ItemGroup>
-
-    <UpdateProjectFile ProjectFile="$(_ResolvedReferencesProjectFilePath)" Properties="@(_ResolvedReferenceProperty)" Items="@(_GameReferenceToSave)" ItemNames="Reference" />
-  </Target>
-
-  <Target Name="_ResolveGameAssemblyReferencesInner" Returns="@(_TaskOutput)">
-    <ItemGroup>
+    <ItemGroup Condition="'$(_ResolveGameAssemblyReferencesIsRunning)' == 'true'">
       <Reference Remove="@(Reference->WithMetadataValue('IsImplicitlyDefinedGameReference', 'true'))" />
     </ItemGroup>
 
-    <PropertyGroup>
-      <GamePath Condition="'$(GamePath)' == ''">$(_ResolvedGamePath)</GamePath>
-    </PropertyGroup>
-
-    <ResolveGameAssemblyReferences GamePath="$(GamePath)" TargetFramework="$(TargetFramework)" ExistingReferences="@(Reference)">
+    <ResolveGameAssemblyReferences GamePath="$(GamePath)" TargetFramework="$(TargetFramework)" ExistingReferences="@(_PreExistingReference)">
       <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
       <Output TaskParameter="ReferencesToAdd" ItemName="_GameReferencesToAdd" />
       <Output TaskParameter="ReferencesToUpdate" ItemName="_GameReferencesToUpdate" />
@@ -333,25 +330,21 @@
                             Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
       <_GameReferenceToSave Include="@(_GameReferencesToUpdate)" ItemName="Reference" ItemAction="Update" IncludeMetadata="HintPath;Private" />
       <_GameReferenceToSave Include="@(_GameReferencesToRemove)" ItemName="Reference" ItemAction="Remove" />
-      <_TaskOutput Include="@(_ResolvedReferenceProperty)" OutputGroup="_ResolvedReferenceProperty" />
-      <_TaskOutput Include="@(_GameReferenceToSave)" OutputGroup="_GameReferenceToSave" />
-      <_TaskOutput ConditionExpression="'%24(GameVersion)' == '$(GameVersion)'" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
+
+    <ItemGroup Condition="'$(_ResolveGameAssemblyReferencesIsRunning)' == 'true'">
+      <Reference Remove="@(_GameReferencesToRemove)" />
+      <Reference Update="@(_GameReferencesToUpdate)" HintPath="%(_GameReferencesToUpdate.HintPath)" Private="%(_GameReferencesToUpdate.Private)" />
+      <Reference Include="@(_GameReferencesToAdd)" Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
+    </ItemGroup>
+
+    <UpdateProjectFile ProjectFile="$(_ResolvedReferencesProjectFilePath)" Properties="@(_ResolvedReferenceProperty)" Items="@(_GameReferenceToSave)" ItemNames="Reference">
+      <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_HasWrittenResolvedReferencesProjectFile" />
+    </UpdateProjectFile>
   </Target>
 
   <Target Name="GameAssemblyReferencesResolved" />
-
-  <Target Name="BuildSpecificGameVersions" Returns="@(SpecificGameVersionOutput)">
-    <!-- BypassCache=1 is here so Resolved*.targets are re-read during build. The properties just have to be different from earlier MSBuild invocations. -->
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Build" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true;BypassCache=1">
-      <Output TaskParameter="TargetOutputs" ItemName="SpecificGameVersionOutput" />
-      <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
-    </MSBuild>
-  </Target>
-  
-  <Target Name="CleanSpecificGameVersions">
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Clean" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true" />
-  </Target>
 
   <Target Name="PrepareModPaths" DependsOnTargets="GamePropertiesResolved">
     <PropertyGroup>
@@ -474,21 +467,15 @@
     <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
   </Target>
 
-  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" Condition="'$(IsInnerBuild)' != 'true'">
+  <Target Name="_PreparePathsFromSpecificGameVersionBuilds">
     <ItemGroup>
       <_AllTargetDirs Include="@(SpecificGameVersionOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
       <_AllModTargetPaths Include="@(SpecificGameVersionOutput->'%(ModTargetPath)')" KeepDuplicates="false" Condition="'%(SpecificGameVersionOutput.ModDeploymentMode)' == 'Copy'" />
-      <_AllModTargetPathsXAllTargetDirs Include="@(_AllModTargetPaths)" OtherTargetDir="%(_AllTargetDirs.Identity)" OtherGameVersion="%(_AllTargetDirs.GameVersion)" />
-      <_AllModTargetPathsXAllTargetDirs Remove="@(_AllModTargetPathsXAllTargetDirs)" Condition="'%(GameVersion)' == '%(OtherGameVersion)'" />
     </ItemGroup>
-    <ResolveTargetPath RelativeToPath="%(_AllModTargetPathsXAllTargetDirs.ModSourcePath)" Input="@(_AllModTargetPathsXAllTargetDirs->'%(OtherTargetDir)')">
-      <Output TaskParameter="Output" ItemName="_ResolvedModOtherVersionPaths" />
-    </ResolveTargetPath>
-    <ItemGroup>
-      <_ResolvedModOtherVersionFiles Include="%(_ResolvedModOtherVersionPaths.Identity)**" DestinationFolder="%(_ResolvedModOtherVersionPaths.ModTargetPath)%(_ResolvedModOtherVersionPaths.TargetPath)" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_ResolvedModOtherVersionFiles)" DestinationFolder="%(_ResolvedModOtherVersionFiles.DestinationFolder)" />
   </Target>
+
+  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" DependsOnTargets="_PreparePathsFromSpecificGameVersionBuilds;_CopyOtherGameVersionsCompiledOutput"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(IsInnerBuild)' != 'true' and '$(GameVersion)' == ''" />
 
   <Target Name="_AddGameSpecificMetadata" AfterTargets="AfterBuild" DependsOnTargets="PrepareModPaths">
     <ItemGroup>
@@ -496,23 +483,22 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="AddGameToRegistry">
-    <Error Code="UMS0005" Text="GamePath property is not set." Condition="'$(_UserSpecifiedGamePath)' == ''" />
-
-    <AddGameToRegistry Path="$(_UserSpecifiedGamePath)" DisplayName="$(_UserSpecifiedGameDisplayName)" ModsPath="$(_UserSpecifiedGameModsPath)" Version="$(_UserSpecifiedGameVersion)" 
-                       ModDeploymentMode="$(_UserSpecifiedModDeploymentMode)" DeploySourceCode="$(_UserSpecifiedDeploySourceCode)" DoorstopMode="$(_UserSpecifiedDoorstopMode)" 
-                       UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" GameRegistryPath="$(GameRegistryPath)" />
+  <Target Name="GetGamePropertiesAndReferences" DependsOnTargets="GameAssemblyReferencesResolved" Returns="@(SpecificGameVersionOutput)">
+    <ItemGroup>
+      <SpecificGameVersionOutput Include="@(Reference)" OutputType="Reference" />
+      <SpecificGameVersionOutput Include="GameVersion" Value="$(GameVersion)" OutputType="GameProperty" />
+      <SpecificGameVersionOutput GameVersion="$(GameVersion)" />
+    </ItemGroup>
   </Target>
 
-  <Target Name="UpdateGameRegistry">
-    <UpdateGameRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)" 
-                        Path="$(_UserSpecifiedGamePath)" ModsPath="$(_UserSpecifiedGameModsPath)" ModDeploymentMode="$(_UserSpecifiedModDeploymentMode)" DeploySourceCode="$(_UserSpecifiedDeploySourceCode)"
-                        DoorstopMode="$(_UserSpecifiedDoorstopMode)" UseAlternateDoorstopDllName="$(_UserSpecifiedUseAlternateDoorstopDllName)" GameRegistryPath="$(GameRegistryPath)" />
-  </Target>
-
-  <Target Name="RemoveGameFromRegistry">
-    <RemoveGameFromRegistry Id="$(_UserSpecifiedGameInstanceId)" DisplayName="$(_UserSpecifiedGameDisplayName)" GameName="$(_UserSpecifiedGameName)" Version="$(_UserSpecifiedGameVersion)"
-                            GameRegistryPath="$(GameRegistryPath)"/>
+  <Target Name="_ReplaceAssemblyReferences" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="BuildSpecificGameVersions" Condition="'$(DesignTimeBuild)' == 'true' and '$(_EffectiveGameVersionType)' == 'Multiple'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.IsImplicitlyDefined)' == 'true'" />
+      <Reference Include="@(SpecificGameVersionOutput)" Condition="'%(SpecificGameVersionOutput.OutputType)' == 'Reference' and '%(SpecificGameVersionOutput.GameVersion)' == '$(DefaultGameVersion)'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <GameVersion Condition="'$(GameVersion)' == '' and '%(SpecificGameVersionOutput.OutputType)' == 'GameProperty' and '%(SpecificGameVersionOutput.GameVersion)' == '$(DefaultGameVersion)'">%(SpecificGameVersionOutput.Value)</GameVersion>
+    </PropertyGroup>
   </Target>
 
 </Project>

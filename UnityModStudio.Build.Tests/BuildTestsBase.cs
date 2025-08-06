@@ -1,6 +1,7 @@
 ﻿using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Mono.Cecil;
 using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Common.Tests;
@@ -28,7 +29,7 @@ public abstract class BuildTestsBase
 
     private string _gameRegistryPath = null!;
 
-    private List<DirectoryInfo> _scratchDirs = [];
+    private readonly List<DirectoryInfo> _scratchDirs = [];
 
     public TestContext TestContext { get; set; } = null!;
 
@@ -128,5 +129,12 @@ public abstract class BuildTestsBase
         game.Architecture = gameInformation.Architecture.ToString();
         game.UnityVersion = gameInformation.UnityVersion;
         game.MonoProfile = gameInformation.GetMonoProfileString();
+    }
+
+    protected static void VerifyModAssemblyGameVersion(string modAssemblyPath, string gameVersion)
+    {
+        using var modAssembly = AssemblyDefinition.ReadAssembly(modAssemblyPath);
+        var gameAssemblyReference = modAssembly.MainModule.AssemblyReferences.Single(reference => reference.Name == "Assembly-CSharp");
+        Assert.AreEqual(gameVersion, gameAssemblyReference.Version.ToString(2));
     }
 }

@@ -25,7 +25,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
             new Dictionary<string, string>
             {
-                { "GamePath", Path.Combine(SampleGameInfo.DownloadPath, "2018-net4") },
+                { "GamePath", Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") },
                 { "GameRegistryPath", "!@#$%^&*()" },
             });
 
@@ -41,7 +41,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenAddGameToRegistryCalledWithAllProperties_AddGameToRegistry()
     {
-        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
             new Dictionary<string, string>
             {
@@ -81,7 +81,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenAddGameToRegistryCalledWithOnlyGamePath_AddGameToRegistry()
     {
-        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
             new Dictionary<string, string>
             {
@@ -114,7 +114,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenAddGameToRegistryCalledWithOnlyGamePathAndGameVersion_AddGameToRegistry()
     {
-        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
             new Dictionary<string, string>
             {
@@ -150,10 +150,10 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         SetupGameRegistry(new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
             DisplayName = "Test",
         });
-        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+        var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
             new Dictionary<string, string>
             {
@@ -232,11 +232,11 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         ResolveGameProperties(existingGame);
         SetupGameRegistry(existingGame);
-        var newGamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20");
+        var newGamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
         var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj",
             new Dictionary<string, string>
             {
@@ -279,7 +279,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         ResolveGameProperties(existingGame);
         SetupGameRegistry(existingGame);
@@ -317,13 +317,13 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame10 = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             Version = "1.0",
             DisplayName = "Game [1.0]",
         };
         var existingGame11 = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
             Version = "1.1",
             DisplayName = "Game [1.1]",
         };
@@ -374,16 +374,78 @@ public class GameRegistryManagementTests : BuildTestsBase
     }
 
     [TestMethod]
+    public void WhenUpdateGameRegistryCalledWithGameNameAndVersionInMultiTargetProject_UpdateGameRegistry()
+    {
+        var existingGame10 = new Game
+        {
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+            Version = "1.0",
+            DisplayName = "Game [1.0]",
+        };
+        var existingGame11 = new Game
+        {
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
+            Version = "1.1",
+            DisplayName = "Game [1.1]",
+        };
+        ResolveGameProperties(existingGame10);
+        ResolveGameProperties(existingGame11);
+        SetupGameRegistry(existingGame10, existingGame11);
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\MultiVersionMultiTarget\MultiVersionMultiTarget.csproj",
+            new Dictionary<string, string>
+            {
+                { "GameDisplayName", "UpdateGameRegistryTest" },
+                { "GameVersion", "1.0" },
+            });
+
+        var success = project.Build(["UpdateGameRegistry"], [logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, logger.BuildErrors.Count);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+        var gameRegistry = LoadGameRegistry();
+        Assert.AreEqual(2, gameRegistry.Games.Count);
+        var game10 = gameRegistry.Games.First(g => g.Version == "1.0");
+        Assert.AreEqual(existingGame10.Path, game10.Path);
+        Assert.AreEqual("UpdateGameRegistryTest", game10.DisplayName);
+        Assert.IsNull(game10.ModsPath);
+        Assert.AreEqual("1.0", game10.Version);
+        Assert.AreEqual(ModDeploymentMode.Copy, game10.ModDeploymentMode);
+        Assert.AreEqual(false, game10.DeploySourceCode);
+        Assert.AreEqual(DoorstopMode.Debugging, game10.DoorstopMode);
+        Assert.AreEqual(false, game10.UseAlternateDoorstopDllName);
+        Assert.AreEqual("Unity2018Test", game10.GameName);
+        Assert.AreEqual("Unity2018Test.exe", game10.GameExecutableFileName);
+        Assert.AreEqual("X64", game10.Architecture);
+        Assert.AreEqual("2018.4.36f1", game10.UnityVersion);
+        Assert.AreEqual(".NET 4.6", game10.MonoProfile);
+        var game11 = gameRegistry.Games.First(g => g.Version == "1.1");
+        Assert.AreEqual(existingGame11.Path, game11.Path);
+        Assert.AreEqual(existingGame11.DisplayName, game11.DisplayName);
+        Assert.AreEqual(existingGame11.ModsPath, game11.ModsPath);
+        Assert.AreEqual(existingGame11.Version, game11.Version);
+        Assert.AreEqual(existingGame11.ModDeploymentMode, game11.ModDeploymentMode);
+        Assert.AreEqual(existingGame11.DeploySourceCode, game11.DeploySourceCode);
+        Assert.AreEqual(existingGame11.DoorstopMode, game11.DoorstopMode);
+        Assert.AreEqual(existingGame11.UseAlternateDoorstopDllName, game11.UseAlternateDoorstopDllName);
+        Assert.AreEqual(existingGame11.GameName, game11.GameName);
+        Assert.AreEqual(existingGame11.GameExecutableFileName, game11.GameExecutableFileName);
+        Assert.AreEqual(existingGame11.Architecture, game11.Architecture);
+        Assert.AreEqual(existingGame11.UnityVersion, game11.UnityVersion);
+        Assert.AreEqual(existingGame11.MonoProfile, game11.MonoProfile);
+    }
+
+    [TestMethod]
     public void WhenUpdateGameRegistryCalledWithGameDisplayName_UpdateGameRegistry()
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             DisplayName = "UpdateGameRegistryTest",
         };
         ResolveGameProperties(existingGame);
         SetupGameRegistry(existingGame);
-        var newGamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20");
+        var newGamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
         var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj",
             new Dictionary<string, string>
             {
@@ -463,12 +525,12 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             DisplayName = "Game",
         };
         var existingGame2 = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
             DisplayName = "Game2",
         };
         ResolveGameProperties(existingGame);
@@ -495,7 +557,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             DisplayName = "Game",
         };
         var existingGame2 = new Game
@@ -523,13 +585,13 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             Version = "1.0",
             DisplayName = "Game",
         };
         var existingGame2 = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
             Version = "1.1",
             DisplayName = "Game2",
         };
@@ -553,12 +615,12 @@ public class GameRegistryManagementTests : BuildTestsBase
     {
         var existingGame = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             DisplayName = "Game",
         };
         var existingGame2 = new Game
         {
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
             DisplayName = "Game2",
         };
         ResolveGameProperties(existingGame);

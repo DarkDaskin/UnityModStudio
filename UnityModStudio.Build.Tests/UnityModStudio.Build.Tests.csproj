@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Include="Projects\**\*" />
     <None Update="Projects\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="Projects\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -67,7 +67,7 @@ public class TestBinaryLogger : ILogger, IEventSource
 #endif
     }
 
-    public LoggerVerbosity Verbosity { get; set; }
+    public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
     public string? Parameters { get; set; }
 
     public event BuildMessageEventHandler? MessageRaised;

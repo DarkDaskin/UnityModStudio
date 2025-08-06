@@ -37,7 +37,7 @@ public class FailedBuildTests : BuildTestsBase
         SetupGameRegistry(new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             GameName = "Unity2018Test",
         });
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\SingleVersion.csproj");
@@ -56,7 +56,7 @@ public class FailedBuildTests : BuildTestsBase
         SetupGameRegistry(new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = MakeGameCopy("2018-net4-v1.0"),
             GameName = "Unity2018Test",
             Version = "1.0",
         });
@@ -76,13 +76,13 @@ public class FailedBuildTests : BuildTestsBase
         SetupGameRegistry(new Game
             {
                 DisplayName = "Unity2018Test",
-                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
                 GameName = "Unity2018Test",
             },
             new Game
             {
                 DisplayName = "Unity2018Test (2)",
-                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
                 GameName = "Unity2018Test",
             });
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -101,14 +101,14 @@ public class FailedBuildTests : BuildTestsBase
         SetupGameRegistry(new Game
             {
                 DisplayName = "Unity2018Test",
-                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
                 GameName = "Unity2018Test",
                 Version = "1.0",
             },
             new Game
             {
                 DisplayName = "Unity2018Test (2)",
-                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
                 GameName = "Unity2018Test",
                 Version = "1.0",
             });
@@ -128,14 +128,14 @@ public class FailedBuildTests : BuildTestsBase
         SetupGameRegistry(new Game
             {
                 DisplayName = "Unity2018Test [1.0]",
-                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
                 GameName = "Unity2018Test",
                 Version = "1.0",
             },
             new Game
             {
                 DisplayName = "Unity2018Test [1.1]",
-                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
                 GameName = "Unity2018Test",
                 Version = "1.1",
             });
@@ -188,23 +188,58 @@ public class FailedBuildTests : BuildTestsBase
     }
 
     [TestMethod]
-    public void WhenBothGameVersionAndGameVersionsAreSpecified_ProduceError()
+    public void WhenGameVersionIsNotInGameVersions_ProduceError()
     {
         SetupGameRegistry(new Game
-        {
-            DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
-            GameName = "Unity2018Test",
-            Version = "1.0",
-        });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongGameVersionType\WrongGameVersionType.csproj");
+            {
+                DisplayName = "Unity2018Test [1.0]",
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+                GameName = "Unity2018Test",
+                Version = "1.0",
+            },
+            new Game
+            {
+                DisplayName = "Unity2018Test [1.1]",
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
+                GameName = "Unity2018Test",
+                Version = "1.1",
+            });
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongGameVersion\WrongGameVersion.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
         Assert.AreEqual("UMS0001", logger.BuildErrors[0].Code);
-        Assert.AreEqual("Both GameVersion and GameVersions properties are specified, but they are mutually exclusive.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("Specified GameVersion must be one of specified GameVersions.", logger.BuildErrors[0].Message);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+    }
+
+    [TestMethod]
+    public void WhenDefaultGameVersionIsNotInGameVersions_ProduceError()
+    {
+        SetupGameRegistry(new Game
+            {
+                DisplayName = "Unity2018Test [1.0]",
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+                GameName = "Unity2018Test",
+                Version = "1.0",
+            },
+            new Game
+            {
+                DisplayName = "Unity2018Test [1.1]",
+                Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
+                GameName = "Unity2018Test",
+                Version = "1.1",
+            });
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongDefaultGameVersion\WrongDefaultGameVersion.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsFalse(success);
+        Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0001", logger.BuildErrors[0].Code);
+        Assert.AreEqual("Specified DefaultGameVersion must be one of specified GameVersions.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 }

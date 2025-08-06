@@ -98,7 +98,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManager(game) };
         vm.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
@@ -218,15 +218,15 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var changedProperties = new List<string>();
         var game1 = new Game
         {
-            DisplayName = "Unity2018Test [1.1]",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            DisplayName = "Unity2018Test [2.0]",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
             GameName = "Unity2018Test",
-            Version = "1.1",
+            Version = "2.0",
         };
         var game2 = new Game
         {
             DisplayName = "Unity2018Test [1.0]",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             GameName = "Unity2018Test",
             Version = "1.0",
         };
@@ -240,12 +240,12 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.AreEqual("1.0", vm.GameVersions[0].Version);
         Assert.IsTrue(vm.GameVersions[0].IsEnabled);
         Assert.IsFalse(vm.GameVersions[0].IsSelected);
-        Assert.AreEqual("1.1", vm.GameVersions[1].Version);
+        Assert.AreEqual("2.0", vm.GameVersions[1].Version);
         Assert.IsFalse(vm.GameVersions[1].IsEnabled);
         Assert.IsTrue(vm.GameVersions[1].IsSelected);
         Assert.IsTrue(vm.IsMultiVersionPanelVisible);
-        Assert.AreEqual("1.1", vm.GameVersionString);
-        Assert.AreEqual("1.1", vm.GameVersion);
+        Assert.AreEqual("2.0", vm.GameVersionString);
+        Assert.AreEqual("2.0", vm.GameVersion);
         Assert.IsTrue(vm.HasValidGamePath);
         Assert.IsFalse(vm.HasErrors);
         Assert.IsTrue(changedProperties.ToHashSet().IsSupersetOf([
@@ -271,7 +271,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             .Callback((Game game) =>
             {
                 game.DisplayName = "Unity2018Test";
-                game.Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4");
+                game.Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
             });
         Mock.Get(vm.GameManager.GameRegistry)
             .Setup(gameRegistry => gameRegistry.AddGame(It.IsNotNull<Game>()))
@@ -308,7 +308,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
         vm.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
@@ -334,7 +334,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
         CollectionViewSource.GetDefaultView(vm.Games).CollectionChanged += (_, args) => gamesChangeNotifications.Add(args);
@@ -364,7 +364,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
         vm.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
@@ -392,7 +392,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
         vm.Closed += success => closedInvocations.Add(success);
@@ -412,7 +412,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var game = new Game
         {
             DisplayName = "Unity2018Test",
-            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4"),
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
         vm.Closed += success => closedInvocations.Add(success);

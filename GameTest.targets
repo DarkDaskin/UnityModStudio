@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <SampleGameRepositoryUrl Condition="'$(SampleGameRepositoryUrl)' == ''">https://github.com/DarkDaskin/Unity-Game-Samples/</SampleGameRepositoryUrl>
-    <SampleGameRepositoryTag Condition="'$(SampleGameRepositoryTag)' == ''">v1</SampleGameRepositoryTag>
+    <SampleGameRepositoryTag Condition="'$(SampleGameRepositoryTag)' == ''">v2</SampleGameRepositoryTag>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseDefaultSampleGames)' != 'false'">
@@ -20,8 +20,10 @@
     <SampleGameType Include="2017-net46" />
     <SampleGameType Include="2018-net20" />
     <SampleGameType Include="2018-net20-subset" />
-    <SampleGameType Include="2018-net4" />
-    <SampleGameType Include="2018-netstandard20" />
+    <SampleGameType Include="2018-net4-v1.0" />
+    <SampleGameType Include="2018-net4-v1.1" />
+    <SampleGameType Include="2018-netstandard20-v2.0" />
+    <SampleGameType Include="2018-netstandard20-v2.1" />
     <SampleGameType Include="2022-net4" />
     <SampleGameType Include="2022-netstandard21" />
   </ItemGroup>

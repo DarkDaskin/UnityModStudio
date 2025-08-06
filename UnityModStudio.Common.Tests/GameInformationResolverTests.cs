@@ -137,8 +137,8 @@ public sealed class GameInformationResolverTests
     [DataRow("2017-net46")]
     [DataRow("2018-net20")]
     [DataRow("2018-net20-subset")]
-    [DataRow("2018-net4")]
-    [DataRow("2018-netstandard20")]
+    [DataRow("2018-net4-v1.0")]
+    [DataRow("2018-netstandard20-v2.0")]
     [DataRow("2022-net4")]
     [DataRow("2022-netstandard21")]
     public void WhenGameIsValid_ReturnGameInformation(string gameType)
@@ -254,7 +254,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual("net35", gameInformation.TargetFrameworkMoniker);
                 Assert.IsFalse(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(6, gameInformation.FrameworkAssemblyFiles.Count);
-                Assert.AreEqual(70, gameInformation.GameAssemblyFiles.Count);
+                Assert.AreEqual(71, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "2018-net20-subset":
                 Assert.AreEqual("Unity2018Test", gameInformation.Name);
@@ -263,25 +263,25 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual("net35", gameInformation.TargetFrameworkMoniker);
                 Assert.IsTrue(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(3, gameInformation.FrameworkAssemblyFiles.Count);
-                Assert.AreEqual(69, gameInformation.GameAssemblyFiles.Count);
+                Assert.AreEqual(70, gameInformation.GameAssemblyFiles.Count);
                 break;
-            case "2018-net4":
+            case "2018-net4-v1.0":
                 Assert.AreEqual("Unity2018Test", gameInformation.Name);
                 Assert.AreEqual(Architecture.X64, gameInformation.Architecture);
                 Assert.AreEqual("2018.4.36f1", gameInformation.UnityVersion);
                 Assert.AreEqual("net46", gameInformation.TargetFrameworkMoniker);
                 Assert.IsFalse(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(6, gameInformation.FrameworkAssemblyFiles.Count);
-                Assert.AreEqual(70, gameInformation.GameAssemblyFiles.Count);
+                Assert.AreEqual(71, gameInformation.GameAssemblyFiles.Count);
                 break;
-            case "2018-netstandard20":
+            case "2018-netstandard20-v2.0":
                 Assert.AreEqual("Unity2018Test", gameInformation.Name);
                 Assert.AreEqual(Architecture.X64, gameInformation.Architecture);
                 Assert.AreEqual("2018.4.36f1", gameInformation.UnityVersion);
                 Assert.AreEqual("netstandard2.0", gameInformation.TargetFrameworkMoniker);
                 Assert.IsFalse(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(22, gameInformation.FrameworkAssemblyFiles.Count);
-                Assert.AreEqual(69, gameInformation.GameAssemblyFiles.Count);
+                Assert.AreEqual(70, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "2022-net4":
                 Assert.AreEqual("Unity2022Test", gameInformation.Name);

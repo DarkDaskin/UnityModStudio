@@ -9,7 +9,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasDefaultSettings_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4") };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0") };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -31,7 +31,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasModLoadingEnabled_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), DoorstopMode = DoorstopMode.DebuggingAndModLoading };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), DoorstopMode = DoorstopMode.DebuggingAndModLoading };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -53,7 +53,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameUsesAlternateDoorstopDllName_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), UseAlternateDoorstopDllName = true };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), UseAlternateDoorstopDllName = true };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -75,7 +75,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasDoorstopDisabled_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), DoorstopMode = DoorstopMode.Disabled };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), DoorstopMode = DoorstopMode.Disabled };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -95,7 +95,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasDeploymentDisabled_Build()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), DoorstopMode = DoorstopMode.Disabled, ModDeploymentMode = ModDeploymentMode.Disabled };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), DoorstopMode = DoorstopMode.Disabled, ModDeploymentMode = ModDeploymentMode.Disabled };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -114,7 +114,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasDeploymentModeLink_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), ModDeploymentMode = ModDeploymentMode.Link };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), ModDeploymentMode = ModDeploymentMode.Link };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -138,7 +138,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameHasDeploySourceCode_BuildAndDeployWithWarning()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), DeploySourceCode = true };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), DeploySourceCode = true };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
@@ -162,7 +162,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenProjectHasModSourcePath_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4") };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0") };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersionedWithModSourcePath\Sources\NonVersionedWithModSourcePath.csproj");
@@ -186,7 +186,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenProjectHasModSourcePathAndGameHasDeploySourceCode_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), DeploySourceCode = true };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), DeploySourceCode = true };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersionedWithModSourcePath\Sources\NonVersionedWithModSourcePath.csproj");
@@ -210,7 +210,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenProjectHasModSourcePathAndGameHasDeploymentModeLink_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), ModDeploymentMode = ModDeploymentMode.Link };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), ModDeploymentMode = ModDeploymentMode.Link };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersionedWithModSourcePath\Sources\NonVersionedWithModSourcePath.csproj");
@@ -236,7 +236,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameIsBuiltTwice_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4") };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0") };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         const string projectPath = @"Projects\Correct\NonVersioned\NonVersioned.csproj";
@@ -265,7 +265,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameIsBuiltAgainWithUseAlternateDoorstopDllName_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), UseAlternateDoorstopDllName = false };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), UseAlternateDoorstopDllName = false };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         const string projectPath = @"Projects\Correct\NonVersioned\NonVersioned.csproj";
@@ -295,7 +295,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameIsBuiltAgainWithDeploymentModeChangedToLink_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), ModDeploymentMode = ModDeploymentMode.Copy };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), ModDeploymentMode = ModDeploymentMode.Copy };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         const string projectPath = @"Projects\Correct\NonVersioned\NonVersioned.csproj";
@@ -330,7 +330,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenGameIsBuiltAgainWithDeploymentModeChangedToCopy_BuildAndDeploy()
     {
-        var game = new Game { Path = MakeGameCopy("2018-net4"), ModDeploymentMode = ModDeploymentMode.Link };
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), ModDeploymentMode = ModDeploymentMode.Link };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         const string projectPath = @"Projects\Correct\NonVersioned\NonVersioned.csproj";

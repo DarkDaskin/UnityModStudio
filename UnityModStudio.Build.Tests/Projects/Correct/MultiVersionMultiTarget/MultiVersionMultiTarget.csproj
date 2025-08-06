@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
     <GameName>Unity2018Test</GameName>
-    <GameVersions Condition="'$(TargetFramework)' == 'net46'">1.0</GameVersions>
-    <GameVersions Condition="'$(TargetFramework)' == 'netstandard2.0'">1.1</GameVersions>
+    <GameVersions Condition="'$(TargetFramework)' == 'net46'">1.0;1.1</GameVersions>
+    <GameVersions Condition="'$(TargetFramework)' == 'netstandard2.0'">2.0</GameVersions>
   </PropertyGroup>
 
   <ItemGroup>

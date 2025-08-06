@@ -1,26 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
-  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\build\UnityModStudio.Common.targets" />
 
-  <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
-
-  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="Build">
+  <Target Name="_PreparePathsFromInnerBuilds">
     <ItemGroup>
       <_AllTargetDirs Include="@(InnerOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
       <_AllModTargetPaths Include="@(InnerOutput->'%(ModTargetPath)')" KeepDuplicates="false" Condition="'%(InnerOutput.ModDeploymentMode)' == 'Copy'" />
-      <_AllModTargetPathsXAllTargetDirs Include="@(_AllModTargetPaths)" OtherTargetDir="%(_AllTargetDirs.Identity)" OtherGameVersion="%(_AllTargetDirs.GameVersion)" />
-      <_AllModTargetPathsXAllTargetDirs Remove="@(_AllModTargetPathsXAllTargetDirs)" Condition="'%(GameVersion)' == '%(OtherGameVersion)'" />
     </ItemGroup>
-    <ResolveTargetPath RelativeToPath="%(_AllModTargetPathsXAllTargetDirs.ModSourcePath)" Input="@(_AllModTargetPathsXAllTargetDirs->'%(OtherTargetDir)')">
-      <Output TaskParameter="Output" ItemName="_ResolvedModOtherVersionPaths" />
-    </ResolveTargetPath>
-    <ItemGroup>
-      <_ResolvedModOtherVersionFiles Include="%(_ResolvedModOtherVersionPaths.Identity)**" DestinationFolder="%(_ResolvedModOtherVersionPaths.ModTargetPath)%(_ResolvedModOtherVersionPaths.TargetPath)" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_ResolvedModOtherVersionFiles)" DestinationFolder="%(_ResolvedModOtherVersionFiles.DestinationFolder)" />
   </Target>
+
+  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="Build" DependsOnTargets="_PreparePathsFromInnerBuilds;_CopyOtherGameVersionsCompiledOutput" />
 
 </Project>
