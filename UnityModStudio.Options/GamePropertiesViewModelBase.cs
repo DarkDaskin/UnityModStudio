@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -14,6 +16,9 @@ namespace UnityModStudio.Options
 {
     public abstract class GamePropertiesViewModelBase : ObservableObjectWithValidation
     {
+        private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
+        private static readonly string InvalidFileNameCharsString = string.Join(" ", InvalidFileNameChars.Where(c => !char.IsControl(c)));
+
         private Game? _game;
         private string? _gamePath;
         private string? _modsPath;
@@ -65,7 +70,10 @@ namespace UnityModStudio.Options
         public string? GameVersion
         {
             get => _gameVersion;
-            set => SetProperty(ref _gameVersion, value);
+            set => SetPropertyWithValidation(ref _gameVersion, value,
+                v => v?.Any(InvalidFileNameChars.Contains) ?? false
+                    ? [$"Game version must not contain any of the following characters: {InvalidFileNameCharsString}"]
+                    : []);
         }
 
         public string? GameName

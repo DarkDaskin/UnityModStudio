@@ -165,6 +165,22 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     }
 
     [TestMethod]
+    public void WhenGameVersionContainsInvalidChars_ProduceError()
+    {
+        var game1 = new Game
+        {
+            DisplayName = "Unity2018Test",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+        };
+        var vm = new GamePropertiesViewModel(game1) { GameManager = SetupGameManager() };
+
+        vm.GameVersion = "Some*";
+
+        Assert.IsTrue(vm.HasErrors);
+        Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.GameVersion)).SequenceEqual(["Game version must not contain any of the following characters: \" < > | : * ? \\ /"]));
+    }
+
+    [TestMethod]
     public void WhenBrowseForGamePathIsInvoked_UpdateGamePath()
     {
         var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
