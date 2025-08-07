@@ -241,7 +241,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     }
 
     [TestMethod]
-    public void WhenConfirmIsInvoked_UpdateGameAndCloseWindow()
+    public void WhenConfirmIsInvoked_UpdateGameTrimValuesAndCloseWindow()
     {
         var closedInvocations = new List<bool>();
         var oldPath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
@@ -263,10 +263,10 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
         vm.Closed += success => closedInvocations.Add(success);
 
-        vm.DisplayName = "New name";
-        vm.GameVersion = "1.0";
+        vm.DisplayName = "New name ";
+        vm.GameVersion = "1.0 ";
         vm.GamePath = newPath;
-        vm.ModsPath = "Mods";
+        vm.ModsPath = "Mods ";
         vm.ModDeploymentMode = ModDeploymentMode.Link;
         vm.DeploySourceCode = false;
         vm.DoorstopMode = DoorstopMode.Debugging;

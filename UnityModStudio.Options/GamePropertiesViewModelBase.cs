@@ -189,9 +189,9 @@ namespace UnityModStudio.Options
 
         protected virtual void OnConfirm()
         {
-            Game!.Path = GamePath!;
-            Game.ModsPath = ModsPath;
-            Game.Version = GameVersion;
+            Game!.Path = GamePath!.Trim();
+            Game.ModsPath = ModsPath?.Trim();
+            Game.Version = GameVersion?.Trim();
             Game.GameName = GameName;
             Game.GameExecutableFileName = GameExecutableFileName;
             Game.Architecture = Architecture;

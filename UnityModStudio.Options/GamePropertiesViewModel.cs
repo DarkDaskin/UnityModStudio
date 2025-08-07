@@ -22,7 +22,7 @@ namespace UnityModStudio.Options
             get => _displayName;
             set
             {
-                if (!SetProperty(ref _displayName, value.Trim()))
+                if (!SetProperty(ref _displayName, value))
                     return;
                 
                 ValidateDisplayName();
@@ -134,7 +134,7 @@ namespace UnityModStudio.Options
         {
             base.OnConfirm();
 
-            Game!.DisplayName = DisplayName;
+            Game!.DisplayName = DisplayName.Trim();
             Game.ModDeploymentMode = ModDeploymentMode;
             Game.DeploySourceCode = DeploySourceCode;
             Game.DoorstopMode = DoorstopMode;
