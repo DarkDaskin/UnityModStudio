@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework />
@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnityModStudio.Build" Version="$BuildPackageVersion$" />
+    <PackageReference Include="UnityModStudio.Build" Version="3.0" />
   </ItemGroup>
 
 </Project>

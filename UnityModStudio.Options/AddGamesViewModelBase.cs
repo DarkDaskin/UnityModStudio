@@ -106,6 +106,7 @@ public abstract class AddGamesViewModelBase : ObservableObject
                 GameExecutableFileName = gameInformation.GameExecutableFile.Name,
                 Architecture = gameInformation.Architecture.ToString(),
                 UnityVersion = gameInformation.UnityVersion,
+                TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker,
                 MonoProfile = gameInformation.GetMonoProfileString(),
             };
         }

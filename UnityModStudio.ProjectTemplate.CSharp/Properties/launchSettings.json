@@ -1,11 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/launchsettings",
 
-  "profiles": {
-    "Game": {
-      "commandName": "Executable",
-      "executablePath": "$(GamePath)$(GameExecutableFileName)",
-      "workingDirectory": "$(GamePath)"
-    }
-  }
+  "profiles": { }
 }

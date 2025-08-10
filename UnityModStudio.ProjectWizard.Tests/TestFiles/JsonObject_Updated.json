@@ -1,0 +1,15 @@
+{
+  "bar": "baz",
+  "qux": 34,
+  "nested": {
+    "array": [
+      1,
+      2,
+      3
+    ],
+    "object": {
+      "key": "value"
+    }
+  },
+  "newProperty": "newValue"
+}

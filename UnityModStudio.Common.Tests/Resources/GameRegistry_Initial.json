@@ -45,6 +45,7 @@
     "GameExecutableFileName": "Game2.exe",
     "Architecture": "X64",
     "UnityVersion": "2018.4.36f1",
+    "TargetFrameworkMoniker": "net46",
     "MonoProfile": ".NET 4.6"
   }
 ]

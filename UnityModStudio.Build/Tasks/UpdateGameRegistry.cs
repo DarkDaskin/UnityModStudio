@@ -61,6 +61,7 @@ public class UpdateGameRegistry : GameRegistryTaskBase
                         match.Game.GameExecutableFileName = gameInformation.GameExecutableFile.Name;
                         match.Game.Architecture = gameInformation.Architecture.ToString();
                         match.Game.UnityVersion = gameInformation.UnityVersion;
+                        match.Game.TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
                         match.Game.MonoProfile = gameInformation.GetMonoProfileString();
                     }
                 }

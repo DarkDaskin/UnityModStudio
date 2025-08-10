@@ -9,6 +9,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using UnityModStudio.Common;
 
 namespace UnityModStudio.Build.Tasks
 {
@@ -77,7 +78,7 @@ namespace UnityModStudio.Build.Tasks
             {
                 inputStream.Position = 0;
                 outputStream.Position = 0;
-                if (AreStreamsDifferent(inputStream, outputStream))
+                if (!Utils.AreStreamsEqual(inputStream, outputStream))
                 {
                     inputStream.Close();
 
@@ -225,59 +226,6 @@ namespace UnityModStudio.Build.Tasks
             }
             else
                 commentNode.Value = comment;
-        }
-
-        // Inspired by https://dev.to/emrahsungu/how-to-compare-two-files-using-net-really-really-fast-2pd9
-        private static bool AreStreamsDifferent(Stream streamA, Stream streamB)
-        {
-            if (streamA.Length != streamB.Length)
-                return true;
-
-            const int bufferLength = 4096 * 32;
-            var bufferA = ArrayPool<byte>.Shared.Rent(bufferLength);
-            var bufferB = ArrayPool<byte>.Shared.Rent(bufferLength);
-            try
-            {
-                while (true)
-                {
-                    var bytesReadA = ReadIntoBuffer(streamA, bufferA);
-                    var bytesReadB = ReadIntoBuffer(streamB, bufferB);
-
-                    if (bytesReadA != bytesReadB)
-                        return true;
-
-                    if (bytesReadA == 0)
-                        return false;
-
-                    var totalProcessed = 0;
-                    while (totalProcessed < bufferA.Length)
-                    {
-                        if (!Vector.EqualsAll(new Vector<byte>(bufferA, totalProcessed), new Vector<byte>(bufferB, totalProcessed)))
-                            return true;
-
-                        totalProcessed += Vector<byte>.Count;
-                    }
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bufferA);
-                ArrayPool<byte>.Shared.Return(bufferB);                
-            }
-
-            static int ReadIntoBuffer(Stream stream, byte[] buffer)
-            {
-                var totalBytesRead = 0;
-                while (totalBytesRead < buffer.Length)
-                {
-                    var bytesRead = stream.Read(buffer, totalBytesRead, buffer.Length - totalBytesRead);
-                    if (bytesRead == 0)
-                        return totalBytesRead;
-
-                    totalBytesRead += bytesRead;
-                }
-                return totalBytesRead;
-            }
         }
 
 

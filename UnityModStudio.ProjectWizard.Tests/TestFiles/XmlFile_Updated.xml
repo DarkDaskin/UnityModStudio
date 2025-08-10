@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  
+  <ExistingElement Attribute="NewValue">NewValue2</ExistingElement>
+  <NewElement Attribute="NewValue3">NewValue4</NewElement>
+  
+</Root>

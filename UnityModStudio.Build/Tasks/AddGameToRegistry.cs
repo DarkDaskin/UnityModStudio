@@ -48,6 +48,7 @@ public class AddGameToRegistry : GameRegistryTaskBase
             GameExecutableFileName = gameInformation.GameExecutableFile.Name,
             Architecture = gameInformation.Architecture.ToString(),
             UnityVersion = gameInformation.UnityVersion,
+            TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker,
             MonoProfile = gameInformation.GetMonoProfileString(),
         };
         if (TryParseEnum(ModDeploymentMode, nameof(ModDeploymentMode), out ModDeploymentMode modDeploymentMode))

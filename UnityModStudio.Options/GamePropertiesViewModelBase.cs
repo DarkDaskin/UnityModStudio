@@ -204,6 +204,7 @@ namespace UnityModStudio.Options
             Game.GameExecutableFileName = GameExecutableFileName;
             Game.Architecture = Architecture;
             Game.UnityVersion = UnityVersion;
+            Game.TargetFrameworkMoniker = TargetFrameworkMoniker;
             Game.MonoProfile = MonoProfile;
         }
     }

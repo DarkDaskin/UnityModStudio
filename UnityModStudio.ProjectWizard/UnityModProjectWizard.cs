@@ -1,15 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 using EnvDTE;
-using Microsoft.IO;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
-using Microsoft.VisualStudio.Threading;
 using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 
@@ -19,7 +15,8 @@ namespace UnityModStudio.ProjectWizard
     {
         private IComponentModel? _componentModel;
         private Game? _game;
-        
+        private Game[] _selectedGames = [];
+
         public void RunStarted(object automationObject, Dictionary<string, string?> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -35,7 +32,8 @@ namespace UnityModStudio.ProjectWizard
             ThreadHelper.ThrowIfNotOnUIThread();
 
             var projectPath = project.FullName;
-            ThreadHelper.JoinableTaskFactory.Run(() => CleanUpProjectAsync(projectPath));
+            ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateXmlFileAsync(projectPath, 
+                document => FileGenerator.UpdateProject(document, _selectedGames)));
         }
 
         void IWizard.RunFinished() { }
@@ -49,7 +47,19 @@ namespace UnityModStudio.ProjectWizard
 
         void IWizard.BeforeOpeningFile(ProjectItem projectItem) { }
 
-        void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem) { }
+        public void ProjectItemFinishedGenerating(ProjectItem projectItem)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if (projectItem.Name == "launchSettings.json")
+            {
+                var path = projectItem.Document.Path;
+                Debug.Assert(_game != null, nameof(_game) + " != null");
+                var gameVersions = _selectedGames.ToDictionary(game => game.DisplayName, game => game.Version!);
+                ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateJsonFileAsync(path,
+                    root => FileGenerator.UpdateLaunchSettings(root, _game!.DisplayName, gameVersions)));
+            }
+        }
 
         private bool TryInvokeWizard(WizardRunKind runKind, Dictionary<string, string?> replacementsDictionary)
         {
@@ -63,37 +73,14 @@ namespace UnityModStudio.ProjectWizard
                 return false;
 
             _game = viewModel.Game;
-            var selectedGameVersions = viewModel.GameVersions
+            _selectedGames = viewModel.GameVersions
                 .Where(vm => vm.IsSelected)
-                .Select(vm => vm.Version)
+                .Select(vm => vm.Game)
                 .ToArray();
             
-            replacementsDictionary["$TargetFramework$"] = viewModel.TargetFrameworkMoniker ?? "";
             replacementsDictionary["$BuildPackageVersion$"] = Utils.GetPackageVersion();
-            replacementsDictionary["$GameName$"] = viewModel.GameName ?? "";
-            replacementsDictionary["$GameVersion$"] = selectedGameVersions.Length <= 1 ? viewModel.GameVersion ?? "" : "";
-            replacementsDictionary["$GameVersions$"] = selectedGameVersions.Length > 1 ? string.Join(";", selectedGameVersions) : "";
 
             return true;
-        }
-
-        private static async Task CleanUpProjectAsync(string projectPath)
-        {
-            await TaskScheduler.Default;
-
-            var document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace);
-            document.Descendants()
-                .Where(element => !element.HasAttributes && !element.HasElements && string.IsNullOrEmpty(element.Value))
-                .SelectMany(IncludeWhitespace)
-                .Remove();
-            document.Save(projectPath);
-        }
-
-        private static IEnumerable<XNode> IncludeWhitespace(XElement element)
-        {
-            yield return element;
-            if (element.PreviousNode is XText textNode && string.IsNullOrWhiteSpace(textNode.Value))
-                yield return textNode;
         }
     }
 }

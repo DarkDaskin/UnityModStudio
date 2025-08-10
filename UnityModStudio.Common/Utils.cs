@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Buffers;
+using System.IO;
+using System.Numerics;
 using System.Text;
 
 namespace UnityModStudio.Common
@@ -35,6 +37,59 @@ namespace UnityModStudio.Common
                 if (!char.IsLetterOrDigit(sb[i]))
                     sb[i] = '_';
             return sb.ToString();
+        }
+
+        // Inspired by https://dev.to/emrahsungu/how-to-compare-two-files-using-net-really-really-fast-2pd9
+        public static bool AreStreamsEqual(Stream streamA, Stream streamB)
+        {
+            if (streamA.Length != streamB.Length)
+                return false;
+
+            const int bufferLength = 4096 * 32;
+            var bufferA = ArrayPool<byte>.Shared.Rent(bufferLength);
+            var bufferB = ArrayPool<byte>.Shared.Rent(bufferLength);
+            try
+            {
+                while (true)
+                {
+                    var bytesReadA = ReadIntoBuffer(streamA, bufferA);
+                    var bytesReadB = ReadIntoBuffer(streamB, bufferB);
+
+                    if (bytesReadA != bytesReadB)
+                        return false;
+
+                    if (bytesReadA == 0)
+                        return true;
+
+                    var totalProcessed = 0;
+                    while (totalProcessed < bufferA.Length)
+                    {
+                        if (!Vector.EqualsAll(new Vector<byte>(bufferA, totalProcessed), new Vector<byte>(bufferB, totalProcessed)))
+                            return false;
+
+                        totalProcessed += Vector<byte>.Count;
+                    }
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bufferA);
+                ArrayPool<byte>.Shared.Return(bufferB);
+            }
+
+            static int ReadIntoBuffer(Stream stream, byte[] buffer)
+            {
+                var totalBytesRead = 0;
+                while (totalBytesRead < buffer.Length)
+                {
+                    var bytesRead = stream.Read(buffer, totalBytesRead, buffer.Length - totalBytesRead);
+                    if (bytesRead == 0)
+                        return totalBytesRead;
+
+                    totalBytesRead += bytesRead;
+                }
+                return totalBytesRead;
+            }
         }
     }
 }

@@ -403,6 +403,8 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsTrue(closedInvocations.SequenceEqual([true]));
         Mock.Get(vm.GameManager).VerifyAll();
         Mock.Get(vm.GameManager).VerifyNoOtherCalls();
+        foreach (var gameVersionViewModel in vm.GameVersions)
+            Assert.IsNotNull(gameVersionViewModel.Game.TargetFrameworkMoniker);
     }
 
     [TestMethod]

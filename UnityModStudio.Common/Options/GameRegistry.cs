@@ -19,6 +19,7 @@ public interface IGameRegistry
 
     void AddGame(Game game);
     void RemoveGame(Game game);
+    void EnsureAllGameProperties(Game game);
     Game? FindGameById(Guid id);
     Game? FindGameByDisplayName(string name);
     GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties, bool strictMatch);
@@ -78,6 +79,22 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
     public void AddGame(Game game) => _games.Add(game.Id, game);
 
     public void RemoveGame(Game game) => _games.Remove(game.Id);
+
+    public void EnsureAllGameProperties(Game game)
+    {
+        if (game is { GameName: not null, GameExecutableFileName: not null, Architecture: not null, UnityVersion: not null, TargetFrameworkMoniker: not null, MonoProfile: not null })
+            return;
+
+        if (!GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _))
+            return;
+
+        game.GameName = gameInformation!.Name;
+        game.GameExecutableFileName = gameInformation.GameExecutableFile.Name;
+        game.Architecture = gameInformation.Architecture.ToString();
+        game.UnityVersion = gameInformation.UnityVersion;
+        game.TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
+        game.MonoProfile = gameInformation.GetMonoProfileString();
+    }
 
     public Game? FindGameById(Guid id) => _games.TryGetValue(id, out var game) ? game : null;
 

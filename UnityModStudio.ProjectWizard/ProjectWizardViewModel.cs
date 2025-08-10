@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
@@ -142,14 +143,19 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
 
     private void FillVersions()
     {
+        if (GameManager == null)
+            return;
+
         if (Game == _previousGame)
             return;
 
         GameVersions = Games
             .Where(game => game.GameName == GameName && game.Version is not null)
-            .Select(game => new GameVersionViewModel(game.Version!, game == Game))
+            .Select(game => new GameVersionViewModel(game, game == Game))
             .OrderBy(vm => vm.Version, new GameVersionComparer())
             .ToList();
+        foreach (var vm in GameVersions)
+            GameManager.GameRegistry.EnsureAllGameProperties(vm.Game);
         NotifyPropertyChanged(nameof(GameVersions));
         NotifyPropertyChanged(nameof(IsMultiVersionPanelVisible));
 
@@ -167,9 +173,10 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
     }
 
 
-    public class GameVersionViewModel(string version, bool isDefault)
+    public class GameVersionViewModel(Game game, bool isDefault)
     {
-        public string Version { get; } = version;
+        public Game Game { get; } = game;
+        public string Version { get; } = game.Version ?? throw new ArgumentException("Game version must be specified.", nameof(game));
         public bool IsEnabled { get; } = !isDefault;
         public bool IsSelected { get; set; } = isDefault;
     }

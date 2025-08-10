@@ -86,6 +86,7 @@ public sealed class GameRegistryTests
         Assert.AreEqual("Game1.exe", game1.GameExecutableFileName);
         Assert.AreEqual("X64", game1.Architecture);
         Assert.AreEqual("2022.3.22f1", game1.UnityVersion);
+        Assert.IsNull(game1.TargetFrameworkMoniker);
         Assert.AreEqual(".NET Standard 2.1", game1.MonoProfile);
 
         var game2 = gameRegistry.Games.ElementAt(1);
@@ -102,6 +103,7 @@ public sealed class GameRegistryTests
         Assert.AreEqual("Game2.exe", game2.GameExecutableFileName);
         Assert.AreEqual("X64", game2.Architecture);
         Assert.AreEqual("2018.4.36f1", game2.UnityVersion);
+        Assert.IsNull(game2.TargetFrameworkMoniker);
         Assert.AreEqual(".NET 4.6", game2.MonoProfile);
 
         var game3 = gameRegistry.Games.ElementAt(2);
@@ -118,6 +120,7 @@ public sealed class GameRegistryTests
         Assert.AreEqual("Game2.exe", game3.GameExecutableFileName);
         Assert.AreEqual("X64", game3.Architecture);
         Assert.AreEqual("2018.4.36f1", game3.UnityVersion);
+        Assert.AreEqual("net46", game3.TargetFrameworkMoniker);
         Assert.AreEqual(".NET 4.6", game3.MonoProfile);
 
         Assert.IsFalse(gameRegistry.WatchForChanges);
@@ -137,6 +140,28 @@ public sealed class GameRegistryTests
         await gameRegistry.SaveAsync();
 
         VerifyGameResistryEquals("GameRegistry_SingleGameSaved.json");
+    }
+
+    [TestMethod]
+    public void WhenEnsureAllGamePropertiesInvoked_ResolveAllProperties()
+    {
+        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        var game = new Game
+        {
+            DisplayName = "Game 1",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+            GameName = "Unity2018Test",
+        };
+        gameRegistry.AddGame(game);
+        
+        gameRegistry.EnsureAllGameProperties(game);
+
+        Assert.AreEqual("Unity2018Test", game.GameName);
+        Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
+        Assert.AreEqual("X64", game.Architecture);
+        Assert.AreEqual("2018.4.36f1", game.UnityVersion);
+        Assert.AreEqual("net46", game.TargetFrameworkMoniker);
+        Assert.AreEqual(".NET 4.6", game.MonoProfile);
     }
 
     [TestMethod]

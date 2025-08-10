@@ -23,6 +23,7 @@ namespace UnityModStudio.Common.Options
         public string? GameExecutableFileName { get; set; }
         public string? Architecture { get; set; }
         public string? UnityVersion { get; set; }
+        public string? TargetFrameworkMoniker { get; set; }
         public string? MonoProfile { get; set; }
     }
 }
