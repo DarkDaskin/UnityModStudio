@@ -25,6 +25,11 @@
     <_AllGameVersions Include="$(GameVersions)" KeepDuplicates="false" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_AllGameVersionsForAllTargetFrameworks Include="$([MSBuild]::Unescape('$(_AllGameVersionsForAllTargetFrameworksEscaped)'))" Condition="'$(IsInnerBuild)' == 'true'" />
+    <_AllGameVersionsForAllTargetFrameworks Include="@(_AllGameVersions)" Condition="'$(IsInnerBuild)' != 'true'" />
+  </ItemGroup>
+
   <PropertyGroup>
     <_EffectiveGameVersionType>None</_EffectiveGameVersionType>
     <_EffectiveGameVersionType Condition="'$(GameVersion)' != '' and ('$(_SpecifiedGameVersionType)' != 'Multiple' or '$(IsSpecificGameVersionBuild)' == 'true')">Single</_EffectiveGameVersionType>
@@ -122,6 +127,8 @@
     <TargetDir>$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
     <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
   </PropertyGroup>
+
+  <Target Name="_GetGameVersions" Returns="@(_AllGameVersions)" />
 
   <Target Name="_RemoveNetStandardReferences" BeforeTargets="BeforeBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <ItemGroup>
@@ -263,6 +270,15 @@
     <SanitizeGameVersion Version="$(GameVersion)">
       <Output TaskParameter="SanitizedVersion" PropertyName="SanitizedGameVersion" />
     </SanitizeGameVersion>
+  </Target>
+
+  <Target Name="AddGameVersionDefineConstants" AfterTargets="AddImplicitDefineConstants" Condition="'$(_EffectiveGameVersionType)' == 'Single'">
+    <GetGameVersionDefineConstants Versions="@(_AllGameVersionsForAllTargetFrameworks)" CurrentVersion="$(GameVersion)">
+      <Output TaskParameter="DefineConstants" PropertyName="_GameVersionDefineConstants" />
+    </GetGameVersionDefineConstants>
+    <PropertyGroup>
+      <DefineConstants>$(DefineConstants);$(_GameVersionDefineConstants)</DefineConstants>
+    </PropertyGroup>
   </Target>
 
   <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" Condition="'$(UseGameRegistry)' == 'true' and '$(_EffectiveGameVersionType)' != 'Multiple'" 
@@ -466,14 +482,14 @@
     <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
   </Target>
 
-  <Target Name="_PreparePathsFromSpecificGameVersionBuilds">
+  <Target Name="_CollectPathsFromSpecificGameVersionBuilds">
     <ItemGroup>
       <_AllTargetDirs Include="@(SpecificGameVersionOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
       <_AllModTargetPaths Include="@(SpecificGameVersionOutput->'%(ModTargetPath)')" KeepDuplicates="false" Condition="'%(SpecificGameVersionOutput.ModDeploymentMode)' == 'Copy'" />
     </ItemGroup>
   </Target>
 
-  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" DependsOnTargets="_PreparePathsFromSpecificGameVersionBuilds;_CopyOtherGameVersionsCompiledOutput"
+  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" DependsOnTargets="_CollectPathsFromSpecificGameVersionBuilds;_CopyOtherGameVersionsCompiledOutput"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(IsInnerBuild)' != 'true' and '$(GameVersion)' == ''" />
 
   <Target Name="CreateGameSpecificProperties" AfterTargets="BuildSpecificGameVersions" Condition="'$(IsInnerBuild)' != 'true'"

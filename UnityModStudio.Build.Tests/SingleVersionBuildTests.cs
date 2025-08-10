@@ -20,7 +20,9 @@ public class SingleVersionBuildTests : BuildTestsBase
         Assert.IsTrue(success);
         Assert.AreEqual(0, logger.BuildErrors.Count);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
-        Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"SingleVersion\SingleVersion.dll")));
+        var modAssemblyPath = Path.Combine(game.Path, @"SingleVersion\SingleVersion.dll");
+        Assert.IsTrue(File.Exists(modAssemblyPath));
+        VerifyModAssemblyConstants(modAssemblyPath, "IsGame10", "IsGame10OrGreater");
         Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "SingleVersion"), false));
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
         Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));

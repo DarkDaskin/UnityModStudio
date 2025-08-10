@@ -3,16 +3,44 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\build\UnityModStudio.Common.targets" />
 
-  <Import Project="$(_GameSpecificPropertiesProjectFilePath)" Condition="Exists('$(_GameSpecificPropertiesProjectFilePath)')" />
+  <PropertyGroup>
+    <_AllGameVersionsProjectFilePath>$(_FullBaseIntermediateOutputPath)$(MSBuildProjectName).AllGameVersions.targets</_AllGameVersionsProjectFilePath>
+  </PropertyGroup>
 
-  <Target Name="_PreparePathsFromInnerBuilds">
+  <Import Project="$(_GameSpecificPropertiesProjectFilePath)" Condition="Exists('$(_GameSpecificPropertiesProjectFilePath)')" />
+  <Import Project="$(_AllGameVersionsProjectFilePath)" Condition="Exists('$(_AllGameVersionsProjectFilePath)')" />
+
+  <Target Name="_CollectGameVersions" Inputs="$(MSBuildAllProjects)" Outputs="$(_AllGameVersionsProjectFilePath)">
+    <ItemGroup>
+      <_AllGameVersionsForAllTargetFrameworks Remove="@(_AllGameVersionsForAllTargetFrameworks)" />
+    </ItemGroup>
+    <MSBuild Projects="@(_InnerBuildProjects)" Targets="_GetGameVersions">
+      <Output TaskParameter="TargetOutputs" ItemName="_AllGameVersionsForAllTargetFrameworks" />
+    </MSBuild>
+    <ItemGroup>
+      <_AllGameVersionsForAllTargetFrameworks ItemName="_AllGameVersionsForAllTargetFrameworks" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_AllGameVersionsProjectFilePath)" Items="@(_AllGameVersionsForAllTargetFrameworks)" ItemNames="_AllGameVersionsForAllTargetFrameworks" />
+  </Target>
+
+  <Target Name="_AddAllGameVersionsForAllTargetFrameworks" BeforeTargets="DispatchToInnerBuilds" DependsOnTargets="_CollectGameVersions">
+    <PropertyGroup>
+      <_AllGameVersionsForAllTargetFrameworks>@(_AllGameVersionsForAllTargetFrameworks)</_AllGameVersionsForAllTargetFrameworks>
+      <_AllGameVersionsForAllTargetFrameworksEscaped>$([MSBuild]::Escape('$(_AllGameVersionsForAllTargetFrameworks)'))</_AllGameVersionsForAllTargetFrameworksEscaped>
+    </PropertyGroup>
+    <ItemGroup>
+      <_InnerBuildProjects AdditionalProperties="%(AdditionalProperties);_AllGameVersionsForAllTargetFrameworksEscaped=$(_AllGameVersionsForAllTargetFrameworksEscaped)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_CollectPathsFromInnerBuilds">
     <ItemGroup>
       <_AllTargetDirs Include="@(InnerOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
       <_AllModTargetPaths Include="@(InnerOutput->'%(ModTargetPath)')" KeepDuplicates="false" Condition="'%(InnerOutput.ModDeploymentMode)' == 'Copy'" />
     </ItemGroup>
   </Target>
 
-  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="Build" DependsOnTargets="_PreparePathsFromInnerBuilds;_CopyOtherGameVersionsCompiledOutput" />
+  <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="Build" DependsOnTargets="_CollectPathsFromInnerBuilds;_CopyOtherGameVersionsCompiledOutput" />
 
   <Target Name="CreateGameSpecificProperties" AfterTargets="Build" Inputs="$(GameRegistryPath);$(MSBuildAllProjects)" Outputs="$(_GameSpecificPropertiesProjectFilePath)">
     <ItemGroup>

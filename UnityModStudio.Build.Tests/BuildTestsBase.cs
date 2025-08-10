@@ -137,4 +137,17 @@ public abstract class BuildTestsBase
         var gameAssemblyReference = modAssembly.MainModule.AssemblyReferences.Single(reference => reference.Name == "Assembly-CSharp");
         Assert.AreEqual(gameVersion, gameAssemblyReference.Version.ToString(2));
     }
+
+    protected static void VerifyModAssemblyConstants(string modAssemblyPath, params string[] constants)
+    {
+        using var modAssembly = AssemblyDefinition.ReadAssembly(modAssemblyPath);
+        var constantsType = modAssembly.MainModule.GetType("Constants");
+        Assert.IsNotNull(constantsType, "Constants type not found in mod assembly.");
+        Assert.AreEqual(constants.Length, constantsType.Fields.Count, "Wrong number of constants.");
+        foreach (var constant in constants)
+        {
+            var field = constantsType.Fields.FirstOrDefault(f => f.Name == constant);
+            Assert.IsNotNull(field, $"Constant '{constant}' not found in Constants type.");
+        }
+    }
 }

@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <UsingTask TaskName="SanitizeGameVersion" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="GetGameVersionDefineConstants" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="ResolveGameProperties" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="ResolveGameAssemblyReferences" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="UpdateProjectFile" AssemblyFile="$(UnityModStudioTasksAssembly)" />

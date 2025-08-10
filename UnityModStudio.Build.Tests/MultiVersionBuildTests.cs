@@ -27,6 +27,10 @@ public class MultiVersionBuildTests : BuildTestsBase
             var modAssemblyPath = Path.Combine(game.Path, @"MultiVersion\MultiVersion.dll");
             Assert.IsTrue(File.Exists(modAssemblyPath));
             VerifyModAssemblyGameVersion(modAssemblyPath, game.Version!);
+            if (game == game10)
+                VerifyModAssemblyConstants(modAssemblyPath, "IsGame10", "IsGame10OrGreater");
+            if (game == game11)
+                VerifyModAssemblyConstants(modAssemblyPath, "IsGame11", "IsGame10OrGreater", "IsGame11OrGreater");
             Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "MultiVersion"), false));
             Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
             Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
