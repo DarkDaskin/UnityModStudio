@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace UnityModStudio.Common
 {
@@ -23,5 +24,17 @@ namespace UnityModStudio.Common
         /// <returns>Path ending with trailing slash.</returns>
         public static string AppendTrailingSlash(string path) =>
             path.EndsWith(DirectorySeparator) ? path : path + DirectorySeparator;
+
+        public static string? SanitizeGameVersion(string? version)
+        {
+            if (version is null)
+                return null;
+
+            var sb = new StringBuilder(version);
+            for (var i = 0; i < sb.Length; i++)
+                if (!char.IsLetterOrDigit(sb[i]))
+                    sb[i] = '_';
+            return sb.ToString();
+        }
     }
 }

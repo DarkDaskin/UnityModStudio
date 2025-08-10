@@ -46,6 +46,8 @@
 
   <Import Project="$(_OutputPathsCheckResultProjectFilePath)" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple' and Exists('$(_OutputPathsCheckResultProjectFilePath)')" />
 
+  <Import Project="$(_GameSpecificPropertiesProjectFilePath)" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple' and '$(IsInnerBuild)' != 'true' and Exists('$(_GameSpecificPropertiesProjectFilePath)')" />
+
   <PropertyGroup>
     <IntermediateOutputPath Condition="'$(HasIntermediateOutputPathClash)' == 'true'">$(IntermediateOutputPath)$(GameVersion)\</IntermediateOutputPath>
     <OutDir Condition="'$(HasOutDirClash)' == 'true'">$(OutDir)$(GameVersion)\</OutDir>
@@ -81,6 +83,7 @@
     </BuildDependsOn>
     <CoreBuildDependsOn>
       _ErrorOnInconsistentGameVersion;
+      _ErrorOnSanitizedGameVersionClash;
       BuildSpecificGameVersions
     </CoreBuildDependsOn>
     <RebuildDependsOn>
@@ -180,6 +183,15 @@
     <Error Code="UMS0001" Text="Specified DefaultGameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingDefault->Count()) > @(_AllGameVersions->Count())" />
   </Target>
 
+  <Target Name="_ErrorOnSanitizedGameVersionClash" Condition="'$(GameVersions)' != ''">
+    <ItemGroup>
+    </ItemGroup>
+    <SanitizeGameVersion Version="%(_AllGameVersions.Identity)">
+      <Output TaskParameter="SanitizedVersion" ItemName="_SanitizedGameVersions" />
+    </SanitizeGameVersion>
+    <Error Text="Sanitized GameVersions values are not unique." Condition="@(_AllGameVersions->Count()) > @(_SanitizedGameVersions->Distinct()->Count())" />
+  </Target>
+
   <Target Name="ResolveDefaultGameVersion" Condition="'$(_UserSpecifiedDefaultGameVersion)' == ''" Inputs="$(MSBuildAllProjects)" Outputs="$(_DefaultGameVersionProjectFilePath)">
     <PropertyGroup>
       <DefaultGameVersion>%(_AllGameVersions.Identity)</DefaultGameVersion>
@@ -245,6 +257,12 @@
   
   <Target Name="CleanSpecificGameVersions">
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Clean" Properties="GameVersion=%(_AllGameVersions.Identity);IsSpecificGameVersionBuild=true" />
+  </Target>
+
+  <Target Name="_SanitizeGameVersion" BeforeTargets="PrepareForBuild" Condition="'$(_EffectiveGameVersionType)' == 'Single'">
+    <SanitizeGameVersion Version="$(GameVersion)">
+      <Output TaskParameter="SanitizedVersion" PropertyName="SanitizedGameVersion" />
+    </SanitizeGameVersion>
   </Target>
 
   <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" Condition="'$(UseGameRegistry)' == 'true' and '$(_EffectiveGameVersionType)' != 'Multiple'" 
@@ -321,7 +339,7 @@
 
     <UpdateProjectFile ProjectFile="$(_ResolvedReferencesProjectFilePath)" Properties="@(_ResolvedReferenceProperty)" Items="@(_GameReferenceToSave)" ItemNames="Reference">
       <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
-      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_HasWrittenResolvedReferencesProjectFile" />
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_ReEvaluationRequired" />
     </UpdateProjectFile>
   </Target>
 
@@ -458,9 +476,23 @@
   <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="BuildSpecificGameVersions" DependsOnTargets="_PreparePathsFromSpecificGameVersionBuilds;_CopyOtherGameVersionsCompiledOutput"
           Condition="'$(DesignTimeBuild)' != 'true' and '$(IsInnerBuild)' != 'true' and '$(GameVersion)' == ''" />
 
+  <Target Name="CreateGameSpecificProperties" AfterTargets="BuildSpecificGameVersions" Condition="'$(IsInnerBuild)' != 'true'"
+          Inputs="$(GameRegistryPath);$(MSBuildAllProjects)" Outputs="$(_GameSpecificPropertiesProjectFilePath)">
+    <ItemGroup>
+      <_GameSpecificProperty Include="@(SpecificGameVersionOutput->'GamePath_%(SanitizedGameVersion)')" Value="%(SpecificGameVersionOutput.GamePath)" />
+      <_GameSpecificProperty Include="@(SpecificGameVersionOutput->'GameExecutableFileName_%(SanitizedGameVersion)')" Value="%(SpecificGameVersionOutput.GameExecutableFileName)" />
+      <_GameSpecificProperty Include="@(SpecificGameVersionOutput->'DoorstopMode_%(SanitizedGameVersion)')" Value="%(SpecificGameVersionOutput.DoorstopMode)" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_GameSpecificPropertiesProjectFilePath)" Properties="@(_GameSpecificProperty)">
+      <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_ReEvaluationRequired" />
+    </UpdateProjectFile>
+  </Target>
+
   <Target Name="_AddGameSpecificMetadata" AfterTargets="AfterBuild" DependsOnTargets="PrepareModPaths">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker GameVersion="$(GameVersion)" ModDeploymentMode="$(ModDeploymentMode)" ModSourcePath="$(ModSourcePath)" ModTargetPath="$(ModTargetPath)" />
+      <TargetPathWithTargetPlatformMoniker GameVersion="$(GameVersion)" SanitizedGameVersion="$(SanitizedGameVersion)" GamePath="$(GamePath)" GameExecutableFileName="$(GameExecutableFileName)"
+                                           DoorstopMode="$(DoorstopMode)" ModDeploymentMode="$(ModDeploymentMode)" ModSourcePath="$(ModSourcePath)" ModTargetPath="$(ModTargetPath)" />
     </ItemGroup>
   </Target>
 

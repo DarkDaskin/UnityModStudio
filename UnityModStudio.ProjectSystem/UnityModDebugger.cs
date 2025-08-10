@@ -17,24 +17,21 @@ namespace UnityModStudio.ProjectSystem;
 
 [Export(typeof(IDebugProfileLaunchTargetsProvider)), Order(2000)]
 [AppliesTo(ProjectCapability.UnityModStudio)]
-public class UnityModDebugger : DebugLaunchProviderBase, IDebugProfileLaunchTargetsProvider
+[method: ImportingConstructor]
+public class UnityModDebugger(ConfiguredProject configuredProject)
+    : DebugLaunchProviderBase(configuredProject), IDebugProfileLaunchTargetsProvider
 {
     private const string UnityDebugEngineName = "Unity";
     private static readonly Guid UnityDebugEngineGuid = new("f18a0491-a310-4822-b12f-12cc30404eec");
     private static readonly Guid UnityPackageGuid = new("b6546c9c-e5fe-4095-8d39-c080d9bd6a85");
 
     private IPEndPoint? _endPoint;
-    
-    [ImportingConstructor]
-    public UnityModDebugger(ConfiguredProject configuredProject) : base(configuredProject)
-    {
-    }
 
     public override async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions)
     {
         var noDebug = (launchOptions & DebugLaunchOptions.NoDebug) != 0;
         if (noDebug)
-            return Array.Empty<IDebugLaunchSettings>();
+            return [];
 
         await LoadUnityToolsAsync();
 
@@ -48,7 +45,7 @@ public class UnityModDebugger : DebugLaunchProviderBase, IDebugProfileLaunchTarg
             LaunchDebugEngineGuid = UnityDebugEngineGuid,
             Options = $"{_endPoint}|{debugHostType?.AssemblyQualifiedName}",
         };
-        return new[] { launchSettings };
+        return [launchSettings];
     }
 
     private static int GetAvailablePort()
@@ -77,40 +74,54 @@ public class UnityModDebugger : DebugLaunchProviderBase, IDebugProfileLaunchTarg
         shell.LoadPackage(ref vstuGuid, out _);
     }
 
-    public override Task<bool> CanLaunchAsync(DebugLaunchOptions launchOptions) => IsEnabledAsync();
+    public override Task<bool> CanLaunchAsync(DebugLaunchOptions launchOptions) => IsEnabledAsync(null);
 
     // TODO: only support proper profile
-    public bool SupportsProfile(ILaunchProfile profile) => 
-        ThreadingService.ExecuteSynchronously(IsEnabledAsync);
-
-    private async Task<bool> IsEnabledAsync()
+    public bool SupportsProfile(ILaunchProfile profile)
     {
-        var configuration = await GetGameConfigurationAsync();
-        return configuration.DoorstopMode != DoorstopMode.Disabled;
+        if (profile.CommandName != "Executable")
+            return false;
+
+        return ThreadingService.ExecuteSynchronously(() => IsEnabledAsync(profile));
     }
 
-    private async Task<GameConfiguration> GetGameConfigurationAsync()
+    private async Task<bool> IsEnabledAsync(ILaunchProfile? profile)
+    {
+        var configuration = await GetGameConfigurationAsync(profile);
+        return !string.IsNullOrEmpty(configuration.GameExecutablePath);
+    }
+
+    private async Task<GameConfiguration> GetGameConfigurationAsync(ILaunchProfile? profile)
     {
         var properties = ConfiguredProject.Services.ProjectPropertiesProvider!.GetCommonProperties();
-        return await GameConfiguration.GetAsync(properties);
+        var gameVersion = profile?.OtherSettings["gameVersion"] as string;
+        return await GameConfiguration.GetAsync(properties, gameVersion);
     }
 
     public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
     {
+        var configuration = await GetGameConfigurationAsync(profile);
+        if (configuration.DoorstopMode == DoorstopMode.Disabled)
+            return [];
+
         return await QueryDebugTargetsAsync(launchOptions);
     }
 
     public async Task OnBeforeLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
     {
-        var configuration = await GetGameConfigurationAsync();
+        var configuration = await GetGameConfigurationAsync(profile);
         var exePath = configuration.GameExecutablePath;
 
         if (exePath == null)
             throw new InvalidOperationException("Unable to determine game executable path.");
 
-        var psi = new ProcessStartInfo(exePath) { UseShellExecute = false };
+        var psi = new ProcessStartInfo(exePath)
+        {
+            UseShellExecute = false,
+            WorkingDirectory = configuration.GamePath ?? throw new InvalidOperationException("Unable to determine game path."),
+        };
 
-        var noDebug = (launchOptions & DebugLaunchOptions.NoDebug) != 0;
+        var noDebug = (launchOptions & DebugLaunchOptions.NoDebug) != 0 || configuration.DoorstopMode == DoorstopMode.Disabled;
         if (!noDebug)
             psi.Arguments = $"--doorstop-mono-debug-enabled true --doorstop-mono-debug-suspend true --doorstop-mono-debug-address {_endPoint}";
 

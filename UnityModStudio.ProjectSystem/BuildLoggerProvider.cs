@@ -53,8 +53,6 @@ public class BuildLoggerProvider(ConfiguredProject configuredProject) : IBuildLo
 
     private class DetectingLogger(BuildLoggerProvider parent) : ILogger
     {
-        private string? _currentTarget;
-        private string? _currentTask;
         private bool _shouldTriggerEvaluation;
 
         public void Initialize(IEventSource eventSource) => eventSource.AnyEventRaised += OnAnyEventRaised;
@@ -68,19 +66,11 @@ public class BuildLoggerProvider(ConfiguredProject configuredProject) : IBuildLo
         {
             switch (args)
             {
-                case TargetStartedEventArgs args2:
-                    _currentTarget = args2.TargetName;
-                    break;
-
-                case TaskStartedEventArgs args2:
-                    _currentTask = args2.TaskName;
-                    break;
-
                 case TaskParameterEventArgs {
                     Kind: TaskParameterMessageKind.TaskOutput, 
-                    ItemType: "_HasWrittenResolvedReferencesProjectFile",
+                    ItemType: "_ReEvaluationRequired",
                     Items: [ITaskItem taskItem]
-                } when _currentTarget == "ResolveGameAssemblyReferences" && _currentTask == "UpdateProjectFile" && bool.TryParse(taskItem.ItemSpec, out var v) && v:
+                } when bool.TryParse(taskItem.ItemSpec, out var v) && v:
                     _shouldTriggerEvaluation = true;
                     break;
 

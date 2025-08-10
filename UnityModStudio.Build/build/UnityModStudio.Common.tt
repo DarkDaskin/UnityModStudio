@@ -11,6 +11,9 @@
   <PropertyGroup>
     <UnityModStudioTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.Build.dll</UnityModStudioTasksAssembly>
     <GameRegistryPath Condition="'$(GameRegistryPath)' == ''">$(LOCALAPPDATA)\UnityModStudio\GameRegistry.json</GameRegistryPath>
+    <_FullBaseIntermediateOutputPath>$(BaseIntermediateOutputPath)</_FullBaseIntermediateOutputPath>
+    <_FullBaseIntermediateOutputPath Condition="!$([System.IO.Path]::IsPathRooted('$(_FullBaseIntermediateOutputPath)'))">$(MSBuildProjectDirectory)\$(_FullBaseIntermediateOutputPath)</_FullBaseIntermediateOutputPath>
+    <_GameSpecificPropertiesProjectFilePath>$(_FullBaseIntermediateOutputPath)$(MSBuildProjectName).GameSpecificProperties.targets</_GameSpecificPropertiesProjectFilePath>
   </PropertyGroup>
 
   <PropertyGroup>

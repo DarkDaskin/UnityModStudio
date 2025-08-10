@@ -3,6 +3,8 @@
 
   <Import Project="$(MSBuildThisFileDirectory)..\build\UnityModStudio.Common.targets" />
 
+  <Import Project="$(_GameSpecificPropertiesProjectFilePath)" Condition="Exists('$(_GameSpecificPropertiesProjectFilePath)')" />
+
   <Target Name="_PreparePathsFromInnerBuilds">
     <ItemGroup>
       <_AllTargetDirs Include="@(InnerOutput->'%(RootDir)%(Directory)')" KeepDuplicates="false" />
@@ -11,5 +13,17 @@
   </Target>
 
   <Target Name="CopyOtherGameVersionsCompiledOutput" AfterTargets="Build" DependsOnTargets="_PreparePathsFromInnerBuilds;_CopyOtherGameVersionsCompiledOutput" />
+
+  <Target Name="CreateGameSpecificProperties" AfterTargets="Build" Inputs="$(GameRegistryPath);$(MSBuildAllProjects)" Outputs="$(_GameSpecificPropertiesProjectFilePath)">
+    <ItemGroup>
+      <_GameSpecificProperty Include="@(InnerOutput->'GamePath_%(SanitizedGameVersion)')" Value="%(InnerOutput.GamePath)" />
+      <_GameSpecificProperty Include="@(InnerOutput->'GameExecutableFileName_%(SanitizedGameVersion)')" Value="%(InnerOutput.GameExecutableFileName)" />
+      <_GameSpecificProperty Include="@(InnerOutput->'DoorstopMode_%(SanitizedGameVersion)')" Value="%(InnerOutput.DoorstopMode)" />
+    </ItemGroup>
+    <UpdateProjectFile ProjectFile="$(_GameSpecificPropertiesProjectFilePath)" Properties="@(_GameSpecificProperty)">
+      <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_ReEvaluationRequired" />
+    </UpdateProjectFile>
+  </Target>
 
 </Project>

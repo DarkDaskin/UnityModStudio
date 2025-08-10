@@ -25,6 +25,7 @@
         ..gameProperties
     ];
     string[] tasks = [
+        "SanitizeGameVersion",
         "ResolveGameProperties",
         "ResolveGameAssemblyReferences",
         "UpdateProjectFile",
