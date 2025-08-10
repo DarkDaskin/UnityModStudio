@@ -31,11 +31,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Projects\AmbientGame\MultipleGameVersions\Assemblies\" />
+    <Folder Include="Projects\AmbientGame\WithGameVersion\Assemblies\" />
+    <Folder Include="Projects\AmbientGame\WithGameName\Assemblies\" />
+    <Folder Include="Projects\AmbientGame\WrongGameName\Assemblies\" />
+    <Folder Include="Projects\AmbientGame\NoGameProperties\Assemblies\" />
     <Folder Include="Projects\Correct\MultiVersionMultiTargetWithModSourcePath\1.0\Assemblies\" />
     <Folder Include="Projects\Correct\MultiVersionMultiTargetWithModSourcePath\1.1\Assemblies\" />
     <Folder Include="Projects\Correct\MultiVersionWithModSourcePath\1.1\Assemblies\" />
     <Folder Include="Projects\Correct\MultiVersionWithModSourcePath\1.0\Assemblies\" />
-    <Folder Include="Projects\Correct\SingleVersionWithModSourcePath\1.0\" />
     <Folder Include="Projects\Correct\SingleVersionWithModSourcePath\1.0\Assemblies\" />
     <Folder Include="Projects\Correct\NonVersionedWithModSourcePath\Assemblies\" />
   </ItemGroup>

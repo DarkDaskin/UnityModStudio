@@ -286,7 +286,7 @@
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
-    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" GameRegistryPath="$(GameRegistryPath)">
+    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" ProjectDirectory="$(MSBuildProjectDirectory)" GameRegistryPath="$(GameRegistryPath)">
       <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
       <Output TaskParameter="GameModsPath" PropertyName="_ResolvedGameModsPath" />
       <Output TaskParameter="GameExecutableFileName" PropertyName="_ResolvedGameExecutableFileName" />
@@ -295,7 +295,11 @@
       <Output TaskParameter="DeploySourceCode" PropertyName="_ResolvedDeploySourceCode" />
       <Output TaskParameter="DoorstopMode" PropertyName="_ResolvedDoorstopMode" />
       <Output TaskParameter="UseAlternateDoorstopDllName" PropertyName="_ResolvedUseAlternateDoorstopDllName" />
+      <Output TaskParameter="IsAmbientGame" PropertyName="_IsAmbientGame" />
     </ResolveGameProperties>
+
+    <Error Text="Building multi-version mod for an ambient game is not supported." Condition="'$(_IsAmbientGame)' == 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'" />
+
     <ItemGroup>
       <_ResolvedProperty Include="_ResolvedGamePath" Value="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''" />
       <_ResolvedProperty Include="_ResolvedGameModsPath" Value="$(_ResolvedGameModsPath)" Condition="'$(_ResolvedGameModsPath)' != ''" />

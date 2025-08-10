@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 
@@ -12,13 +13,17 @@ namespace UnityModStudio.Build.Tasks
         [Required]
         public ITaskItem[] LookupProperties { get; set; } = [];
 
+        public string? ProjectDirectory { get; set; }
+
         public bool BuildingInsideVisualStudio { get; set; }
 
-        [Output]
-        public ITaskItem? GamePath { get; private set; }
+        public bool IsAmbientGameLookupAllowed { get; set; } = true;
 
         [Output]
-        public ITaskItem? GameModsPath { get; private set; }
+        public string? GamePath { get; private set; }
+
+        [Output]
+        public string? GameModsPath { get; private set; }
 
         [Output]
         public string? GameExecutableFileName { get; private set; }
@@ -38,6 +43,9 @@ namespace UnityModStudio.Build.Tasks
         [Output]
         public bool UseAlternateDoorstopDllName { get; private set; }
 
+        [Output]
+        public bool IsAmbientGame { get; private set; }
+
         public override bool Execute()
         {
             if (!base.Execute())
@@ -46,6 +54,9 @@ namespace UnityModStudio.Build.Tasks
             var properties = LookupProperties.ToDictionary(item => item.ItemSpec, item => item.GetMetadata("Value"));
             if (properties.Count == 0)
             {
+                if (ResolveAmbientGame(properties))
+                    return true;
+
                 Log.LogError("No game properties are defined.");
                 return false;
             }
@@ -55,8 +66,8 @@ namespace UnityModStudio.Build.Tasks
             switch (GameRegistry.FindGameByProperties(properties, false))
             {
                 case GameMatchResult.Match match:
-                    GamePath = new TaskItem(Utils.AppendTrailingSlash(match.Game.Path));
-                    GameModsPath = match.Game.ModsPath != null ? new TaskItem(Utils.AppendTrailingSlash(match.Game.ModsPath)) : null;
+                    GamePath = Utils.AppendTrailingSlash(match.Game.Path);
+                    GameModsPath = match.Game.ModsPath != null ? Utils.AppendTrailingSlash(match.Game.ModsPath) : null;
                     GameExecutableFileName = match.Game.GameExecutableFileName;
                     GameInstanceId = match.Game.Id.ToString();
                     ModDeploymentMode = match.Game.ModDeploymentMode.ToString();
@@ -66,6 +77,9 @@ namespace UnityModStudio.Build.Tasks
                     return true;
 
                 case GameMatchResult.NoMatch:
+                    if (ResolveAmbientGame(properties))
+                        return true;
+
                     LogGameRegistryError(NoMatchMessage);
                     return false;
 
@@ -84,6 +98,33 @@ namespace UnityModStudio.Build.Tasks
                 message += "\nGo to Unity Mod Studio options to update the game registry.";
 
             Log.LogError(message);
+        }
+
+        private bool ResolveAmbientGame(Dictionary<string, string> properties)
+        {
+            if (!IsAmbientGameLookupAllowed || !Directory.Exists(ProjectDirectory))
+                return false;
+
+            var directory = new DirectoryInfo(ProjectDirectory!).Parent;
+            while (directory != null)
+            {
+                if (GameInformationResolver.TryGetGameInformation(directory.FullName, out var gameInformation, out _))
+                {
+                    IsAmbientGame = true;
+                    GamePath = Utils.AppendTrailingSlash(directory.FullName);
+                    GameExecutableFileName = gameInformation.GameExecutableFile.Name;
+
+                    if (properties.TryGetValue(nameof(Game.GameName), out var gameName) && 
+                        !string.Equals(gameInformation.Name, gameName, StringComparison.CurrentCultureIgnoreCase)) 
+                        Log.LogWarning($"Ambient game name is '{gameInformation.Name}', but '{gameName}' is defined by the project.");
+
+                    return true;
+                }
+
+                directory = directory.Parent;
+            }
+
+            return false;
         }
     }
 }

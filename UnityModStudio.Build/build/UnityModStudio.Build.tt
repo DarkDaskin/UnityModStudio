@@ -282,11 +282,15 @@
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
-    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" GameRegistryPath="$(GameRegistryPath)">
+    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" ProjectDirectory="$(MSBuildProjectDirectory)" GameRegistryPath="$(GameRegistryPath)">
 <# foreach (var property in gameProperties) { #>
       <Output TaskParameter="<#= property #>" PropertyName="_Resolved<#= property #>" />
 <# } #>
+      <Output TaskParameter="IsAmbientGame" PropertyName="_IsAmbientGame" />
     </ResolveGameProperties>
+
+    <Error Text="Building multi-version mod for an ambient game is not supported." Condition="'$(_IsAmbientGame)' == 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'" />
+
     <ItemGroup>
 <# foreach (var property in gameProperties) { #>
       <_ResolvedProperty Include="_Resolved<#= property #>" Value="$(_Resolved<#= property #>)" Condition="'$(_Resolved<#= property #>)' != ''" />
