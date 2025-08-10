@@ -254,7 +254,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual("net35", gameInformation.TargetFrameworkMoniker);
                 Assert.IsFalse(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(6, gameInformation.FrameworkAssemblyFiles.Count);
-                Assert.AreEqual(71, gameInformation.GameAssemblyFiles.Count);
+                Assert.AreEqual(70, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "2018-net20-subset":
                 Assert.AreEqual("Unity2018Test", gameInformation.Name);
@@ -263,7 +263,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual("net35", gameInformation.TargetFrameworkMoniker);
                 Assert.IsTrue(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(3, gameInformation.FrameworkAssemblyFiles.Count);
-                Assert.AreEqual(70, gameInformation.GameAssemblyFiles.Count);
+                Assert.AreEqual(69, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "2018-net4-v1.0":
                 Assert.AreEqual("Unity2018Test", gameInformation.Name);
