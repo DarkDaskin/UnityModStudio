@@ -26,6 +26,13 @@
   <UsingTask TaskName="<#= task #>" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 <# } #>
 
+  <Target Name="_ErrorOnSanitizedGameVersionClash" AfterTargets="_CollectGameVersions" Condition="('$(GameVersions)' != '' and '$(IsInnerBuild)' != 'true') or '$(IsCrossTargetingBuild)' == 'true'">
+    <SanitizeGameVersion Version="%(_AllGameVersionsForAllTargetFrameworks.Identity)">
+      <Output TaskParameter="SanitizedVersion" ItemName="_SanitizedGameVersions" />
+    </SanitizeGameVersion>
+    <Error Text="Sanitized game versions are not unique." Condition="@(_AllGameVersionsForAllTargetFrameworks->Count()) > @(_SanitizedGameVersions->Distinct()->Count())" />
+  </Target>
+
   <Target Name="_CopyOtherGameVersionsCompiledOutput">
     <ItemGroup>
       <_AllModTargetPathsXAllTargetDirs Include="@(_AllModTargetPaths)" OtherTargetDir="%(_AllTargetDirs.Identity)" OtherGameVersion="%(_AllTargetDirs.GameVersion)" />

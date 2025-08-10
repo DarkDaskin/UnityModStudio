@@ -242,4 +242,56 @@ public class FailedBuildTests : BuildTestsBase
         Assert.AreEqual("Specified DefaultGameVersion must be one of specified GameVersions.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
+
+    [TestMethod]
+    public void WhenGameVersionsAreNotUnique_ProduceError()
+    {
+        SetupGameRegistry(new Game
+        {
+            DisplayName = "Unity2018Test [1.0]",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+            GameName = "Unity2018Test",
+            Version = "1.0",
+        });
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\DuplicateGameVersions\DuplicateGameVersions.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsFalse(success);
+        Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("Sanitized game versions are not unique.", logger.BuildErrors[0].Message);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+    }
+
+    [TestMethod]
+    public void WhenGameVersionsAreNotUniqueAcrossTargetFrameworks_ProduceError()
+    {
+        SetupGameRegistry(new Game
+        {
+            DisplayName = "Unity2018Test [1.0]",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+            GameName = "Unity2018Test",
+            Version = "1.0",
+        }, new Game
+        {
+            DisplayName = "Unity2018Test [1.1]",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
+            GameName = "Unity2018Test",
+            Version = "1.1",
+        }, new Game
+        {
+            DisplayName = "Unity2018Test [2.2]",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
+            GameName = "Unity2018Test",
+            Version = "2.0",
+        });
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\DuplicateGameVersionsMultiTarget\DuplicateGameVersionsMultiTarget.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsFalse(success);
+        Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("Sanitized game versions are not unique.", logger.BuildErrors[0].Message);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+    }
 }

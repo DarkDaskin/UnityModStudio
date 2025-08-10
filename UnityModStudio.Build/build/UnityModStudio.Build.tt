@@ -190,15 +190,6 @@
     <Error Code="UMS0001" Text="Specified DefaultGameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingDefault->Count()) > @(_AllGameVersions->Count())" />
   </Target>
 
-  <Target Name="_ErrorOnSanitizedGameVersionClash" Condition="'$(GameVersions)' != ''">
-    <ItemGroup>
-    </ItemGroup>
-    <SanitizeGameVersion Version="%(_AllGameVersions.Identity)">
-      <Output TaskParameter="SanitizedVersion" ItemName="_SanitizedGameVersions" />
-    </SanitizeGameVersion>
-    <Error Text="Sanitized GameVersions values are not unique." Condition="@(_AllGameVersions->Count()) > @(_SanitizedGameVersions->Distinct()->Count())" />
-  </Target>
-
   <Target Name="ResolveDefaultGameVersion" Condition="'$(_UserSpecifiedDefaultGameVersion)' == ''" Inputs="$(MSBuildAllProjects)" Outputs="$(_DefaultGameVersionProjectFilePath)">
     <PropertyGroup>
       <DefaultGameVersion>%(_AllGameVersions.Identity)</DefaultGameVersion>
