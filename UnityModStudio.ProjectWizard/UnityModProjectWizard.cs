@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -34,6 +35,15 @@ namespace UnityModStudio.ProjectWizard
             var projectPath = project.FullName;
             ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateXmlFileAsync(projectPath, 
                 document => FileGenerator.UpdateProject(document, _selectedGames)));
+
+            var launchSettingsPath = Path.Combine(Path.GetDirectoryName(projectPath)!, @"Properties\launchSettings.json");
+            if (File.Exists(launchSettingsPath))
+            {
+                Debug.Assert(_game != null, nameof(_game) + " != null");
+                var gameVersions = _selectedGames.ToDictionary(game => game.DisplayName, game => game.Version!);
+                ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateJsonFileAsync(launchSettingsPath,
+                    root => FileGenerator.UpdateLaunchSettings(root, _game!.DisplayName, gameVersions)));
+            }
         }
 
         void IWizard.RunFinished() { }
@@ -47,19 +57,7 @@ namespace UnityModStudio.ProjectWizard
 
         void IWizard.BeforeOpeningFile(ProjectItem projectItem) { }
 
-        public void ProjectItemFinishedGenerating(ProjectItem projectItem)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-
-            if (projectItem.Name == "launchSettings.json")
-            {
-                var path = projectItem.Document.Path;
-                Debug.Assert(_game != null, nameof(_game) + " != null");
-                var gameVersions = _selectedGames.ToDictionary(game => game.DisplayName, game => game.Version!);
-                ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateJsonFileAsync(path,
-                    root => FileGenerator.UpdateLaunchSettings(root, _game!.DisplayName, gameVersions)));
-            }
-        }
+        void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem) { }
 
         private bool TryInvokeWizard(WizardRunKind runKind, Dictionary<string, string?> replacementsDictionary)
         {
