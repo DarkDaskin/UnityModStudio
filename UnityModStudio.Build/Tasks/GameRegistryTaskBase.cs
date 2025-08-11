@@ -17,11 +17,15 @@ public abstract class GameRegistryTaskBase : StoreTaskBase<IGameRegistry>
                        string.Join("\n  ", properties.Select(kv => $"'{kv.Key}' = '{kv.Value}'")));
     }
 
-    protected const string NoMatchMessage = "No game registry entries match speified game properties.";
-    
+    protected const string NoMatchCode = "UMS0002";
+
+    protected const string NoMatchMessage = "No game registry entries match specified game properties.";
+
+    protected const string AmbiguousMatchCode = "UMS0003";
+
     protected static string GetAmbiguousMatchMessage(GameMatchResult.AmbiguousMatch match)
     {
-        return "Multiple game registry entries match speified game properties:\n  " +
+        return "Multiple game registry entries match specified game properties:\n  " +
                string.Join("\n  ", match.Games.Select(game => $"'{game.DisplayName}'"));
     }
 

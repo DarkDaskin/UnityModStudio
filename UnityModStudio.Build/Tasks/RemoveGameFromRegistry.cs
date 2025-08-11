@@ -41,11 +41,11 @@ public class RemoveGameFromRegistry : GameRegistryTaskBase
                 return true;
 
             case GameMatchResult.NoMatch:
-                Log.LogError(NoMatchMessage);
+                Log.LogErrorWithCode(NoMatchCode, NoMatchMessage);
                 return false;
 
             case GameMatchResult.AmbiguousMatch match:
-                Log.LogError(GetAmbiguousMatchMessage(match));
+                Log.LogErrorWithCode(AmbiguousMatchCode, GetAmbiguousMatchMessage(match));
                 return false;
 
             default:

@@ -190,8 +190,8 @@
       <_AllGameVersionsIncludingDefault Include="@(_AllGameVersions)" />
       <_AllGameVersionsIncludingDefault Include="$(DefaultGameVersion)" KeepDuplicates="false" Condition="'$(DefaultGameVersion)' != ''" />
     </ItemGroup>
-    <Error Code="UMS0001" Text="Specified GameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingCurrent->Count()) > @(_AllGameVersions->Count())" />
-    <Error Code="UMS0001" Text="Specified DefaultGameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingDefault->Count()) > @(_AllGameVersions->Count())" />
+    <Error Code="UMS0004" Text="Specified GameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingCurrent->Count()) > @(_AllGameVersions->Count())" />
+    <Error Code="UMS0005" Text="Specified DefaultGameVersion must be one of specified GameVersions." Condition="@(_AllGameVersionsIncludingDefault->Count()) > @(_AllGameVersions->Count())" />
   </Target>
 
   <Target Name="ResolveDefaultGameVersion" Condition="'$(_UserSpecifiedDefaultGameVersion)' == ''" Inputs="$(MSBuildAllProjects)" Outputs="$(_DefaultGameVersionProjectFilePath)">
@@ -437,7 +437,7 @@
       <ModSourceCodeFile Include="$(ModSourcePath)**\*" Exclude="@(_IgnoredFile);$(TargetDir)**" />
     </ItemGroup>
 
-    <Warning Code="UMS0004" Text="No source code files found." Condition="'@(ModSourceCodeFile)' == ''" />
+    <Warning Code="UMS0009" Text="No source code files found." Condition="'@(ModSourceCodeFile)' == ''" />
   </Target>
 
   <!-- Not so fun fact: formerly named CopyModToGame, that name broke MSBuild somehow -->
@@ -494,7 +494,7 @@
       <DoorstopContentFile Include="$(MSBuildThisFileDirectory)..\content\**" />
     </ItemGroup>
 
-    <Error Code="UMS0003" Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFile)' == ''" />
+    <Error Code="UMS0010" Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFile)' == ''" />
 
     <PropertyGroup>
       <_PrimaryDoorstopDllPath>$(GamePath)winhttp.dll</_PrimaryDoorstopDllPath>

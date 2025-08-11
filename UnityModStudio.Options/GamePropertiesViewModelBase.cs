@@ -165,7 +165,7 @@ namespace UnityModStudio.Options
                 return false;
             }
 
-            if (!GameInformationResolver.TryGetGameInformation(GamePath, out var gameInformation, out var error))
+            if (!GameInformationResolver.TryGetGameInformation(GamePath, out var gameInformation, out var error, out _))
             {
                 AddError(error, nameof(GamePath));
                 return false;

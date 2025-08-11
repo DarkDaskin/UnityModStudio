@@ -17,18 +17,19 @@ public sealed class GameInformationResolverTests
             _scratchDir.Delete(true);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(null)]
     [DataRow("")]
     [DataRow("(*&#^:<$*&#$(")]
     [DataRow(@"C:\NonExistentPath")]
     public void WhenGamePathIsWrong_ReturnError(string? gamePath)
     {
-        var success = GameInformationResolver.TryGetGameInformation(gamePath, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(gamePath, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("Game directory does not exist.", error);
+        Assert.AreEqual("UMS1001", errorCode);
     }
 
     [TestMethod]
@@ -36,11 +37,12 @@ public sealed class GameInformationResolverTests
     {
         CreateScratchDir();
         
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("Unable to determine game data directory.", error);
+        Assert.AreEqual("UMS1002", errorCode);
     }
 
     [TestMethod]
@@ -49,11 +51,12 @@ public sealed class GameInformationResolverTests
         CreateScratchDir();
         File.Copy(Path.Combine(SampleGameInfo.DownloadPath, @"567-net20\567-net20.exe"), Path.Combine(_scratchDir.FullName, "567-net20.exe"));
 
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("Unable to determine game data directory.", error);
+        Assert.AreEqual("UMS1002", errorCode);
     }
 
     [TestMethod]
@@ -63,11 +66,12 @@ public sealed class GameInformationResolverTests
         TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName);
         TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "2017-net46"), _scratchDir.FullName);
 
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("Ambiguous game data directory.", error);
+        Assert.AreEqual("UMS1003", errorCode);
     }
 
     [TestMethod]
@@ -76,11 +80,12 @@ public sealed class GameInformationResolverTests
         CreateScratchDir();
         TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(path) != "Managed");
 
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("Game managed assembly directory does not exist.", error);
+        Assert.AreEqual("UMS1004", errorCode);
     }
 
     [TestMethod]
@@ -89,11 +94,12 @@ public sealed class GameInformationResolverTests
         CreateScratchDir();
         TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(Path.GetDirectoryName(path)) != "Managed");
 
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("'mscorlib.dll' is missing.", error);
+        Assert.AreEqual("UMS1005", errorCode);
     }
 
     [TestMethod]
@@ -103,11 +109,12 @@ public sealed class GameInformationResolverTests
         TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetFileName(Path.GetDirectoryName(path)) != "Managed");
         File.Copy(Path.Combine(SampleGameInfo.DownloadPath, @"567-net20\567-net20.exe"), Path.Combine(_scratchDir.FullName, @"567-net20_Data\Managed\mscorlib.dll"));
 
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out var errorCode);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
         Assert.AreEqual("Specified assembly set does not correspond to any known target framework.", error);
+        Assert.AreEqual("UMS1006", errorCode);
     }
 
     [TestMethod]
@@ -117,7 +124,7 @@ public sealed class GameInformationResolverTests
         TestUtils.CopyDirectory(Path.Combine(SampleGameInfo.DownloadPath, "567-net20"), _scratchDir.FullName, path => Path.GetExtension(path) != ".exe");
         File.WriteAllText(Path.Combine(_scratchDir.FullName, "567-net20.exe"), "");
 
-        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(_scratchDir.FullName, out var gameInformation, out var error, out _);
 
         Assert.IsFalse(success);
         Assert.IsNull(gameInformation);
@@ -125,7 +132,7 @@ public sealed class GameInformationResolverTests
     }
 
     // Game types listed here must also be listed as SampleGameType item in GameTest.targets.
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("357-net20")]
     [DataRow("357-net20-subset")]
     [DataRow("472-net20")]
@@ -143,10 +150,11 @@ public sealed class GameInformationResolverTests
     [DataRow("2022-netstandard21")]
     public void WhenGameIsValid_ReturnGameInformation(string gameType)
     {
-        var success = GameInformationResolver.TryGetGameInformation(Path.Combine(SampleGameInfo.DownloadPath, gameType), out var gameInformation, out var error);
+        var success = GameInformationResolver.TryGetGameInformation(Path.Combine(SampleGameInfo.DownloadPath, gameType), out var gameInformation, out var error, out var errorCode);
 
         Assert.IsTrue(success);
         Assert.IsNull(error);
+        Assert.IsNull(errorCode);
         Assert.IsNotNull(gameInformation);
         if (gameType[0] is not ('3' or '4'))
             Assert.AreEqual("DefaultCompany", gameInformation.Company);

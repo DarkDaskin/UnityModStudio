@@ -38,7 +38,7 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
         if (game is { GameName: not null, GameExecutableFileName: not null, Architecture: not null, UnityVersion: not null, TargetFrameworkMoniker: not null, MonoProfile: not null })
             return;
 
-        if (!GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _))
+        if (!GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _, out _))
             return;
 
         game.GameName = gameInformation!.Name;

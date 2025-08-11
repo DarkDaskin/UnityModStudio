@@ -32,9 +32,9 @@ public class ResolveGameAssemblyReferences : Task
 
     public override bool Execute()
     {
-        if (!GameInformationResolver.TryGetGameInformation(GamePath, out var gameInformation, out var error))
+        if (!GameInformationResolver.TryGetGameInformation(GamePath, out var gameInformation, out var error, out var errorCode))
         {
-            Log.LogError(error);
+            Log.LogErrorWithCode(errorCode, error);
             return false;
         }
 

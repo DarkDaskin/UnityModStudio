@@ -23,7 +23,7 @@ public abstract class StoreTaskBase<TStore> : Task where TStore : IStore
         }
         catch (Exception exception)
         {
-            Log.LogError($"Unable to initialize {StoreName}: {exception.Message}");
+            Log.LogErrorWithCode("UMS0008", $"Unable to initialize {StoreName}: {exception.Message}");
             return false;
         }
     }

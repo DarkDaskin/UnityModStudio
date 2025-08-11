@@ -130,7 +130,7 @@ public abstract class BuildTestsBase
 
     protected static void ResolveGameProperties(Game game)
     {
-        var success = GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _);
+        var success = GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _, out _);
         Assert.IsTrue(success);
         Assert.IsNotNull(gameInformation);
 

@@ -55,7 +55,7 @@ public class UpdateGameRegistry : GameRegistryTaskBase
                 if (!string.IsNullOrWhiteSpace(Path) && match.Game.Path != Path)
                 {
                     match.Game.Path = Path!;
-                    if (GameInformationResolver.TryGetGameInformation(Path, out var gameInformation, out _))
+                    if (GameInformationResolver.TryGetGameInformation(Path, out var gameInformation, out _, out _))
                     {
                         match.Game.GameName = gameInformation.Name;
                         match.Game.GameExecutableFileName = gameInformation.GameExecutableFile.Name;
@@ -82,11 +82,11 @@ public class UpdateGameRegistry : GameRegistryTaskBase
                 return true;
 
             case GameMatchResult.NoMatch:
-                Log.LogError(NoMatchMessage);
+                Log.LogErrorWithCode(NoMatchCode, NoMatchMessage);
                 return false;
 
             case GameMatchResult.AmbiguousMatch match:
-                Log.LogError(GetAmbiguousMatchMessage(match));
+                Log.LogErrorWithCode(AmbiguousMatchCode, GetAmbiguousMatchMessage(match));
                 return false;
 
             default:

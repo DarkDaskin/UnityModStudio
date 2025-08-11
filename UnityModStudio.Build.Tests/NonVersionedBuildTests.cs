@@ -148,7 +148,7 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
         Assert.IsTrue(success);
         Assert.AreEqual(0, logger.BuildErrors.Count);
         Assert.AreEqual(1, logger.BuildWarnings.Count);
-        Assert.AreEqual("UMS0004", logger.BuildWarnings[0].Code);
+        Assert.AreEqual("UMS0009", logger.BuildWarnings[0].Code);
         Assert.AreEqual("No source code files found.", logger.BuildWarnings[0].Message);
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"NonVersioned\NonVersioned.dll")));
         Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "NonVersioned"), false));

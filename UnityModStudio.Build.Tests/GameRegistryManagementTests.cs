@@ -14,7 +14,7 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("UMS0005", logger.BuildErrors[0].Code);
+        Assert.AreEqual("UMS0007", logger.BuildErrors[0].Code);
         Assert.AreEqual("GamePath property is not set.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -33,6 +33,7 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0008", logger.BuildErrors[0].Code);
         // Exception message may be localized, check only prefix.
         Assert.IsTrue(logger.BuildErrors[0].Message?.StartsWith("Unable to initialize game registry:"));
         Assert.AreEqual(0, logger.BuildWarnings.Count);
@@ -197,6 +198,7 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0008", logger.BuildErrors[0].Code);
         Assert.IsTrue(logger.BuildErrors[0].Message?.StartsWith("Unable to initialize game registry:"));
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -210,7 +212,8 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -223,7 +226,8 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -489,6 +493,7 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0008", logger.BuildErrors[0].Code);
         // Exception message may be localized, check only prefix.
         Assert.IsTrue(logger.BuildErrors[0].Message?.StartsWith("Unable to initialize game registry:"));
         Assert.AreEqual(0, logger.BuildWarnings.Count);
@@ -503,7 +508,8 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -516,7 +522,8 @@ public class GameRegistryManagementTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 

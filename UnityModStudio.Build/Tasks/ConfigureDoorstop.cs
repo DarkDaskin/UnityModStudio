@@ -21,7 +21,7 @@ public class ConfigureDoorstop : Task
         var configPath = ConfigPath!.GetMetadata("FullPath");
         if (!File.Exists(configPath))
         {
-            Log.LogError("Unity Doorstop config file does not exist.");
+            Log.LogErrorWithCode("UMS0012", "Unity Doorstop config file does not exist.");
             return false;
         }
 
@@ -35,7 +35,7 @@ public class ConfigureDoorstop : Task
             var targetAssemblyPath = TargetAssemblyPath?.GetMetadata("FullPath");
             if (!File.Exists(targetAssemblyPath))
             {
-                Log.LogError("Target assembly file does not exist.");
+                Log.LogErrorWithCode("UMS0013", "Target assembly file does not exist.");
                 return false;
             }
             values.Add(("target_assembly", GetRelativePath(targetAssemblyPath!, configPath)));

@@ -57,7 +57,7 @@ namespace UnityModStudio.Build.Tasks
                 if (ResolveAmbientGame(properties))
                     return true;
 
-                Log.LogError("No game properties are defined.");
+                Log.LogErrorWithCode("UMS0001", "No game properties are defined.");
                 return false;
             }
 
@@ -80,11 +80,11 @@ namespace UnityModStudio.Build.Tasks
                     if (ResolveAmbientGame(properties))
                         return true;
 
-                    LogGameRegistryError(NoMatchMessage);
+                    LogGameRegistryError(NoMatchCode, NoMatchMessage);
                     return false;
 
                 case GameMatchResult.AmbiguousMatch match:
-                    LogGameRegistryError(GetAmbiguousMatchMessage(match));
+                    LogGameRegistryError(AmbiguousMatchCode, GetAmbiguousMatchMessage(match));
                     return false;
 
                 default:
@@ -92,12 +92,12 @@ namespace UnityModStudio.Build.Tasks
             }
         }
 
-        private void LogGameRegistryError(string message)
+        private void LogGameRegistryError(string code, string message)
         {
             if (BuildingInsideVisualStudio)
                 message += "\nGo to Unity Mod Studio options to update the game registry.";
 
-            Log.LogError(message);
+            Log.LogErrorWithCode(code, message);
         }
 
         private bool ResolveAmbientGame(Dictionary<string, string> properties)
@@ -108,7 +108,7 @@ namespace UnityModStudio.Build.Tasks
             var directory = new DirectoryInfo(ProjectDirectory!).Parent;
             while (directory != null)
             {
-                if (GameInformationResolver.TryGetGameInformation(directory.FullName, out var gameInformation, out _))
+                if (GameInformationResolver.TryGetGameInformation(directory.FullName, out var gameInformation, out _, out _))
                 {
                     IsAmbientGame = true;
                     GamePath = Utils.AppendTrailingSlash(directory.FullName);
@@ -116,7 +116,7 @@ namespace UnityModStudio.Build.Tasks
 
                     if (properties.TryGetValue(nameof(Game.GameName), out var gameName) && 
                         !string.Equals(gameInformation.Name, gameName, StringComparison.CurrentCultureIgnoreCase)) 
-                        Log.LogWarning($"Ambient game name is '{gameInformation.Name}', but '{gameName}' is defined by the project.");
+                        Log.LogWarningWithCode("UMS0011", $"Ambient game name is '{gameInformation.Name}', but '{gameName}' is defined by the project.");
 
                     return true;
                 }

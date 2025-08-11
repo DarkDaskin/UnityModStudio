@@ -14,6 +14,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0001", logger.BuildErrors[0].Code);
         Assert.AreEqual("No game properties are defined.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -27,7 +28,8 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -46,7 +48,8 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -66,7 +69,8 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("No game registry entries match speified game properties.", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0002", logger.BuildErrors[0].Code);
+        Assert.AreEqual("No game registry entries match specified game properties.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -91,7 +95,8 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("Multiple game registry entries match speified game properties:\n  'Unity2018Test'\n  'Unity2018Test (2)'", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0003", logger.BuildErrors[0].Code);
+        Assert.AreEqual("Multiple game registry entries match specified game properties:\n  'Unity2018Test'\n  'Unity2018Test (2)'", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -118,7 +123,8 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("Multiple game registry entries match speified game properties:\n  'Unity2018Test'\n  'Unity2018Test (2)'", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0003", logger.BuildErrors[0].Code);
+        Assert.AreEqual("Multiple game registry entries match specified game properties:\n  'Unity2018Test'\n  'Unity2018Test (2)'", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -145,7 +151,8 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("Multiple game registry entries match speified game properties:\n  'Unity2018Test [1.0]'\n  'Unity2018Test [1.1]'", logger.BuildErrors[0].Message);
+        Assert.AreEqual("UMS0003", logger.BuildErrors[0].Code);
+        Assert.AreEqual("Multiple game registry entries match specified game properties:\n  'Unity2018Test [1.0]'\n  'Unity2018Test [1.1]'", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
 
@@ -164,6 +171,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS1001", logger.BuildErrors[0].Code);
         Assert.AreEqual("Game directory does not exist.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -183,6 +191,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS1002", logger.BuildErrors[0].Code);
         Assert.AreEqual("Unable to determine game data directory.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -210,7 +219,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("UMS0001", logger.BuildErrors[0].Code);
+        Assert.AreEqual("UMS0004", logger.BuildErrors[0].Code);
         Assert.AreEqual("Specified GameVersion must be one of specified GameVersions.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -238,7 +247,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
-        Assert.AreEqual("UMS0001", logger.BuildErrors[0].Code);
+        Assert.AreEqual("UMS0005", logger.BuildErrors[0].Code);
         Assert.AreEqual("Specified DefaultGameVersion must be one of specified GameVersions.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -259,6 +268,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0006", logger.BuildErrors[0].Code);
         Assert.AreEqual("Sanitized game versions are not unique.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }
@@ -291,6 +301,7 @@ public class FailedBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.AreEqual(1, logger.BuildErrors.Count);
+        Assert.AreEqual("UMS0006", logger.BuildErrors[0].Code);
         Assert.AreEqual("Sanitized game versions are not unique.", logger.BuildErrors[0].Message);
         Assert.AreEqual(0, logger.BuildWarnings.Count);
     }

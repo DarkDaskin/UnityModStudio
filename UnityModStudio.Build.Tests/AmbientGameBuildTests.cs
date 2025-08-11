@@ -44,6 +44,7 @@ public class AmbientGameBuildTests : BuildTestsBase
         Assert.IsTrue(success);
         Assert.IsEmpty(logger.BuildErrors);
         Assert.HasCount(1, logger.BuildWarnings);
+        Assert.AreEqual("UMS0011", logger.BuildWarnings[0].Code);
         Assert.AreEqual("Ambient game name is 'Unity2018Test', but 'WrongGame' is defined by the project.", logger.BuildWarnings[0].Message);
         Assert.IsTrue(File.Exists(Path.Combine(modPath, @"Assemblies\WrongGameName.dll")));
         Assert.IsTrue(File.Exists(Path.Combine(gamePath, "winhttp.dll")));

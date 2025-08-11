@@ -82,7 +82,7 @@ public abstract class AddGamesViewModelBase : ObservableObject
 
         foreach (var gameEntry in FindGames().OrderBy(g => g.Name))
         {
-            if (!GameInformationResolver.TryGetGameInformation(gameEntry.Path, out var gameInformation, out _))
+            if (!GameInformationResolver.TryGetGameInformation(gameEntry.Path, out var gameInformation, out _, out _))
                 continue;
 
             if (GameManager!.GameRegistry.Games.Any(g => string.Equals(g.Path, gameEntry.Path, StringComparison.OrdinalIgnoreCase)))

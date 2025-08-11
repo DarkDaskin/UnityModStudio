@@ -30,9 +30,9 @@ public class AddGameToRegistry : GameRegistryTaskBase
         if (!base.Execute())
             return false;
 
-        if (!GameInformationResolver.TryGetGameInformation(Path, out var gameInformation, out var error))
+        if (!GameInformationResolver.TryGetGameInformation(Path, out var gameInformation, out var error, out var errorCode))
         {
-            Log.LogError(error);
+            Log.LogErrorWithCode(errorCode, error);
             return false;
         }
 

@@ -13,7 +13,8 @@ namespace UnityModStudio.Common
         public static bool TryGetGameInformation(
             [NotNullWhen(true)] string? gamePath,
             [NotNullWhen(true)] out GameInformation? gameInformation,
-            [NotNullWhen(false)] out string? error)
+            [NotNullWhen(false)] out string? error,
+            out string? errorCode)
         {
             gameInformation = null;
 
@@ -22,13 +23,14 @@ namespace UnityModStudio.Common
                 if (!Directory.Exists(gamePath))
                 {
                     error = "Game directory does not exist.";
+                    errorCode = "UMS1001";
                     return false;
                 }
 
-                if (!TryGetGameDataDirectory(new DirectoryInfo(gamePath!), out var gameExecutableFile, out var gameDataDirectory, out error))
+                if (!TryGetGameDataDirectory(new DirectoryInfo(gamePath!), out var gameExecutableFile, out var gameDataDirectory, out error, out errorCode))
                     return false;
 
-                if (!TryGetGameManagedDirectory(gameDataDirectory, out var gameManagedDirectory, out error))
+                if (!TryGetGameManagedDirectory(gameDataDirectory, out var gameManagedDirectory, out error, out errorCode))
                     return false;
             
                 var assemblyFiles = GetAssemblies(gameManagedDirectory);
@@ -57,15 +59,16 @@ namespace UnityModStudio.Common
             catch (Exception exception)
             {
                 error = exception.Message;
+                errorCode = exception.GetErrorCode();
                 return false;
             }
         }
 
-        private static bool TryGetGameDataDirectory(
-            DirectoryInfo gameDirectory,
+        private static bool TryGetGameDataDirectory(DirectoryInfo gameDirectory,
             [NotNullWhen(true)] out FileInfo? gameExecutableFile,
             [NotNullWhen(true)] out DirectoryInfo? gameDataDirectory,
-            [NotNullWhen(false)] out string? error)
+            [NotNullWhen(false)] out string? error, 
+            [NotNullWhen(false)] out string? errorCode)
         {
             var query =
                 from exeFile in gameDirectory.EnumerateFiles("*.exe")
@@ -79,10 +82,12 @@ namespace UnityModStudio.Common
                 gameExecutableFile = candidates[0].exeFile;
                 gameDataDirectory = candidates[0].dataDirectory;
                 error = null;
+                errorCode = null;
                 return true;
             }
 
             error = candidates.Count == 0 ? "Unable to determine game data directory." : "Ambiguous game data directory.";
+            errorCode = candidates.Count == 0 ? "UMS1002" : "UMS1003";
             gameExecutableFile = null;
             gameDataDirectory = null;
             return false;
@@ -91,16 +96,19 @@ namespace UnityModStudio.Common
         private static bool TryGetGameManagedDirectory(
             DirectoryInfo gameDataDirectory,
             [NotNullWhen(true)] out DirectoryInfo? gameManagedDirectory,
-            [NotNullWhen(false)] out string? error)
+            [NotNullWhen(false)] out string? error, 
+            [NotNullWhen(false)] out string? errorCode)
         {
             gameManagedDirectory = gameDataDirectory.EnumerateDirectories("Managed").SingleOrDefault();
             if (gameManagedDirectory != null)
             {
                 error = null;
+                errorCode = null;
                 return true;
             }
 
             error = "Game managed assembly directory does not exist.";
+            errorCode = "UMS1004";
             return false;
         }
 
@@ -110,7 +118,7 @@ namespace UnityModStudio.Common
         {
             var mscorlibFile = GetAssemblyFile(assemblyFiles, "mscorlib.dll");
             if (mscorlibFile == null)
-                throw new NotSupportedException("'mscorlib.dll' is missing.");
+                throw new NotSupportedException("'mscorlib.dll' is missing.").WithErrorCode("UMS1005");
             var mscorlibVersion = Version.Parse(FileVersionInfo.GetVersionInfo(mscorlibFile.FullName).FileVersion);
             var systemCoreFile = GetAssemblyFile(assemblyFiles, "System.Core.dll");
             var systemXmlFile = GetAssemblyFile(assemblyFiles, "System.Xml.dll");
@@ -144,7 +152,7 @@ namespace UnityModStudio.Common
                 // Unity 3.x .NET 2.0 profile
                 2 => ("net20", false),
                 // Probably some future version of Unity.
-                _ => throw new NotSupportedException("Specified assembly set does not correspond to any known target framework.")
+                _ => throw new NotSupportedException("Specified assembly set does not correspond to any known target framework.").WithErrorCode("UMS1006")
             };
         }
 
@@ -180,7 +188,7 @@ namespace UnityModStudio.Common
             reader.BaseStream.Position = peHeaderOffset;
             var actualPeSignature = reader.ReadUInt32();
             if (actualPeSignature != peSignature)
-                throw new BadImageFormatException("Invalid PE header.");
+                throw new BadImageFormatException("Invalid PE header.").WithErrorCode("UMS1007");
 
             var machineType = reader.ReadUInt16();
             return machineType switch
@@ -190,7 +198,7 @@ namespace UnityModStudio.Common
                 IMAGE_FILE_MACHINE_ARM => Architecture.Arm,
                 IMAGE_FILE_MACHINE_ARMNT => Architecture.Arm,
                 IMAGE_FILE_MACHINE_ARM64 => Architecture.Arm64,
-                _ => throw new BadImageFormatException("Unsupported PE architecture.")
+                _ => throw new BadImageFormatException("Unsupported PE architecture.").WithErrorCode("UMS1008")
             };
         }
 
