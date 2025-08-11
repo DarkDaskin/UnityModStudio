@@ -269,7 +269,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual("Unity2018Test", gameInformation.Name);
                 Assert.AreEqual(Architecture.X64, gameInformation.Architecture);
                 Assert.AreEqual("2018.4.36f1", gameInformation.UnityVersion);
-                Assert.AreEqual("net46", gameInformation.TargetFrameworkMoniker);
+                Assert.AreEqual("net472", gameInformation.TargetFrameworkMoniker);
                 Assert.IsFalse(gameInformation.IsSubsetProfile);
                 Assert.AreEqual(6, gameInformation.FrameworkAssemblyFiles.Count);
                 Assert.AreEqual(71, gameInformation.GameAssemblyFiles.Count);

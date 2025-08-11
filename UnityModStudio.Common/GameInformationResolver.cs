@@ -114,9 +114,11 @@ namespace UnityModStudio.Common
             var mscorlibVersion = Version.Parse(FileVersionInfo.GetVersionInfo(mscorlibFile.FullName).FileVersion);
             var systemCoreFile = GetAssemblyFile(assemblyFiles, "System.Core.dll");
             var systemXmlFile = GetAssemblyFile(assemblyFiles, "System.Xml.dll");
+            var unityEngineCoreFile = GetAssemblyFile(assemblyFiles, "UnityEngine.CoreModule.dll");
             var netstandardFile = GetAssemblyFile(assemblyFiles, "netstandard.dll");
             var hasSystemCore = systemCoreFile != null;
             var hasSystemXml = systemXmlFile != null;
+            var hasUnityEngineCore = unityEngineCoreFile != null;
             var netStandardVersion = netstandardFile is null
                 ? null
                 : Version.Parse(FileVersionInfo.GetVersionInfo(netstandardFile.FullName).FileVersion);
@@ -127,6 +129,8 @@ namespace UnityModStudio.Common
                 4 when netStandardVersion is { Major: 2, Minor: 1 } => ("netstandard2.1", false),
                 // Unity 2018.x+ .NET Standard 2.0 profile
                 4 when netStandardVersion is { Major: 2, Minor: 0 } => ("netstandard2.0", false),
+                // Unity 2018.x+ .NET 4.x profile
+                4 when hasUnityEngineCore => ("net472", false),
                 // Unity 2017.x+ .NET 4.6 profile
                 4 => ("net46", false),
                 // Unity 4.x .NET 2.0 Subset profile

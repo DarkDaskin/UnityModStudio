@@ -160,8 +160,8 @@ public sealed class GameRegistryTests
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual("net46", game.TargetFrameworkMoniker);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual("net472", game.TargetFrameworkMoniker);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
     }
 
     [TestMethod]

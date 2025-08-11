@@ -75,7 +75,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
     }
 
     [TestMethod]
@@ -108,7 +108,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
     }
 
     [TestMethod]
@@ -142,7 +142,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
     }
 
     [TestMethod]
@@ -181,7 +181,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
     }
 
     [TestMethod]
@@ -309,7 +309,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
     }
 
     [TestMethod]
@@ -356,7 +356,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game10.GameExecutableFileName);
         Assert.AreEqual("X64", game10.Architecture);
         Assert.AreEqual("2018.4.36f1", game10.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game10.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game10.MonoProfile);
         var game11 = gameRegistry.Games.First(g => g.Version == "1.1");
         Assert.AreEqual(existingGame11.Path, game11.Path);
         Assert.AreEqual(existingGame11.DisplayName, game11.DisplayName);
@@ -418,7 +418,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         Assert.AreEqual("Unity2018Test.exe", game10.GameExecutableFileName);
         Assert.AreEqual("X64", game10.Architecture);
         Assert.AreEqual("2018.4.36f1", game10.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game10.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game10.MonoProfile);
         var game11 = gameRegistry.Games.First(g => g.Version == "1.1");
         Assert.AreEqual(existingGame11.Path, game11.Path);
         Assert.AreEqual(existingGame11.DisplayName, game11.DisplayName);

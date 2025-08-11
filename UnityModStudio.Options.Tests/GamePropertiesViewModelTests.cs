@@ -31,8 +31,8 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         Assert.AreEqual("Unity2018Test", vm.GameName);
         Assert.AreEqual("X64", vm.Architecture);
         Assert.AreEqual("2018.4.36f1", vm.UnityVersion);
-        Assert.AreEqual(".NET 4.6", vm.MonoProfile);
-        Assert.AreEqual("net46", vm.TargetFrameworkMoniker);
+        Assert.AreEqual(".NET 4.7.2", vm.MonoProfile);
+        Assert.AreEqual("net472", vm.TargetFrameworkMoniker);
         Assert.AreEqual("Unity2018Test.exe", vm.GameExecutableFileName);
         Assert.IsNotNull(vm.GameIcon);
         Assert.IsTrue(vm.HasValidGamePath);
@@ -106,8 +106,8 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         Assert.AreEqual("Unity2018Test", vm.GameName);
         Assert.AreEqual("X64", vm.Architecture);
         Assert.AreEqual("2018.4.36f1", vm.UnityVersion);
-        Assert.AreEqual(".NET 4.6", vm.MonoProfile);
-        Assert.AreEqual("net46", vm.TargetFrameworkMoniker);
+        Assert.AreEqual(".NET 4.7.2", vm.MonoProfile);
+        Assert.AreEqual("net472", vm.TargetFrameworkMoniker);
         Assert.AreEqual("Unity2018Test.exe", vm.GameExecutableFileName);
         Assert.IsNotNull(vm.GameIcon);
         Assert.IsTrue(vm.HasValidGamePath);
@@ -274,7 +274,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
             GameExecutableFileName = "Unity2018Test.exe",
             Architecture = "X64",
             UnityVersion = "2018.4.36f1",
-            MonoProfile = ".NET 4.6",
+            MonoProfile = ".NET 4.7.2",
         };
         var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
         vm.Closed += success => closedInvocations.Add(success);
@@ -323,7 +323,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
             GameExecutableFileName = "Unity2018Test.exe",
             Architecture = "X64",
             UnityVersion = "2018.4.36f1",
-            MonoProfile = ".NET 4.6",
+            MonoProfile = ".NET 4.7.2",
         };
         var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
         vm.Closed += success => closedInvocations.Add(success);
@@ -350,7 +350,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);
-        Assert.AreEqual(".NET 4.6", game.MonoProfile);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
         Assert.IsTrue(closedInvocations.SequenceEqual([false]));
     }
 

@@ -124,8 +124,8 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.AreEqual("Unity2018Test", vm.GameName);
         Assert.AreEqual("X64", vm.Architecture);
         Assert.AreEqual("2018.4.36f1", vm.UnityVersion);
-        Assert.AreEqual(".NET 4.6", vm.MonoProfile);
-        Assert.AreEqual("net46", vm.TargetFrameworkMoniker);
+        Assert.AreEqual(".NET 4.7.2", vm.MonoProfile);
+        Assert.AreEqual("net472", vm.TargetFrameworkMoniker);
         Assert.AreEqual("Unity2018Test.exe", vm.GameExecutableFileName);
         Assert.IsNotNull(vm.GameIcon);
         Assert.IsTrue(vm.HasValidGamePath);
