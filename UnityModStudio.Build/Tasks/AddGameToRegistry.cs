@@ -60,8 +60,8 @@ public class AddGameToRegistry : GameRegistryTaskBase
         if (TryParseBoolean(UseAlternateDoorstopDllName, nameof(UseAlternateDoorstopDllName), out var useAlternateDoorstopDllName)) 
             game.UseAlternateDoorstopDllName = useAlternateDoorstopDllName;
 
-        GameRegistry.AddGame(game);
-        GameRegistry.Save();
+        Store.AddGame(game);
+        Store.Save();
 
         Log.LogMessage(MessageImportance.High, "Added a game with ID '{0}' and display name '{1}' to the game registry.", game.Id, game.DisplayName);
 
@@ -73,13 +73,13 @@ public class AddGameToRegistry : GameRegistryTaskBase
         var baseDisplayName = string.IsNullOrWhiteSpace(DisplayName) ? gameInformation.Name ?? "Game" : DisplayName!.Trim();
         if (string.IsNullOrWhiteSpace(DisplayName) && !string.IsNullOrWhiteSpace(Version))
             baseDisplayName = $"{baseDisplayName} [{Version}]";
-        if (GameRegistry!.FindGameByDisplayName(baseDisplayName) is null)
+        if (Store!.FindGameByDisplayName(baseDisplayName) is null)
             return baseDisplayName;
 
         for (var i = 1; i < int.MaxValue; i++)
         {
             var displayNameWithSuffix = $"{baseDisplayName} ({i})";
-            if (GameRegistry.FindGameByDisplayName(displayNameWithSuffix) is null)
+            if (Store.FindGameByDisplayName(displayNameWithSuffix) is null)
                 return displayNameWithSuffix;
         }
 

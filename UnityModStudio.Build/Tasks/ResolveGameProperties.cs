@@ -17,7 +17,7 @@ namespace UnityModStudio.Build.Tasks
 
         public bool BuildingInsideVisualStudio { get; set; }
 
-        public bool IsAmbientGameLookupAllowed { get; set; } = true;
+        public bool IsAmbientGameResolutionAllowed { get; set; } = true;
 
         [Output]
         public string? GamePath { get; private set; }
@@ -63,7 +63,7 @@ namespace UnityModStudio.Build.Tasks
 
             LogLookupProperties(properties);
             
-            switch (GameRegistry.FindGameByProperties(properties, false))
+            switch (Store.FindGameByProperties(properties, false))
             {
                 case GameMatchResult.Match match:
                     GamePath = Utils.AppendTrailingSlash(match.Game.Path);
@@ -102,7 +102,7 @@ namespace UnityModStudio.Build.Tasks
 
         private bool ResolveAmbientGame(Dictionary<string, string> properties)
         {
-            if (!IsAmbientGameLookupAllowed || !Directory.Exists(ProjectDirectory))
+            if (!IsAmbientGameResolutionAllowed || !Directory.Exists(ProjectDirectory))
                 return false;
 
             var directory = new DirectoryInfo(ProjectDirectory!).Parent;

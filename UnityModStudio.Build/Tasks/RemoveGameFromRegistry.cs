@@ -31,11 +31,11 @@ public class RemoveGameFromRegistry : GameRegistryTaskBase
 
         LogLookupProperties(properties);
 
-        switch (GameRegistry.FindGameByProperties(properties, true))
+        switch (Store.FindGameByProperties(properties, true))
         {
             case GameMatchResult.Match match:
-                GameRegistry.RemoveGame(match.Game);
-                GameRegistry.Save();
+                Store.RemoveGame(match.Game);
+                Store.Save();
 
                 Log.LogMessage(MessageImportance.High, "Removed the game with ID '{0}' and display name '{1}' from the game registry.", match.Game.Id, match.Game.DisplayName);
                 return true;

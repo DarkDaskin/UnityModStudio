@@ -276,7 +276,15 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" Condition="'$(UseGameRegistry)' == 'true' and '$(_EffectiveGameVersionType)' != 'Multiple'" 
+  <Target Name="GetGeneralSettings">
+    <GetGeneralSettings StorePath="$(GeneralSettingsPath)">
+      <Output TaskParameter="IsAmbientGameResolutionAllowed" PropertyName="_IsAmbientGameResolutionAllowed" />
+      <Output TaskParameter="AmbientGamesDoorstopMode" PropertyName="_AmbientGamesDoorstopMode" />
+      <Output TaskParameter="UseAlternateDoorstopDllNameForAmbientGames" PropertyName="_UseAlternateDoorstopDllNameForAmbientGames" />
+    </GetGeneralSettings>
+  </Target>
+
+  <Target Name="ResolveGameProperties" BeforeTargets="GamePropertiesResolved" DependsOnTargets="GetGeneralSettings" Condition="'$(UseGameRegistry)' == 'true' and '$(_EffectiveGameVersionType)' != 'Multiple'" 
           Inputs="$(GameRegistryPath);$(MSBuildAllProjects)" Outputs="$(_ResolvedPropertiesProjectFilePath)">
     <PropertyGroup>
       <_PreviousGamePath>$(_ResolvedGamePath)</_PreviousGamePath>
@@ -286,7 +294,8 @@
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
-    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" ProjectDirectory="$(MSBuildProjectDirectory)" GameRegistryPath="$(GameRegistryPath)">
+    <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" ProjectDirectory="$(MSBuildProjectDirectory)" 
+                           IsAmbientGameResolutionAllowed="$(_IsAmbientGameResolutionAllowed)" StorePath="$(GameRegistryPath)">
       <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
       <Output TaskParameter="GameModsPath" PropertyName="_ResolvedGameModsPath" />
       <Output TaskParameter="GameExecutableFileName" PropertyName="_ResolvedGameExecutableFileName" />
@@ -300,6 +309,10 @@
 
     <Error Text="Building multi-version mod for an ambient game is not supported." Condition="'$(_IsAmbientGame)' == 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'" />
 
+    <PropertyGroup Condition="'$(_IsAmbientGame)' == 'true'">
+      <_ResolvedDoorstopMode>$(_AmbientGamesDoorstopMode)</_ResolvedDoorstopMode>
+      <_ResolvedUseAlternateDoorstopDllName>$(_UseAlternateDoorstopDllNameForAmbientGames)</_ResolvedUseAlternateDoorstopDllName>
+    </PropertyGroup>
     <ItemGroup>
       <_ResolvedProperty Include="_ResolvedGamePath" Value="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''" />
       <_ResolvedProperty Include="_ResolvedGameModsPath" Value="$(_ResolvedGameModsPath)" Condition="'$(_ResolvedGameModsPath)' != ''" />
@@ -375,7 +388,7 @@
 
   <Target Name="GameAssemblyReferencesResolved" />
 
-  <Target Name="PrepareModPaths" DependsOnTargets="GamePropertiesResolved">
+  <Target Name="_PrepareModPathsRegular" DependsOnTargets="GamePropertiesResolved" Condition="'$(_IsAmbientGame)' != 'true'">
     <PropertyGroup>
       <GameModsPath Condition="'$(GameModsPath)' == ''">.\</GameModsPath>
     </PropertyGroup>
@@ -393,7 +406,7 @@
     </ConvertToAbsolutePath>
 
     <ItemGroup>
-      <_CompiledModAssembly Include="$(TargetDir)$(TargetFileName)" />
+      <_CompiledModAssembly Include="$(TargetPath)" />
     </ItemGroup>
     <ResolveTargetPath RelativeToPath="$(ModSourcePath)" Input="@(_CompiledModAssembly)">
       <Output TaskParameter="Output" ItemName="_ResolvedCompiledModAssembly" />
@@ -402,6 +415,14 @@
       <DeployedModAssemblyPath>$(ModTargetPath)%(_ResolvedCompiledModAssembly.TargetPath)$(TargetFileName)</DeployedModAssemblyPath>
     </PropertyGroup>
   </Target>
+
+  <Target Name="_PrepareModPathsAmbient" DependsOnTargets="GamePropertiesResolved" Condition="'$(_IsAmbientGame)' == 'true'">
+    <PropertyGroup>
+      <DeployedModAssemblyPath>$(TargetPath)</DeployedModAssemblyPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="PrepareModPaths" DependsOnTargets="_PrepareModPathsRegular;_PrepareModPathsAmbient" />
 
   <Target Name="GetModSourceCodeFiles" BeforeTargets="CopyModFilesToGame" DependsOnTargets="PrepareModPaths" Condition="'$(DeploySourceCode)' == 'true'">
     <ItemGroup>

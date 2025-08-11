@@ -24,6 +24,7 @@ namespace UnityModStudio
     /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
     /// </para>
     /// </remarks>
+    [ProvideOptionPage(typeof(GeneralPage), GeneralPage.CategoryName, GeneralPage.PageName, 0, 0, true)]
     [ProvideOptionPage(typeof(GameRegistryPage), GameRegistryPage.CategoryName, GameRegistryPage.PageName, 0, 0, true)]
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]

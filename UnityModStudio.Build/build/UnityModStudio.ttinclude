@@ -27,6 +27,7 @@
     string[] tasks = [
         "SanitizeGameVersion",
         "GetGameVersionDefineConstants",
+        "GetGeneralSettings",
         "ResolveGameProperties",
         "ResolveGameAssemblyReferences",
         "UpdateProjectFile",

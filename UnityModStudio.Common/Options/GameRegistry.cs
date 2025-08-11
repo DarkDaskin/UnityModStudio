@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Directory = System.IO.Directory;
 
 namespace UnityModStudio.Common.Options;
 
 [InheritedExport]
-public interface IGameRegistry
+public interface IGameRegistry : IStore
 {
     IReadOnlyCollection<Game> Games { get; }
-    bool WatchForChanges { get; set; }
 
     void AddGame(Game game);
     void RemoveGame(Game game);
@@ -23,57 +17,16 @@ public interface IGameRegistry
     Game? FindGameById(Guid id);
     Game? FindGameByDisplayName(string name);
     GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties, bool strictMatch);
-
-    Task LoadAsync();
-    Task SaveAsync();
 }
 
-public sealed class GameRegistry : IGameRegistry, IDisposable
+public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath), IGameRegistry
 {
-    private readonly string _storePath;
     private readonly Dictionary<Guid, Game> _games = new();
-    private readonly FileSystemWatcher _fsWatcher;
-    private readonly SemaphoreSlim _loadLock = new(1, 1);
-
-    public bool WatchForChanges
-    {
-        get => _fsWatcher.EnableRaisingEvents;
-        set => _fsWatcher.EnableRaisingEvents = value;
-    }
-
+    
     public GameRegistry() : this(Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         @"UnityModStudio\GameRegistry.json")) { }
-
-    public GameRegistry(string storePath)
-    {
-        _storePath = storePath;
-
-        var directoryName = Path.GetDirectoryName(_storePath);
-        if (string.IsNullOrEmpty(directoryName))
-            directoryName = ".";
-        Directory.CreateDirectory(directoryName);
-
-        _fsWatcher = new FileSystemWatcher(directoryName, Path.GetFileName(_storePath))
-        {
-            NotifyFilter = NotifyFilters.LastWrite,
-            EnableRaisingEvents = false,
-        };
-        _fsWatcher.Changed += OnStoreChanged;        
-    }
-
-    private async void OnStoreChanged(object sender, FileSystemEventArgs e)
-    {
-        try
-        {
-            await LoadAsync();
-        }
-        catch (Exception exception)
-        {
-            Debug.WriteLine($"Failed to load game registry: {exception.Message}");
-        }
-    }
-
+    
     public IReadOnlyCollection<Game> Games => _games.Values;
 
     public void AddGame(Game game) => _games.Add(game.Id, game);
@@ -143,58 +96,15 @@ public sealed class GameRegistry : IGameRegistry, IDisposable
         return new GameMatchResult.NoMatch();
     }
 
-    public async Task LoadAsync()
+    protected override void Reset() => _games.Clear();
+
+    protected override void Import(Game[] data)
     {
-        await _loadLock.WaitAsync();
-
-        _games.Clear();
-
-        try
-        {
-            using var stream = File.OpenRead(_storePath);
-
-            if (stream.Length == 0)
-                return;
-
-            foreach (var game in await JsonSerializer.DeserializeAsync<Game[]>(stream) ?? [])
-                AddGame(game);
-        }
-        catch (FileNotFoundException)
-        {
-            // Remain empty.
-        }
-        finally
-        {
-            _loadLock.Release();
-        }
+        foreach (var game in data)
+            AddGame(game);
     }
 
-    public async Task SaveAsync()
-    {
-        var oldWatchForChanges = WatchForChanges;
-        WatchForChanges = false;
+    protected override Game[] Export() => Games.ToArray();
 
-        try
-        {
-            using var stream = File.Open(_storePath, FileMode.Create);
-            await JsonSerializer.SerializeAsync(stream, Games);
-        }
-        finally
-        {
-            WatchForChanges = oldWatchForChanges;
-        }
-    }
-
-    public void Dispose()
-    {
-        _fsWatcher.Dispose();
-        _loadLock.Dispose();
-    }
-}
-
-public static class GameRegistryExtensions
-{
-    public static void Load(this IGameRegistry gameRegistry) => gameRegistry.LoadAsync().GetAwaiter().GetResult();
-
-    public static void Save(this IGameRegistry gameRegistry) => gameRegistry.SaveAsync().GetAwaiter().GetResult();
+    public override string StoreType => "game registry";
 }

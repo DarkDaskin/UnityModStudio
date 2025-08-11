@@ -28,6 +28,7 @@ public abstract class BuildTestsBase
     };
 
     private string _gameRegistryPath = null!;
+    private string _generalSettingsPath = null!;
 
     private readonly List<DirectoryInfo> _scratchDirs = [];
 
@@ -37,7 +38,9 @@ public abstract class BuildTestsBase
     public void TestInitialize()
     {
         _gameRegistryPath = Path.GetTempFileName();
+        _generalSettingsPath = Path.GetTempFileName();
         ProjectOptions.GlobalProperties["GameRegistryPath"] = _gameRegistryPath;
+        ProjectOptions.GlobalProperties["GeneralSettingsPath"] = _generalSettingsPath;
 
         AssemblyFixture.BinaryLogger.InitializeTest(TestContext);
     }
@@ -53,6 +56,8 @@ public abstract class BuildTestsBase
 
         if (File.Exists(_gameRegistryPath))
             File.Delete(_gameRegistryPath);
+        if (File.Exists(_generalSettingsPath))
+            File.Delete(_generalSettingsPath);
 
         foreach (var scratchDir in _scratchDirs)
             if (scratchDir.Exists)
@@ -99,6 +104,13 @@ public abstract class BuildTestsBase
         var gameRegistry = new GameRegistry(_gameRegistryPath);
         gameRegistry.Load();
         return gameRegistry;
+    }
+
+    protected void SetupGeneralSettings(Action<GeneralSettings> action)
+    {
+        var generalSettingsManager = new GeneralSettingsManager(_generalSettingsPath);
+        action(generalSettingsManager.Settings);
+        generalSettingsManager.Save();
     }
 
     protected string MakeGameCopy(string gameType)

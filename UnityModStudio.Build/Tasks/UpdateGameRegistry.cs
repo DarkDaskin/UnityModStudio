@@ -45,7 +45,7 @@ public class UpdateGameRegistry : GameRegistryTaskBase
 
         LogLookupProperties(properties);
 
-        switch (GameRegistry.FindGameByProperties(properties, false))
+        switch (Store.FindGameByProperties(properties, false))
         {
             case GameMatchResult.Match match:
                 if (!string.IsNullOrWhiteSpace(DisplayName))
@@ -76,7 +76,7 @@ public class UpdateGameRegistry : GameRegistryTaskBase
                 if (TryParseBoolean(UseAlternateDoorstopDllName, nameof(UseAlternateDoorstopDllName), out var useAlternateDoorstopDllName))
                     match.Game.UseAlternateDoorstopDllName = useAlternateDoorstopDllName;
 
-                GameRegistry.Save();
+                Store.Save();
 
                 Log.LogMessage(MessageImportance.High, "Updated the game with ID '{0}' and display name '{1}' in the game registry.", match.Game.Id, match.Game.DisplayName);
                 return true;
