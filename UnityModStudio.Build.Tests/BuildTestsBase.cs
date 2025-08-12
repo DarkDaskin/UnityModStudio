@@ -84,7 +84,7 @@ public abstract class BuildTestsBase
         var logger = new TestLogger();
 
         var success = project.Build(["Restore"], [logger]);
-        Assert.IsTrue(success);
+        Assert.IsTrue(success, $"Failed to restore the project. Errors:\n{string.Join("\n", logger.BuildErrors.Select(args => args.Message))}");
 
         // Must reload the project to import NuGet-provided build files.
         project = ProjectInstance.FromFile(projectPath, projectOptions);
