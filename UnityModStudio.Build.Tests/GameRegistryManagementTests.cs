@@ -8,7 +8,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenAddGameToRegistryCalledWithoutGamePath_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build(["AddGameToRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -22,7 +22,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenAddGameToRegistryCalledWithInvalidGameRegistryPath_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GamePath", Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") },
@@ -43,7 +43,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     public void WhenAddGameToRegistryCalledWithAllProperties_AddGameToRegistry()
     {
         var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GamePath", gamePath },
@@ -83,7 +83,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     public void WhenAddGameToRegistryCalledWithOnlyGamePath_AddGameToRegistry()
     {
         var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GamePath", gamePath },
@@ -116,7 +116,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     public void WhenAddGameToRegistryCalledWithOnlyGamePathAndGameVersion_AddGameToRegistry()
     {
         var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GamePath", gamePath },
@@ -155,7 +155,7 @@ public class GameRegistryManagementTests : BuildTestsBase
             DisplayName = "Test",
         });
         var gamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0");
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GamePath", gamePath },
@@ -188,7 +188,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenUpdateGameRegistryCalledWithInvalidGameRegistryPath_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameRegistryPath", "!@#$%^&*()" },
@@ -206,7 +206,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenUpdateGameRegistryCalledWithoutAnyLookupProperty_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj");
 
         var success = project.Build(["UpdateGameRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -220,7 +220,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenUpdateGameRegistryCalledWithNonExistingGameName_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build(["UpdateGameRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -241,7 +241,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame);
         SetupGameRegistry(existingGame);
         var newGamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameInstanceId", existingGame.Id.ToString() },
@@ -287,7 +287,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         };
         ResolveGameProperties(existingGame);
         SetupGameRegistry(existingGame);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameDisplayName", "UpdateGameRegistryTest" },
@@ -334,7 +334,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame10);
         ResolveGameProperties(existingGame11);
         SetupGameRegistry(existingGame10, existingGame11);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\SingleVersion.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameDisplayName", "UpdateGameRegistryTest" },
@@ -395,7 +395,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame10);
         ResolveGameProperties(existingGame11);
         SetupGameRegistry(existingGame10, existingGame11);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\MultiVersionMultiTarget\MultiVersionMultiTarget.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\MultiVersionMultiTarget\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameDisplayName", "UpdateGameRegistryTest" },
@@ -450,7 +450,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame);
         SetupGameRegistry(existingGame);
         var newGamePath = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0");
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GamePath", newGamePath },
@@ -483,7 +483,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenRemoveGameFromRegistryCalledWithInvalidGameRegistryPath_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameRegistryPath", "!@#$%^&*()" },
@@ -502,7 +502,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenRemoveGameFromRegistryCalledWithoutAnyLookupProperty_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj");
 
         var success = project.Build(["RemoveGameFromRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -516,7 +516,7 @@ public class GameRegistryManagementTests : BuildTestsBase
     [TestMethod]
     public void WhenRemoveGameFromRegistryCalledWithNonExistingGameName_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build(["RemoveGameFromRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -543,7 +543,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame);
         ResolveGameProperties(existingGame2);
         SetupGameRegistry(existingGame, existingGame2);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameInstanceId", existingGame.Id.ToString() },
@@ -575,7 +575,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame);
         ResolveGameProperties(existingGame2);
         SetupGameRegistry(existingGame, existingGame2);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build(["RemoveGameFromRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -605,7 +605,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame);
         ResolveGameProperties(existingGame2);
         SetupGameRegistry(existingGame, existingGame2);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\SingleVersion.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\Mod.csproj");
 
         var success = project.Build(["RemoveGameFromRegistry"], [logger, AssemblyFixture.BinaryLogger]);
 
@@ -633,7 +633,7 @@ public class GameRegistryManagementTests : BuildTestsBase
         ResolveGameProperties(existingGame);
         ResolveGameProperties(existingGame2);
         SetupGameRegistry(existingGame, existingGame2);
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj",
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj",
             new Dictionary<string, string>
             {
                 { "GameDisplayName", "Game" },

@@ -8,7 +8,7 @@ public class FailedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenNoGamePropertiesAreDefined_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\NoGameProperties.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\NoGameProperties\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -22,7 +22,7 @@ public class FailedBuildTests : BuildTestsBase
     [TestMethod]
     public void WhenUnknownGameNameIsSpecified_ProduceError()
     {
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -42,7 +42,7 @@ public class FailedBuildTests : BuildTestsBase
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
             GameName = "Unity2018Test",
         });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\SingleVersion.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -63,7 +63,7 @@ public class FailedBuildTests : BuildTestsBase
             GameName = "Unity2018Test",
             Version = "1.0",
         });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\MultiVersion\MultiVersion.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\MultiVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -89,7 +89,7 @@ public class FailedBuildTests : BuildTestsBase
                 Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
                 GameName = "Unity2018Test",
             });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -117,7 +117,7 @@ public class FailedBuildTests : BuildTestsBase
                 GameName = "Unity2018Test",
                 Version = "1.0",
             });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\SingleVersion.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -145,7 +145,7 @@ public class FailedBuildTests : BuildTestsBase
                 GameName = "Unity2018Test",
                 Version = "1.1",
             });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -165,7 +165,7 @@ public class FailedBuildTests : BuildTestsBase
             Path = @"C:\NonExistentDir",
             GameName = "Unity2018Test",
         });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -185,7 +185,7 @@ public class FailedBuildTests : BuildTestsBase
             Path = @"C:\Program Files\Windows Mail",
             GameName = "Unity2018Test",
         });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\NonVersioned.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersioned\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -213,7 +213,7 @@ public class FailedBuildTests : BuildTestsBase
                 GameName = "Unity2018Test",
                 Version = "1.1",
             });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongGameVersion\WrongGameVersion.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongGameVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -241,7 +241,7 @@ public class FailedBuildTests : BuildTestsBase
                 GameName = "Unity2018Test",
                 Version = "1.1",
             });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongDefaultGameVersion\WrongDefaultGameVersion.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\WrongDefaultGameVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -262,7 +262,7 @@ public class FailedBuildTests : BuildTestsBase
             GameName = "Unity2018Test",
             Version = "1.0",
         });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\DuplicateGameVersions\DuplicateGameVersions.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\DuplicateGameVersions\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -295,7 +295,7 @@ public class FailedBuildTests : BuildTestsBase
             GameName = "Unity2018Test",
             Version = "2.0",
         });
-        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\DuplicateGameVersionsMultiTarget\DuplicateGameVersionsMultiTarget.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Incorrect\DuplicateGameVersionsMultiTarget\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
