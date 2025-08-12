@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <GameName>Unity2018Test</GameName>
     <GameVersions>1.0;1.1</GameVersions>
     <ModSourcePath>..\</ModSourcePath>

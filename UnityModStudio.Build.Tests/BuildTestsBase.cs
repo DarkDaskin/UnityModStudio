@@ -46,7 +46,7 @@ public abstract class BuildTestsBase
     }
 
     [TestCleanup]
-    public void TestCleanup()
+    public void CommonTestCleanup()
     {
         AssemblyFixture.BinaryLogger.Shutdown();
 
