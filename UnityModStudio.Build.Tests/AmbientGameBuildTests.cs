@@ -6,6 +6,13 @@ namespace UnityModStudio.Build.Tests;
 [TestClass]
 public class AmbientGameBuildTests : BuildTestsBase
 {
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        ProjectOptions.GlobalProperties["RestoreAdditionalProjectSources"] =
+            Path.GetFullPath(@$"..\..\..\..\UnityModStudio.Build\bin\{Configuration}\");
+    }
+
     [TestMethod]
     public void WhenProjectHasNoGameProperties_Build()
     {

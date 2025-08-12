@@ -35,7 +35,7 @@ public abstract class BuildTestsBase
     public TestContext TestContext { get; set; } = null!;
 
     [TestInitialize]
-    public void TestInitialize()
+    public void CommonTestInitialize()
     {
         _gameRegistryPath = Path.GetTempFileName();
         _generalSettingsPath = Path.GetTempFileName();
