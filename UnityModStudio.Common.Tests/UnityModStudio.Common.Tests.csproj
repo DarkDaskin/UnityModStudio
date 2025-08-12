@@ -13,8 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\GameRegistry_SingleGameSaved.json" />
-    <EmbeddedResource Include="Resources\GameRegistry_Initial.json" />
+    <EmbeddedResource Include="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>

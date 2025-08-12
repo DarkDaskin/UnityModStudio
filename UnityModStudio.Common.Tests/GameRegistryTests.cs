@@ -4,27 +4,12 @@ using UnityModStudio.Common.Options;
 namespace UnityModStudio.Common.Tests;
 
 [TestClass]
-public sealed class GameRegistryTests
+public sealed class GameRegistryTests : StoreTestsBase
 {
-    private string _gameRegistryPath = null!;
-
-    [TestInitialize]
-    public void TestInitialize()
-    {
-        _gameRegistryPath = Path.GetTempFileName();
-    }
-
-    [TestCleanup]
-    public void TestCleanup()
-    {
-        if (File.Exists(_gameRegistryPath))
-            File.Delete(_gameRegistryPath);
-    }
-
     [TestMethod]
     public void WhenCreated_BeEmpty()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
 
         Assert.AreEqual(0, gameRegistry.Games.Count);
         Assert.IsFalse(gameRegistry.WatchForChanges);
@@ -33,7 +18,7 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenLoadedFromEmptyFile_BeEmpty()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
 
         await gameRegistry.LoadAsync();
 
@@ -44,8 +29,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenLoadedFromNonExistingFile_BeEmpty()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        File.Delete(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        File.Delete(StorePath);
 
         await gameRegistry.LoadAsync();
 
@@ -53,20 +38,20 @@ public sealed class GameRegistryTests
         Assert.IsFalse(gameRegistry.WatchForChanges);
     }
 
-    [TestMethod, ExpectedException(typeof(JsonException))]
+    [TestMethod]
     public async Task WhenLoadedFromMalformedFile_Throw()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        await File.WriteAllTextAsync(_gameRegistryPath, "!@$%^&*()");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        await File.WriteAllTextAsync(StorePath, "!@$%^&*()");
 
-        await gameRegistry.LoadAsync();
+        await Assert.ThrowsExactlyAsync<JsonException>(() => gameRegistry.LoadAsync());
     }
 
     [TestMethod]
     public async Task WhenLoadedFromValidFile_FillWithGames()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
 
         await gameRegistry.LoadAsync();
 
@@ -129,7 +114,7 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSavingGame_WriteJson()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
         gameRegistry.AddGame(new Game
         {
             Id = new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6"),
@@ -139,13 +124,13 @@ public sealed class GameRegistryTests
 
         await gameRegistry.SaveAsync();
 
-        VerifyGameResistryEquals("GameRegistry_SingleGameSaved.json");
+        VerifyStoreEquals("GameRegistry_SingleGameSaved.json");
     }
 
     [TestMethod]
     public void WhenEnsureAllGamePropertiesInvoked_ResolveAllProperties()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
         var game = new Game
         {
             DisplayName = "Game 1",
@@ -167,7 +152,7 @@ public sealed class GameRegistryTests
     [TestMethod]
     public void WhenAddingGame_AddToGames()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
 
         var game = new Game
         {
@@ -184,8 +169,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenRemovingGame_RemoveFromGames()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
         var game1 = gameRegistry.Games.ElementAt(0);
         var game2 = gameRegistry.Games.ElementAt(1);
@@ -201,8 +186,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameById_ReturnGame()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var game = gameRegistry.FindGameById(new Guid("91eda532-02c2-441c-808d-07a474692ede"));
@@ -214,8 +199,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingNonExistingGameById_ReturnNull()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var game = gameRegistry.FindGameById(new Guid("7436e934-de45-4784-8c0f-40b8c7f4777f"));
@@ -226,8 +211,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByDisplayName_ReturnGame()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var game = gameRegistry.FindGameByDisplayName("Game 1");
@@ -239,8 +224,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingNonExistingGameByDisplayName_ReturnNull()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var game = gameRegistry.FindGameByDisplayName("NonExistentGame");
@@ -251,8 +236,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByGameName_ReturnMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -268,8 +253,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByGameNameAndVersion_ReturnMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -286,8 +271,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingNonExistingGameByGameName_ReturnNoMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -302,8 +287,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingMultiVersionGameByGameName_ReturnAmbiguousMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -322,8 +307,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByAllProperties_ReturnMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -341,8 +326,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByWrongIdAndGameNameLoose_ReturnMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -359,8 +344,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByWrongIdAndGameNameStrict_ReturnNoMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -376,8 +361,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByWrongDisplayNameAndGameNameLoose_ReturnMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -394,8 +379,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenSearchingExistingGameByWrongDisplayNameAndGameNameStrict_ReturnNoMatch()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        SetGameRegistryFile("GameRegistry_Initial.json");
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
         var result = gameRegistry.FindGameByProperties(new Dictionary<string, string>
@@ -411,8 +396,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public void WhenEnablingWatchWithMissingGameRegistry_Succeed()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        File.Delete(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        File.Delete(StorePath);
 
         gameRegistry.WatchForChanges = true;
 
@@ -422,8 +407,8 @@ public sealed class GameRegistryTests
     [TestMethod]
     public async Task WhenEnablingWatch_ReloadOnExternalChange()
     {
-        IGameRegistry gameRegistry = new GameRegistry(_gameRegistryPath);
-        IGameRegistry gameRegistry2 = new GameRegistry(_gameRegistryPath);
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        IGameRegistry gameRegistry2 = new GameRegistry(StorePath);
 
         gameRegistry.WatchForChanges = true;
         gameRegistry2.AddGame(new Game
@@ -438,22 +423,4 @@ public sealed class GameRegistryTests
         Assert.AreEqual(1, gameRegistry.Games.Count);
         Assert.AreEqual("Game 1", gameRegistry.Games.Single().DisplayName);
     }
-
-    private void SetGameRegistryFile(string fileName)
-    {
-        using var inputStream = GetResourceStream(fileName);
-        using var outputStream = File.OpenWrite(_gameRegistryPath);
-        inputStream.CopyTo(outputStream);
-    }
-
-    private void VerifyGameResistryEquals(string fileName)
-    {
-        using var reader1 = new StreamReader(GetResourceStream(fileName));
-        using var reader2 = new StreamReader(File.OpenRead(_gameRegistryPath));
-        Assert.AreEqual(reader1.ReadToEnd(), reader2.ReadToEnd());
-    }
-
-    private static Stream GetResourceStream(string fileName) => 
-        typeof(GameRegistryTests).Assembly.GetManifestResourceStream($"UnityModStudio.Common.Tests.Resources.{fileName}") ?? 
-        throw new ArgumentException("Resource not found.", nameof(fileName));
 }
