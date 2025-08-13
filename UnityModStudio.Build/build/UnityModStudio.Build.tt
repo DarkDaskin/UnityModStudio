@@ -351,9 +351,10 @@
 
     <ItemGroup Condition="'$(_ResolveGameAssemblyReferencesIsRunning)' == 'true'">
       <Reference Remove="@(Reference->WithMetadataValue('IsImplicitlyDefinedGameReference', 'true'))" />
+      <Reference Include="@(_PreExistingReference)" KeepDuplicates="false" />
     </ItemGroup>
 
-    <ResolveGameAssemblyReferences GamePath="$(GamePath)" TargetFramework="$(TargetFramework)" ExistingReferences="@(_PreExistingReference)">
+    <ResolveGameAssemblyReferences GamePath="$(GamePath)" TargetFramework="$(TargetFramework)" ExistingReferences="@(Reference)">
       <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
       <Output TaskParameter="ReferencesToAdd" ItemName="_GameReferencesToAdd" />
       <Output TaskParameter="ReferencesToUpdate" ItemName="_GameReferencesToUpdate" />
@@ -370,7 +371,8 @@
 
     <ItemGroup Condition="'$(_ResolveGameAssemblyReferencesIsRunning)' == 'true'">
       <Reference Remove="@(_GameReferencesToRemove)" />
-      <Reference Update="@(_GameReferencesToUpdate)" HintPath="%(_GameReferencesToUpdate.HintPath)" Private="%(_GameReferencesToUpdate.Private)" />
+      <Reference Remove="@(_GameReferencesToUpdate)" />
+      <Reference Include="@(_GameReferencesToUpdate)" />
       <Reference Include="@(_GameReferencesToAdd)" Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
     </ItemGroup>
 

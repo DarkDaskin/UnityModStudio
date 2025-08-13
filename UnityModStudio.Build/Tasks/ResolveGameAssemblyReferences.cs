@@ -55,7 +55,7 @@ public class ResolveGameAssemblyReferences : Task
                 reference.SetMetadata("Private", "false");
                 referencesToUpdate.Add(reference);
             }
-            else
+            else if (string.Equals(reference.GetMetadata("IsImplicitlyDefined"), "true", StringComparison.OrdinalIgnoreCase))
                 referencesToRemove.Add(reference);
         }
 
