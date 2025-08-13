@@ -29,11 +29,9 @@
       </Folder>
     </Project>
     <CustomParameters>
-      <CustomParameter Name="$TargetFramework$" Value="netstandard2.0"/>
-      <CustomParameter Name="$GameName$" Value=""/>
-      <CustomParameter Name="$GameVersion$" Value=""/>
-      <CustomParameter Name="$GameVersions$" Value=""/>
-      <CustomParameter Name="$BuildPackageVersion$" Value="1.0.0"/>
+      <CustomParameter Name="$TargetFramework$" Value=""/>
+      <CustomParameter Name="$TargetFrameworks$" Value=""/>
+      <CustomParameter Name="$BuildPackageVersion$" Value=""/>
     </CustomParameters>
   </TemplateContent>
   <WizardExtension>

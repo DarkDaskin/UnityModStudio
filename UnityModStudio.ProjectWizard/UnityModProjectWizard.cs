@@ -76,6 +76,10 @@ namespace UnityModStudio.ProjectWizard
                 .Select(vm => vm.Game)
                 .ToArray();
             
+            // Target framework(s) must be set here, in ProjectFinishedGenerating it's too late.
+            var targetFrameworks = _selectedGames.Select(game => game.TargetFrameworkMoniker).Distinct().ToArray();
+            replacementsDictionary["$TargetFramework$"] = targetFrameworks.Length == 1 ? targetFrameworks[0] : "";
+            replacementsDictionary["$TargetFrameworks$"] = targetFrameworks.Length > 1 ? string.Join(";", targetFrameworks) : "";
             replacementsDictionary["$BuildPackageVersion$"] = Utils.GetPackageVersion();
 
             return true;

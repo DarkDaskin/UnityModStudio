@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
+    <GameName />
+    <GameVersion />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnityModStudio.Build" Version="3.0" />
+  </ItemGroup>
+
+</Project>

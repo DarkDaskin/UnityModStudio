@@ -163,7 +163,7 @@ public class FileGeneratorTests
     [TestMethod]
     public void WhenUpdateProjectInvokedWithNoGames_Throw()
     {
-        var document = XDocument.Load(@"TestFiles\Project_Initial.xml", LoadOptions.PreserveWhitespace);
+        var document = XDocument.Load(@"TestFiles\Project_Initial_SingleTargetFramework.xml", LoadOptions.PreserveWhitespace);
 
         Assert.ThrowsExactly<InvalidOperationException>(() => FileGenerator.UpdateProject(document, []));
     }
@@ -171,7 +171,7 @@ public class FileGeneratorTests
     [TestMethod]
     public void WhenUpdateProjectInvokedWithSingleGameWithoutVersion_UpdateProject()
     {
-        var document = XDocument.Load(@"TestFiles\Project_Initial.xml", LoadOptions.PreserveWhitespace);
+        var document = XDocument.Load(@"TestFiles\Project_Initial_SingleTargetFramework.xml", LoadOptions.PreserveWhitespace);
         var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
         ResolveGameProperties(game);
 
@@ -183,7 +183,7 @@ public class FileGeneratorTests
     [TestMethod]
     public void WhenUpdateProjectInvokedWithSingleGameWithVersion_UpdateProject()
     {
-        var document = XDocument.Load(@"TestFiles\Project_Initial.xml", LoadOptions.PreserveWhitespace);
+        var document = XDocument.Load(@"TestFiles\Project_Initial_SingleTargetFramework.xml", LoadOptions.PreserveWhitespace);
         var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"), Version = "1.0" };
         ResolveGameProperties(game);
 
@@ -195,7 +195,7 @@ public class FileGeneratorTests
     [TestMethod]
     public void WhenUpdateProjectInvokedWithMultipleGames_UpdateProject()
     {
-        var document = XDocument.Load(@"TestFiles\Project_Initial.xml", LoadOptions.PreserveWhitespace);
+        var document = XDocument.Load(@"TestFiles\Project_Initial_SingleTargetFramework.xml", LoadOptions.PreserveWhitespace);
         var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"), Version = "1.0" };
         var game2 = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"), Version = "1.1" };
         ResolveGameProperties(game);
@@ -209,7 +209,7 @@ public class FileGeneratorTests
     [TestMethod]
     public void WhenUpdateProjectInvokedWithMultipleTargetFrameworks_UpdateProject()
     {
-        var document = XDocument.Load(@"TestFiles\Project_Initial.xml", LoadOptions.PreserveWhitespace);
+        var document = XDocument.Load(@"TestFiles\Project_Initial_MultipleTargetFrameworks.xml", LoadOptions.PreserveWhitespace);
         var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"), Version = "1.0" };
         var game2 = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"), Version = "1.1" };
         var game3 = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"), Version = "2.0" };

@@ -44,6 +44,7 @@ internal static class FileGenerator
             }
         }
     }
+
     private static JsonObject GetOrAddChild(JsonObject parent, string key)
     {
         if (parent.TryGetPropertyValue(key, out var value) && value is JsonObject child)
@@ -79,11 +80,12 @@ internal static class FileGenerator
         gameNameElement.Value = gameName;
 
         var targetFrameworkElement = document.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single();
+        var targetFrameworksElement = document.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFrameworks").Single();
         var gameVersionElement = document.Root.Elements(ns + "PropertyGroup").Elements(ns + "GameVersion").Single();
 
         if (gameVersionsByTargetFramework.Count() == 1)
         {
-            targetFrameworkElement.Value = gameVersionsByTargetFramework.First().Key!;
+            IncludeWhitespace(targetFrameworksElement).Remove();
 
             var gameVersions = GetGameVersions(games);
             switch (gameVersions.Length)
@@ -105,8 +107,7 @@ internal static class FileGenerator
         }
         else
         {
-            targetFrameworkElement.ReplaceWith(new XElement(ns + "TargetFrameworks",
-                string.Join(";", gameVersionsByTargetFramework.Select(gv => gv.Key))));
+            IncludeWhitespace(targetFrameworkElement).Remove();
             
             gameVersionElement.ReplaceWith(AddWhitespace(gameVersionsByTargetFramework.Select(g =>
                 new XElement(ns + "GameVersions", new XAttribute("Condition", $"'$(TargetFramework)' == '{g.Key}'"),

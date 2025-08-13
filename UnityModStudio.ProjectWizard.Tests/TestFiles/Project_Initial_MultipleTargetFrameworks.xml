@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework />
+    <TargetFramework></TargetFramework>
+    <TargetFrameworks>net472;netstandard2.0</TargetFrameworks>
     <GameName />
     <GameVersion />
   </PropertyGroup>
