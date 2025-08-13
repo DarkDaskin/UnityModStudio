@@ -134,6 +134,12 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="_RemoveIncompatiblePackageReferences" AfterTargets="ResolveLockFileReferences" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Runtime'" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="PrepareForUpToDateCheckBuilt" BeforeTargets="CollectUpToDateCheckBuiltDesignTime" DependsOnTargets="_GetSpecificGameVersionBuildProperties" Condition="'$(_SpecifiedGameVersionType)' == 'Multiple'">
     <PropertyGroup>
       <SkipCopyBuildProduct>true</SkipCopyBuildProduct>
