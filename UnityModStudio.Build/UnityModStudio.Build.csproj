@@ -20,11 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- 3rd-party binaries were put into a private package to avoid storing them in source control. -->
-    <PackageReference Include="UnityDoorstop" Version="4.0.0" PrivateAssets="all" GeneratePathProperty="true" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="build\*.props" Pack="true" PackagePath="build\" />
     <None Include="build\*.targets" Pack="true" PackagePath="build\" />
     <None Include="buildMultiTargeting\*.targets" Pack="true" PackagePath="buildMultiTargeting\" />
@@ -33,13 +28,6 @@
     <!-- This is the recommended way to get rid of the NU5128 warning. -->
     <!-- See https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128 -->
     <None Include="_._" Visible="false" Pack="true" PackagePath="lib\netstandard2.0\" />
-  </ItemGroup>
-
-  <!-- Merge UnityDoorstop package into this project package. -->
-  <!-- Can't just set Visible="false" due to https://github.com/microsoft/VSProjectSystem/issues/162, so put it into a folder instead. -->
-  <ItemGroup>
-    <None Include="$(PkgUnityDoorstop)\content\**" LinkBase="UnityDoorstop\content\" Visible="false" Pack="true" PackagePath="content\" />
-    <None Include="$(PkgUnityDoorstop)\runtimes\**" LinkBase="UnityDoorstop\runtimes\" Visible="false" Pack="true" PackagePath="runtimes\" />
   </ItemGroup>
 
   <ItemGroup>

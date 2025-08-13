@@ -5,6 +5,13 @@
 
   <PropertyGroup>
     <UseGameRegistry Condition="'$(UseGameRegistry)' == ''">true</UseGameRegistry>
+    <DoorstopVersion Condition="'$(DoorstopVersion)' == ''">4.4.0</DoorstopVersion>
+    <DoorstopSourcePath Condition="'$(DoorstopSourcePath)' == ''">$(BaseIntermediateOutputPath)Doorstop\</DoorstopSourcePath>
+    <DoorstopSourcePath Condition="!HasTrailingSlash('$(DoorstopSourcePath)')">$(DoorstopSourcePath)\</DoorstopSourcePath>
+    <UseProvidedDoorstop Condition="'$(UseProvidedDoorstop)' == ''">false</UseProvidedDoorstop>
+    <_PrimaryDoorstopDllName>winhttp.dll</_PrimaryDoorstopDllName>
+    <_AlternateDoorstopDllName>version.dll</_AlternateDoorstopDllName>
+    <_DoorstopConfigFileName>doorstop_config.ini</_DoorstopConfigFileName>
     <_SpecifiedGameVersionType>None</_SpecifiedGameVersionType>
     <_SpecifiedGameVersionType Condition="'$(GameVersions)' != ''">Multiple</_SpecifiedGameVersionType>
     <_SpecifiedGameVersionType Condition="'$(GameVersion)' != '' and $(_SpecifiedGameVersionType) != 'Multiple'">Single</_SpecifiedGameVersionType>
@@ -489,38 +496,75 @@
     <RemoveDir Directories="$(ModTargetPath)" Condition="Exists('$(ModTargetPath)') and '$(_ModTargetPathLinkTarget)' == ''" />
     <DeleteSymbolicLink Path="$(ModTargetPath)" Condition="Exists('$(ModTargetPath)') and '$(_ModTargetPathLinkTarget)' != '' and '$(_ModTargetPathLinkTarget)' != '$(ModSourcePath)'" />
 
-    <CreateSymbolicLink Target="$(ModSourcePath)" SymbolicLink="$(ModTargetPath)" Condition="!Exists('$(ModTargetPath)')" />
-    
+    <CreateSymbolicLink Target="$(ModSourcePath)" SymbolicLink="$(ModTargetPath)" Condition="!Exists('$(ModTargetPath)')" />    
   </Target>
 
-  <Target Name="DeployDoorstop" DependsOnTargets="GamePropertiesResolved;GameAssemblyReferencesResolved" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
-    <ItemGroup>
-      <DoorstopNativeFile Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\**" Condition="'$(GameArchitecture)' == 'X86'" />
-      <DoorstopNativeFile Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\**" Condition="'$(GameArchitecture)' == 'X64'" />
-      <DoorstopContentFile Include="$(MSBuildThisFileDirectory)..\content\**" />
-    </ItemGroup>
-
-    <Error Code="UMS0010" Text="No Unity Doorstop native files available for architecture '$(GameArchitecture)'" Condition="'@(DoorstopNativeFile)' == ''" />
+<Target Name="_VerifyDoorstopVersion">
+    <Error Code="UMS0014" Text="Unity Doorstop version is not specified." Condition="'$(DoorstopVersion)' == ''" />  
 
     <PropertyGroup>
-      <_PrimaryDoorstopDllPath>$(GamePath)winhttp.dll</_PrimaryDoorstopDllPath>
-      <_AlternateDoorstopDllPath>$(GamePath)version.dll</_AlternateDoorstopDllPath>
+      <_MinDoorstopVersion>4.0.0</_MinDoorstopVersion>
+    </PropertyGroup>
+    <Error Code="UMS0015" Text="Specified Unity Doorstop version ($(DoorstopVersion)) is less than minimum supported version ($(_MinDoorstopVersion))."
+           Condition="$([MSBuild]::VersionLessThan('$(DoorstopVersion)', '$(_MinDoorstopVersion)'))" />
+  </Target>
+
+  <Target Name="_GetDoorstopSourcePaths">
+    <PropertyGroup>
+      <_DoorstopArchitectureSpecificSourcePath>$(DoorstopSourcePath)$(GameArchitecture.ToLowerInvariant())\</_DoorstopArchitectureSpecificSourcePath>
+      <_DoorstopDllSourcePath>$(_DoorstopArchitectureSpecificSourcePath)$(_PrimaryDoorstopDllName)</_DoorstopDllSourcePath>
+      <_DoorstopConfigSourcePath>$(_DoorstopArchitectureSpecificSourcePath)$(_DoorstopConfigFileName)</_DoorstopConfigSourcePath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_GetExistingDoorstopVersion" DependsOnTargets="_GetDoorstopSourcePaths">
+    <GetFileVersion Path="$(_DoorstopDllSourcePath)" Condition="Exists('$(_DoorstopDllSourcePath)')">
+      <Output TaskParameter="FileVersion" PropertyName="_ExistingDoorstopVersion" />
+    </GetFileVersion>
+  </Target>
+
+  <Target Name="DownloadDoorstop" DependsOnTargets="_GetExistingDoorstopVersion" Condition="'$(UseProvidedDoorstop)' != 'true' and ('$(_ExistingDoorstopVersion)' == '' or $([MSBuild]::VersionNotEquals('$(_ExistingDoorstopVersion)', '$(DoorstopVersion)')))">
+    <PropertyGroup>
+      <_DoorstopReleaseFileName>doorstop_win_release_$(DoorstopVersion).zip</_DoorstopReleaseFileName>
+      <_DoorstopReleaseUrl>https://github.com/NeighTools/UnityDoorstop/releases/download/v$(DoorstopVersion)/$(_DoorstopReleaseFileName)</_DoorstopReleaseUrl>
+    </PropertyGroup>
+    <ItemGroup>
+      <_DoorstopOldFiles Include="$(DoorstopSourcePath)**\*" />
+    </ItemGroup>
+    <Delete Files="@(_DoorstopOldFiles)" />
+    <DownloadFile SourceUrl="$(_DoorstopReleaseUrl)" DestinationFolder="$(DoorstopSourcePath)" />
+    <Unzip SourceFiles="$(DoorstopSourcePath)$(_DoorstopReleaseFileName)" DestinationFolder="$(DoorstopSourcePath)" />
+    <Delete Files="$(DoorstopSourcePath)$(_DoorstopReleaseFileName)" />
+    <ItemGroup>
+      <FileWrites Include="$(DoorstopSourcePath)**\*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="DeployDoorstop" DependsOnTargets="GamePropertiesResolved;GameAssemblyReferencesResolved;_GetDoorstopSourcePaths;_GetExistingDoorstopVersion;DownloadDoorstop" 
+          Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
+    <Error Code="UMS0010" Text="No Unity Doorstop files are available for architecture '$(GameArchitecture)'." Condition="!Exists('$(_DoorstopDllSourcePath)') or !Exists('$(_DoorstopConfigSourcePath)')" />
+
+    <PropertyGroup>
+      <_PrimaryDoorstopDllTargetPath>$(GamePath)$(_PrimaryDoorstopDllName)</_PrimaryDoorstopDllTargetPath>
+      <_AlternateDoorstopDllTargetPath>$(GamePath)$(_AlternateDoorstopDllName)</_AlternateDoorstopDllTargetPath>
+      <_DoorstopConfigTargetPath>$(GamePath)$(_DoorstopConfigFileName)</_DoorstopConfigTargetPath>
     </PropertyGroup>
 
-    <Copy SourceFiles="@(DoorstopNativeFile)" DestinationFolder="$(GamePath)" SkipUnchangedFiles="True" Condition="!Exists('$(_PrimaryDoorstopDllPath)') and !Exists('$(_AlternateDoorstopDllPath)')" />
-    <Move SourceFiles="$(_PrimaryDoorstopDllPath)" DestinationFiles="$(_AlternateDoorstopDllPath)" Condition="Exists('$(_PrimaryDoorstopDllPath)') and '$(UseAlternateDoorstopDllName)' == 'True'" />
-    <Move SourceFiles="$(_AlternateDoorstopDllPath)" DestinationFiles="$(_PrimaryDoorstopDllPath)" Condition="Exists('$(_AlternateDoorstopDllPath)') and '$(UseAlternateDoorstopDllName)' != 'True'" />
-    <Copy SourceFiles="@(DoorstopContentFile)" DestinationFolder="$(GamePath)" Condition="!Exists('$(GamePath)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="$(_DoorstopDllSourcePath)" DestinationFiles="$(_PrimaryDoorstopDllTargetPath)" SkipUnchangedFiles="True" Condition="'$(UseAlternateDoorstopDllName)' != 'true'" />
+    <Copy SourceFiles="$(_DoorstopDllSourcePath)" DestinationFiles="$(_AlternateDoorstopDllTargetPath)" SkipUnchangedFiles="True" Condition="'$(UseAlternateDoorstopDllName)' == 'true'" />
+    <Delete Files="$(_PrimaryDoorstopDllTargetPath)" Condition="Exists('$(_PrimaryDoorstopDllTargetPath)') and '$(UseAlternateDoorstopDllName)' == 'true'" />
+    <Delete Files="$(_AlternateDoorstopDllTargetPath)" Condition="Exists('$(_AlternateDoorstopDllTargetPath)') and '$(UseAlternateDoorstopDllName)' != 'true'" />
+    <Copy SourceFiles="$(_DoorstopConfigSourcePath)" DestinationFiles="$(_DoorstopConfigTargetPath)" Condition="!Exists('$(_DoorstopConfigTargetPath)')" />
   </Target>
 
   <Target Name="ConfigureDoorstop" AfterTargets="CopyModFilesToGame;LinkModToGame" DependsOnTargets="DeployDoorstop;PrepareModPaths" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
     <PropertyGroup>
-      <DoorstopConfigFile>$(GamePath)doorstop_config.ini</DoorstopConfigFile>
+      <DoorstopTargetAssemblyPath Condition="'$(DoorstopTargetAssemblyPath)' == ''">$(DeployedModAssemblyPath)</DoorstopTargetAssemblyPath>
       <_UseDoorstopForModLoading>false</_UseDoorstopForModLoading>
       <_UseDoorstopForModLoading Condition="'$(DoorstopMode)' == 'DebuggingAndModLoading'">true</_UseDoorstopForModLoading>
     </PropertyGroup>
 
-    <ConfigureDoorstop ConfigPath="$(DoorstopConfigFile)" TargetAssemblyPath="$(DeployedModAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
+    <ConfigureDoorstop ConfigPath="$(_DoorstopConfigTargetPath)" TargetAssemblyPath="$(DoorstopTargetAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
   </Target>
 
   <Target Name="_CollectPathsFromSpecificGameVersionBuilds">

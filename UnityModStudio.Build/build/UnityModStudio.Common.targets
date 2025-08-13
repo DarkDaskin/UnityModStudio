@@ -35,6 +35,7 @@
   <UsingTask TaskName="DeleteSymbolicLink" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="GetSymbolicLinkTarget" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="ResolveTargetPath" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="GetFileVersion" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="RemoveEmptyDirectories" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="GetIgnoredFiles" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="AddGameToRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
