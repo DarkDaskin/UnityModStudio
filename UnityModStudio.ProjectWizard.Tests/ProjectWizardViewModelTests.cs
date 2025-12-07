@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Data;
 using Moq;
+using UnityModStudio.Common;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Options;
 using UnityModStudio.Options.Tests;
@@ -426,6 +427,82 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         // Mock.Get(vm.GameManager).VerifyNoOtherCalls();
     }
 
+    [TestMethod]
+    public void WhenNoGameIsSelected_ReturnEmptyArray()
+    {
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(),
+        };
+
+        var selectedGames = vm.GetSelectedGames();
+        Assert.IsNotNull(selectedGames);
+        Assert.AreEqual(0, selectedGames.Length);
+    }
+
+    [TestMethod]
+    public void WhenSingleNonVersionedGameIsSelected_ReturnGame()
+    {
+        var gameNoVersion = new Game { DisplayName = "Game 2022", Path = Path.Combine(SampleGameInfo.DownloadPath, "2022-net4") };
+        var game10 = new Game { DisplayName = "Game 1.0", Version = "1.0", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var game11 = new Game { DisplayName = "Game 1.1", Version = "1.1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1") };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(gameNoVersion, game10, game11),
+        };
+        SetupEnsureAllGameProperties(vm.GameManager.GameRegistry);
+
+        vm.Game = gameNoVersion;
+
+        var selectedGames = vm.GetSelectedGames();
+        Assert.IsNotNull(selectedGames);
+        Assert.AreEqual(1, selectedGames.Length);
+        Assert.AreEqual(gameNoVersion, selectedGames[0]);
+    }
+
+    [TestMethod]
+    public void WhenSingleVersionedGameIsSelected_ReturnGame()
+    {
+        var gameNoVersion = new Game { DisplayName = "Game 2022", Path = Path.Combine(SampleGameInfo.DownloadPath, "2022-net4") };
+        var game10 = new Game { DisplayName = "Game 1.0", Version = "1.0", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var game11 = new Game { DisplayName = "Game 1.1", Version = "1.1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1") };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(gameNoVersion, game10, game11),
+        };
+        SetupEnsureAllGameProperties(vm.GameManager.GameRegistry);
+
+        vm.Game = game10;
+
+        var selectedGames = vm.GetSelectedGames();
+        Assert.IsNotNull(selectedGames);
+        Assert.AreEqual(1, selectedGames.Length);
+        Assert.AreEqual(game10, selectedGames[0]);
+    }
+
+    [TestMethod]
+    public void WhenMultipleVersionedGamesAreSelected_ReturnGames()
+    {
+        var gameNoVersion = new Game { DisplayName = "Game 2022", Path = Path.Combine(SampleGameInfo.DownloadPath, "2022-net4") };
+        var game10 = new Game { DisplayName = "Game 1.0", Version = "1.0", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var game11 = new Game { DisplayName = "Game 1.1", Version = "1.1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1") };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(gameNoVersion, game10, game11),
+        };
+        SetupEnsureAllGameProperties(vm.GameManager.GameRegistry);
+
+        vm.Game = game10;
+        vm.GameVersions[0].IsSelected = true;
+        vm.GameVersions[1].IsSelected = true;
+
+        var selectedGames = vm.GetSelectedGames();
+        Assert.IsNotNull(selectedGames);
+        Assert.AreEqual(2, selectedGames.Length);
+        Assert.AreEqual(game10, selectedGames[0]);
+        Assert.AreEqual(game11, selectedGames[1]);
+    }
+
     private static IGameManager SetupGameManagerWithLoad(params Game[] games)
     {
         var gameManager = SetupGameManager(games);
@@ -433,5 +510,15 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             .Setup(gameRegistry => gameRegistry.LoadAsync())
             .Returns(Task.CompletedTask);
         return gameManager;
+    }
+
+    private static void SetupEnsureAllGameProperties(IGameRegistry gameRegistry)
+    {
+        Mock.Get(gameRegistry).Setup(gr => gr.EnsureAllGameProperties(It.IsNotNull<Game>()))
+            .Callback((Game game) => game.GameName = game.DisplayName switch
+            {
+                "Game 2022" => "Unity2022Test",
+                _ => "Unity2018Test"
+            });
     }
 }

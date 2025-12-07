@@ -150,7 +150,7 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
             return;
 
         GameVersions = Games
-            .Where(game => game.GameName == GameName && game.Version is not null)
+            .Where(game => game.Version is not null && EnsureGameName(game) == GameName)
             .Select(game => new GameVersionViewModel(game, game == Game))
             .OrderBy(vm => vm.Version, new GameVersionComparer())
             .ToList();
@@ -160,6 +160,16 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
         NotifyPropertyChanged(nameof(IsMultiVersionPanelVisible));
 
         _previousGame = Game;
+
+
+        string EnsureGameName(Game game)
+        {
+            if (game.GameName is null)
+                GameManager!.GameRegistry.EnsureAllGameProperties(game);
+
+            Debug.Assert(game.GameName != null, "game.GameName != null");
+            return game.GameName!;
+        }
     }
 
     protected override void OnConfirm()
@@ -170,6 +180,17 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
             return;
 
         ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveSafeAsync);
+    }
+
+    public Game[] GetSelectedGames()
+    {
+        var selectedGames = GameVersions
+            .Where(vm => vm.IsSelected)
+            .Select(vm => vm.Game)
+            .ToArray();
+        if (selectedGames.Length == 0 && Game is not null)
+            selectedGames = [Game];
+        return selectedGames;
     }
 
 

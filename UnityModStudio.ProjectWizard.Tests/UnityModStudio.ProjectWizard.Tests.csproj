@@ -32,6 +32,7 @@
     <SampleGameType Include="2018-net4-v1.0" />
     <SampleGameType Include="2018-net4-v1.1" />
     <SampleGameType Include="2018-netstandard20-v2.0" />
+    <SampleGameType Include="2022-net4" />
   </ItemGroup>
 
   <Import Project="..\GameTest.targets" />

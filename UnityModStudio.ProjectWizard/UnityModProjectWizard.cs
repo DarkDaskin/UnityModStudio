@@ -71,10 +71,7 @@ namespace UnityModStudio.ProjectWizard
                 return false;
 
             _game = viewModel.Game;
-            _selectedGames = viewModel.GameVersions
-                .Where(vm => vm.IsSelected)
-                .Select(vm => vm.Game)
-                .ToArray();
+            _selectedGames = viewModel.GetSelectedGames();
             
             // Target framework(s) must be set here, in ProjectFinishedGenerating it's too late.
             var targetFrameworks = _selectedGames.Select(game => game.TargetFrameworkMoniker).Distinct().ToArray();
