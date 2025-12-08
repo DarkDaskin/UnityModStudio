@@ -33,8 +33,13 @@ namespace UnityModStudio.ProjectWizard
             ThreadHelper.ThrowIfNotOnUIThread();
 
             var projectPath = project.FullName;
+            var solution = project.DTE.Solution;
+            // Temporarily remove the project from the solution to avoid potential change conflict.
+            // Without that, the "One or more projects have changes which cannot be automatically handled by the project system" error may occur.
+            solution.Remove(project);
             ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateXmlFileAsync(projectPath, 
                 document => FileGenerator.UpdateProject(document, _selectedGames)));
+            solution.AddFromFile(projectPath);
 
             var launchSettingsPath = Path.Combine(Path.GetDirectoryName(projectPath)!, @"Properties\launchSettings.json");
             if (File.Exists(launchSettingsPath))
