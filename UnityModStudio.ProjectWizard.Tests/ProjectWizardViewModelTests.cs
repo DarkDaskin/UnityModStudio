@@ -64,15 +64,11 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         {
             DisplayName = "Game 1"
         };
-        var gameManager = SetupGameManager(game);
-        Mock.Get(gameManager.GameRegistry).Setup(gameRegistry => gameRegistry.LoadAsync()).Returns(Task.CompletedTask);
-        var generalSettingsManager = SetupGeneralSettingsManager();
-        Mock.Get(generalSettingsManager).Setup(gsm => gsm.LoadAsync()).Returns(Task.CompletedTask);
         var vm = new ProjectWizardViewModel
         {
-            GameManager = gameManager, 
+            GameManager = SetupGameManagerWithLoad(game), 
             GameExtensionResolvers = [],
-            GeneralSettingsManager = generalSettingsManager,
+            GeneralSettingsManager = SetupGeneralSettingsManagerWithLoad(),
         };
 
         Assert.AreEqual("", vm.Error);
@@ -184,7 +180,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             nameof(ProjectWizardViewModel.GameIcon),
             nameof(ProjectWizardViewModel.HasValidGamePath),
         ]));
-        Assert.IsTrue(changedErrorProperties.ToHashSet().SetEquals([nameof(ProjectWizardViewModel.GamePath)]));
+        Assert.IsEmpty(changedErrorProperties);
     }
 
     [TestMethod]
@@ -428,7 +424,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var vm = new ProjectWizardViewModel
         {
             GameManager = SetupGameManagerWithLoad(game),
-            GeneralSettingsManager = SetupGeneralSettingsManager(),
+            GeneralSettingsManager = SetupGeneralSettingsManagerWithLoad(),
             Game = game
         };
         vm.Closed += success => closedInvocations.Add(success);
@@ -835,6 +831,15 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             .Setup(gameRegistry => gameRegistry.LoadAsync())
             .Returns(Task.CompletedTask);
         return gameManager;
+    }
+
+    private static IGeneralSettingsManager SetupGeneralSettingsManagerWithLoad(GeneralSettings? settings = null)
+    {
+        var generalSettingsManager = SetupGeneralSettingsManager(settings);
+        Mock.Get(generalSettingsManager)
+            .Setup(gsm => gsm.LoadAsync())
+            .Returns(Task.CompletedTask);
+        return generalSettingsManager;
     }
 
     private static void SetupEnsureAllGameProperties(IGameRegistry gameRegistry)

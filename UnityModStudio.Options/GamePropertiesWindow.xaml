@@ -75,6 +75,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
@@ -158,8 +159,16 @@
           Grid.ColumnSpan="2"
           Text="{Binding GameVersion, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
 
-        <Grid
+        <TextBlock
           Grid.Row="6"
+          Grid.Column="1"
+          Grid.ColumnSpan="2"
+          Style="{StaticResource ErrorTextStyle}"
+          Text="{Binding ElementName=GameVersionText, Path=(Validation.Errors)[0].ErrorContent}"
+          Visibility="{Binding ElementName=GameVersionText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <Grid
+          Grid.Row="7"
           Grid.Column="0"
           Grid.ColumnSpan="3"
           d:DataContext=""

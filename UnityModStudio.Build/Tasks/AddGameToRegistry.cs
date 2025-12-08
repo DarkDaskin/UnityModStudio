@@ -73,13 +73,13 @@ public class AddGameToRegistry : GameRegistryTaskBase
         var baseDisplayName = string.IsNullOrWhiteSpace(DisplayName) ? gameInformation.Name ?? "Game" : DisplayName!.Trim();
         if (string.IsNullOrWhiteSpace(DisplayName) && !string.IsNullOrWhiteSpace(Version))
             baseDisplayName = $"{baseDisplayName} [{Version}]";
-        if (Store!.FindGameByDisplayName(baseDisplayName) is null)
+        if (Store!.FindGamesByDisplayName(baseDisplayName).Count == 0)
             return baseDisplayName;
 
         for (var i = 1; i < int.MaxValue; i++)
         {
             var displayNameWithSuffix = $"{baseDisplayName} ({i})";
-            if (Store.FindGameByDisplayName(displayNameWithSuffix) is null)
+            if (Store.FindGamesByDisplayName(displayNameWithSuffix).Count == 0)
                 return displayNameWithSuffix;
         }
 

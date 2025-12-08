@@ -19,25 +19,12 @@ namespace UnityModStudio.Options
         private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
         private static readonly string InvalidFileNameCharsString = string.Join(" ", InvalidFileNameChars.Where(c => !char.IsControl(c)));
 
-        private Game? _game;
-        private string? _gamePath;
-        private string? _modsPath;
-        private string? _gameVersion;
-        private string? _gameName;
-        private string? _architecture;
-        private string? _unityVersion;
-        private string? _monoProfile;
-        private string? _targetFrameworkMoniker;
-        private string? _gameExecutableFileName;
-        private ImageSource? _gameIcon;
-
-
         public Game? Game
         {
-            get => _game;
+            get;
             set
             {
-                SetProperty(ref _game, value);
+                SetProperty(ref field, value);
 
                 GamePath = Game?.Path;
                 ModsPath = Game?.ModsPath;
@@ -49,78 +36,72 @@ namespace UnityModStudio.Options
 
         public string? GamePath
         {
-            get => _gamePath;
+            get;
             set
             {
-                if (!SetProperty(ref _gamePath, value?.Trim()))
+                if (!SetProperty(ref field, value?.Trim()))
                     return;
 
-                ValidateGamePath();
-                NotifyErrorsChanged();
                 NotifyPropertyChanged(nameof(HasValidGamePath));
             }
         }
 
         public string? ModsPath
         {
-            get => _modsPath;
-            set => SetProperty(ref _modsPath, value);
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public string? GameVersion
         {
-            get => _gameVersion;
-            set => SetPropertyWithValidation(ref _gameVersion, value,
-                v => v?.Any(InvalidFileNameChars.Contains) ?? false
-                    ? [$"Game version must not contain any of the following characters: {InvalidFileNameCharsString}"]
-                    : []);
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public string? GameName
         {
-            get => _gameName;
-            private set => SetProperty(ref _gameName, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public string? Architecture
         {
-            get => _architecture;
-            private set => SetProperty(ref _architecture, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public string? UnityVersion
         {
-            get => _unityVersion;
-            private set => SetProperty(ref _unityVersion, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public string? MonoProfile
         {
-            get => _monoProfile;
-            private set => SetProperty(ref _monoProfile, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public string? TargetFrameworkMoniker
         {
-            get => _targetFrameworkMoniker;
-            private set => SetProperty(ref _targetFrameworkMoniker, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public string? GameExecutableFileName
         {
-            get => _gameExecutableFileName;
-            private set => SetProperty(ref _gameExecutableFileName, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public ImageSource? GameIcon
         {
-            get => _gameIcon;
-            private set => SetProperty(ref _gameIcon, value);
+            get;
+            private set => SetProperty(ref field, value);
         }
 
         public bool HasValidGamePath => !string.IsNullOrWhiteSpace(GamePath) && !HasPropertyErrors(nameof(GamePath));
         
-
         public ICommand ConfirmCommand { get; }
         public ICommand CancelCommand { get; }
 
@@ -131,11 +112,29 @@ namespace UnityModStudio.Options
         {
             ConfirmCommand = new DelegateCommand(Confirm, () => Game != null && !HasErrors, ThreadHelper.JoinableTaskFactory);
             CancelCommand = new DelegateCommand(Cancel, null, ThreadHelper.JoinableTaskFactory);
+
+            AddRule(() => GameVersion,
+                v => !(v?.Any(InvalidFileNameChars.Contains) ?? false),
+                $"Game version must not contain any of the following characters: {InvalidFileNameCharsString}");
+            AddRule(() => GamePath,
+                gamePath =>
+                {
+                    if (string.IsNullOrWhiteSpace(gamePath))
+                        return "Specify a path.";
+
+                    if (!GameInformationResolver.TryGetGameInformation(gamePath, out var gameInformation, out var error, out _))
+                        return error;
+
+                    OnValidGamePathChanged(gameInformation);
+
+                    return null;
+                });
+
         }
 
         private void Confirm()
         {
-            if (!ValidateGamePath())
+            if (!HasValidGamePath)
                 return;
 
             OnConfirm();
@@ -155,22 +154,8 @@ namespace UnityModStudio.Options
                 BitmapSizeOptions.FromEmptyOptions());
         }
 
-        protected virtual bool ValidateGamePath()
+        private void OnValidGamePathChanged(GameInformation gameInformation)
         {
-            ClearErrors(nameof(GamePath));
-
-            if (string.IsNullOrWhiteSpace(GamePath))
-            {
-                AddError("Specify a path.", nameof(GamePath));
-                return false;
-            }
-
-            if (!GameInformationResolver.TryGetGameInformation(GamePath, out var gameInformation, out var error, out _))
-            {
-                AddError(error, nameof(GamePath));
-                return false;
-            }
-
             GameName = gameInformation.Name;
             Architecture = gameInformation.Architecture.ToString();
             UnityVersion = gameInformation.UnityVersion;
@@ -179,8 +164,10 @@ namespace UnityModStudio.Options
             GameExecutableFileName = gameInformation.GameExecutableFile.Name;
             GameIcon = GetGameIcon(gameInformation);
 
-            return true;
+            OnValidGamePathChanged();
         }
+
+        protected virtual void OnValidGamePathChanged() { }
 
         protected virtual void RefreshProperties()
         {

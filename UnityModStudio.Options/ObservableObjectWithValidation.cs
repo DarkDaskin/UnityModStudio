@@ -3,23 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.PlatformUI;
+using UnityModStudio.Common;
 
 namespace UnityModStudio.Options;
 
 public class ObservableObjectWithValidation : ObservableObject, INotifyDataErrorInfo
 {
-    private readonly Dictionary<string, List<object>> _errors = new();
+    private readonly Dictionary<string, ValidationInfo> _validationInfos = new();
 
-    public IEnumerable<object> GetErrors(string? propertyName) =>
+    public IEnumerable<string> GetErrors(string? propertyName) =>
         string.IsNullOrEmpty(propertyName) ?
-            _errors.Values.SelectMany(list => list) :
-            _errors.TryGetValue(propertyName!, out var errors) ? errors : Enumerable.Empty<object>();
+            _validationInfos.Values.SelectMany(vi => vi.Errors) :
+            _validationInfos.TryGetValue(propertyName!, out var validationInfo) ? validationInfo.Errors : [];
 
     IEnumerable INotifyDataErrorInfo.GetErrors(string propertyName) => GetErrors(propertyName);
 
-    public bool HasErrors => _errors.Values.Any(errors => errors.Count > 0);
+    public bool HasErrors => _validationInfos.Values.Any(vi => vi.Errors.Count > 0);
 
     public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
@@ -29,31 +31,74 @@ public class ObservableObjectWithValidation : ObservableObject, INotifyDataError
         NotifyPropertyChanged(nameof(HasErrors));
     }
 
-    protected bool SetPropertyWithValidation<T>(ref T field, T newValue, Func<T, IEnumerable<object>> validator, [CallerMemberName] string propertyName = "")
+    protected new bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = "")
     {
-        if (!SetProperty(ref field, newValue, propertyName))
+        if (!base.SetProperty(ref field, newValue, propertyName))
             return false;
 
-        var oldErrors = GetErrors(propertyName);
-        _errors[propertyName] = validator(newValue).ToList();
-        if (!oldErrors.SequenceEqual(GetErrors(propertyName)))
-            NotifyErrorsChanged(propertyName);
+        if (!_validationInfos.ContainsKey(propertyName))
+            return true;
 
+        Validate(propertyName);
         return true;
     }
 
-    protected void ClearAllErrors() => _errors.Clear();
+    protected bool HasPropertyErrors([CallerMemberName] string propertyName = "") => GetErrors(propertyName).Any();
 
-    protected void ClearErrors([CallerMemberName] string propertyName = "") => _errors.Remove(propertyName);
-
-    protected void AddError(object error, [CallerMemberName] string propertyName = "")
+    protected void AddRule<T>(Expression<Func<T>> property, ValidationRule<T> rule)
     {
-        if (!_errors.TryGetValue(propertyName, out var errors))
-            _errors[propertyName] = errors = [];
-
-        errors.Add(error);
+        var propertyName = property.GetMemberName();
+        if (!_validationInfos.TryGetValue(propertyName, out var untypedValidationInfo))
+            _validationInfos.Add(propertyName, untypedValidationInfo = new ValidationInfo<T>(property.Compile()));
+        var validationInfo = (ValidationInfo<T>)untypedValidationInfo;
+        validationInfo.Rules.Add(rule);
     }
 
-    protected bool HasPropertyErrors([CallerMemberName] string propertyName = "") =>
-        _errors.TryGetValue(propertyName, out var errors) && errors.Count > 0;
+    protected void AddRule<T>(Expression<Func<T>> property, Func<T, bool> rule, Func<T, string> errorMessage) =>
+        AddRule(property, v => !rule(v) ? errorMessage(v) : null);
+
+    protected void AddRule<T>(Expression<Func<T>> property, Func<T, bool> rule, string errorMessage) =>
+        AddRule(property, rule, _ => errorMessage);
+
+    protected bool Validate([CallerMemberName] string propertyName = "")
+    {
+        if (!_validationInfos.TryGetValue(propertyName, out var validationInfo))
+            throw new ArgumentException($"Property '{propertyName}' can't be validated.", nameof(propertyName));
+
+        var oldErrors = GetErrors(propertyName).ToHashSet();
+        var result = validationInfo.Validate();
+        var newErrors = GetErrors(propertyName);
+        if (!oldErrors.SetEquals(newErrors))
+            NotifyErrorsChanged(propertyName);
+        return result;
+    }
+
+    protected bool ValidateAll() => _validationInfos.Keys.Aggregate(false, (current, propertyName) => current | Validate(propertyName));
+
+
+    public delegate string? ValidationRule<in T>(T value);
+
+    private abstract class ValidationInfo
+    {
+        public readonly List<string> Errors = [];
+
+        public abstract bool Validate();
+    }
+
+    private class ValidationInfo<T>(Func<T> getter) : ValidationInfo
+    {
+        public readonly List<ValidationRule<T>> Rules = [];
+
+        public override bool Validate()
+        {
+            Errors.Clear();
+            foreach (var rule in Rules)
+            {
+                var error = rule(getter());
+                if (error != null)
+                    Errors.Add(error);
+            }
+            return Errors.Count == 0;
+        }
+    }
 }

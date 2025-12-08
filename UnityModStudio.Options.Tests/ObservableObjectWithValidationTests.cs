@@ -22,13 +22,14 @@ public sealed class ObservableObjectWithValidationTests
 
         vm.PositiveInt = 42;
         vm.ShortString = ":)";
+        vm.AnyInt = 1337;
 
         Assert.IsFalse(vm.HasErrors);
         Assert.IsTrue(vm.GetErrors(nameof(TestViewModel.PositiveInt)).SequenceEqual([]));
         Assert.IsTrue(vm.GetErrors(nameof(TestViewModel.ShortString)).SequenceEqual([]));
         Assert.IsTrue(vm.GetErrors(null).SequenceEqual([]));
         Assert.IsTrue(vm.GetErrors("").SequenceEqual([]));
-        Assert.IsTrue(notifiedProperties.SequenceEqual([nameof(TestViewModel.PositiveInt), nameof(TestViewModel.ShortString)]));
+        Assert.IsTrue(notifiedProperties.SequenceEqual([nameof(TestViewModel.PositiveInt), nameof(TestViewModel.ShortString), nameof(TestViewModel.AnyInt)]));
         Assert.IsTrue(notifiedPropertyErrors.SequenceEqual([]));
     }
 
@@ -39,13 +40,14 @@ public sealed class ObservableObjectWithValidationTests
 
         vm.PositiveInt = -1;
         vm.ShortString = "LongString";
+        vm.AnyInt = 1337;
 
         Assert.IsTrue(vm.HasErrors);
         Assert.IsTrue(vm.GetErrors(nameof(TestViewModel.PositiveInt)).SequenceEqual(["PositiveInt must be positive."]));
         Assert.IsTrue(vm.GetErrors(nameof(TestViewModel.ShortString)).SequenceEqual(["ShortString must not be longer than 5 characters."]));
         Assert.IsTrue(vm.GetErrors(null).SequenceEqual(["PositiveInt must be positive.", "ShortString must not be longer than 5 characters."]));
         Assert.IsTrue(vm.GetErrors("").SequenceEqual(["PositiveInt must be positive.", "ShortString must not be longer than 5 characters."]));
-        Assert.IsTrue(notifiedProperties.SequenceEqual([nameof(TestViewModel.PositiveInt), nameof(TestViewModel.HasErrors), nameof(TestViewModel.ShortString), nameof(TestViewModel.HasErrors)]));
+        Assert.IsTrue(notifiedProperties.SequenceEqual([nameof(TestViewModel.PositiveInt), nameof(TestViewModel.HasErrors), nameof(TestViewModel.ShortString), nameof(TestViewModel.HasErrors), nameof(TestViewModel.AnyInt)]));
         Assert.IsTrue(notifiedPropertyErrors.SequenceEqual([nameof(TestViewModel.PositiveInt), nameof(TestViewModel.ShortString)]));
     }
 
@@ -79,21 +81,28 @@ public sealed class ObservableObjectWithValidationTests
 
     private class TestViewModel : ObservableObjectWithValidation
     {
-        private int _positiveInt = 1;
-        private string _shortString = "";
-
         public int PositiveInt
         {
-            get => _positiveInt;
-            set => SetPropertyWithValidation(ref _positiveInt, value, 
-                v => v > 0 ? [] : [$"{nameof(PositiveInt)} must be positive."]);
-        }
+            get;
+            set => SetProperty(ref field, value);
+        } = 1;
 
         public string ShortString
         {
-            get => _shortString;
-            set => SetPropertyWithValidation(ref _shortString, value,
-                v => v.Length <= 5 ? [] : [$"{nameof(ShortString)} must not be longer than 5 characters."]);
+            get;
+            set => SetProperty(ref field, value);
+        } = "";
+
+        public int AnyInt
+        {
+            get;
+            set => SetProperty(ref field, value);
+        }
+
+        public TestViewModel()
+        {
+            AddRule(() => PositiveInt, v => v > 0, $"{nameof(PositiveInt)} must be positive.");
+            AddRule(() => ShortString, v => v.Length <= 5, $"{nameof(ShortString)} must not be longer than 5 characters.");
         }
     }
 }

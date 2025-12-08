@@ -87,7 +87,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var changedProperties = new List<string>();
         var changedErrorProperties = new List<string>();
         var game = new Game();
-        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager()};
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind()};
         vm.PropertyChanged += (sender, args) => changedProperties.Add(args.PropertyName);
         vm.ErrorsChanged += (sender, args) => changedErrorProperties.Add(args.PropertyName);
 
@@ -139,7 +139,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         {
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
-        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind() };
 
         Assert.IsTrue(vm.HasErrors);
         Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.DisplayName)).SequenceEqual(["Display name must not be empty."]));
@@ -148,17 +148,17 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenDisplayNameIsNotUnique_ProduceError()
     {
-        var game1 = new Game
+        var game = new Game
         {
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
-        var game2 = new Game
+        var existingGame = new Game
         {
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
         };
-        var vm = new GamePropertiesViewModel(game1) { GameManager = SetupGameManagerWithFind(game2) };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind(existingGame) };
 
         Assert.IsTrue(vm.HasErrors);
         Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.DisplayName)).SequenceEqual(["Display name must be unique."]));
@@ -167,17 +167,41 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenGameVersionContainsInvalidChars_ProduceError()
     {
-        var game1 = new Game
+        var game = new Game
         {
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
-        var vm = new GamePropertiesViewModel(game1) { GameManager = SetupGameManager() };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind() };
 
         vm.GameVersion = "Some*";
 
         Assert.IsTrue(vm.HasErrors);
         Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.GameVersion)).SequenceEqual(["Game version must not contain any of the following characters: \" < > | : * ? \\ /"]));
+    }
+
+    [TestMethod]
+    public void WhenGameVersionIsNotUnique_ProduceError()
+    {
+        var game = new Game
+        {
+            DisplayName = "Game 1",
+            GameName = "Unity2018Test",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+        };
+        var existingGame = new Game
+        {
+            DisplayName = "Game 2",
+            GameName = "Unity2018Test",
+            Version = "1",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1"),
+        };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind(existingGame) };
+
+        vm.GameVersion = "1";
+
+        Assert.IsTrue(vm.HasErrors);
+        Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.GameVersion)).SequenceEqual(["Game version must be unique across games with same game name."]));
     }
 
     [TestMethod]
@@ -188,7 +212,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var game = new Game { Path = oldPath };
         var vm = new GamePropertiesViewModel(game)
         {
-            GameManager = SetupGameManager(),
+            GameManager = SetupGameManagerWithFind(),
             FolderBrowserService = Mock.Of<IFolderBrowserService>(fbs => 
                 fbs.BrowseForFolderAsync("Select the game root folder", oldPath) == Task.FromResult(newPath)),
         };
@@ -208,7 +232,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var game = new Game { Path = oldPath };
         var vm = new GamePropertiesViewModel(game)
         {
-            GameManager = SetupGameManager(),
+            GameManager = SetupGameManagerWithFind(),
             FolderBrowserService = Mock.Of<IFolderBrowserService>(fbs => 
                 fbs.BrowseForFolderAsync("Select the game root folder", oldPath) == Task.FromResult<string?>(null)),
         };
@@ -226,7 +250,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
         var vm = new GamePropertiesViewModel(game)
         {
-            GameManager = SetupGameManager(),
+            GameManager = SetupGameManagerWithFind(),
             FolderBrowserService = Mock.Of<IFolderBrowserService>(fbs => 
                 fbs.BrowseForFolderAsync("Select the mods folder", game.Path) == Task.FromResult("Mods")),
         };
@@ -244,7 +268,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var game = new Game { Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
         var vm = new GamePropertiesViewModel(game)
         {
-            GameManager = SetupGameManager(),
+            GameManager = SetupGameManagerWithFind(),
             FolderBrowserService = Mock.Of<IFolderBrowserService>(fbs => 
                 fbs.BrowseForFolderAsync("Select the mods folder", game.Path) == Task.FromResult<string?>(null)),
         };
@@ -276,7 +300,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
             UnityVersion = "2018.4.36f1",
             MonoProfile = ".NET 4.7.2",
         };
-        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind() };
         vm.Closed += success => closedInvocations.Add(success);
 
         vm.DisplayName = "New name ";
@@ -325,7 +349,7 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
             UnityVersion = "2018.4.36f1",
             MonoProfile = ".NET 4.7.2",
         };
-        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManager() };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind() };
         vm.Closed += success => closedInvocations.Add(success);
 
         vm.DisplayName = "New name";
@@ -358,8 +382,11 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     {
         var gameManager = SetupGameManager(games);
         Mock.Get(gameManager.GameRegistry)
-            .Setup(gameRegistry => gameRegistry.FindGameByDisplayName(It.IsAny<string>()))
-            .Returns((string displayName) => gameManager.GameRegistry.Games.First(game => game.DisplayName == displayName));
+            .Setup(gameRegistry => gameRegistry.FindGamesByDisplayName(It.IsAny<string>()))
+            .Returns((string displayName) => gameManager.GameRegistry.Games.Where(game => game.DisplayName == displayName).ToArray());
+        Mock.Get(gameManager.GameRegistry)
+            .Setup(gameRegistry => gameRegistry.FindGamesByGameNameAndVersion(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns((string? gameName, string? version) => gameManager.GameRegistry.Games.Where(game => game.GameName == gameName && game.Version == version).ToArray());
         return gameManager;
     }
 }

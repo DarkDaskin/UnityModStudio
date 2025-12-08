@@ -16,7 +16,8 @@ public interface IGameRegistry : IStore
     void RemoveGame(Game game);
     void EnsureAllGameProperties(Game game);
     Game? FindGameById(Guid id);
-    Game? FindGameByDisplayName(string name);
+    IReadOnlyCollection<Game> FindGamesByDisplayName(string name);
+    IReadOnlyCollection<Game> FindGamesByGameNameAndVersion(string gameName, string? version);
     GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties, bool strictMatch);
 }
 
@@ -54,10 +55,15 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
     }
 
     public Game? FindGameById(Guid id) => _games.TryGetValue(id, out var game) ? game : null;
+    
+    public IReadOnlyCollection<Game> FindGamesByDisplayName(string name) => 
+        Games.Where(game => string.Equals(game.DisplayName, name, StringComparison.CurrentCultureIgnoreCase))
+            .ToArray();
 
-    public Game? FindGameByDisplayName(string name) => FindGamesByDisplayName(name).FirstOrDefault();
-
-    private IEnumerable<Game> FindGamesByDisplayName(string name) => Games.Where(game => string.Equals(game.DisplayName, name, StringComparison.CurrentCultureIgnoreCase));
+    public IReadOnlyCollection<Game> FindGamesByGameNameAndVersion(string gameName, string? version) => 
+        Games.Where(game => string.Equals(game.GameName, gameName, StringComparison.InvariantCultureIgnoreCase) && 
+                                     string.Equals(game.Version ?? "", version ?? "", StringComparison.InvariantCultureIgnoreCase))
+            .ToArray();
 
     public GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties, bool strictMatch)
     {
@@ -71,8 +77,8 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
 
         if (properties.TryGetValue(nameof(Game.DisplayName), out var displayName))
         {
-            var matches = FindGamesByDisplayName(displayName).ToArray();
-            if (matches.Length > 0 || strictMatch)
+            var matches = FindGamesByDisplayName(displayName);
+            if (matches.Count > 0 || strictMatch)
                 return GameMatchResult.Create(matches, "");
         }
 

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace UnityModStudio.Common.Options
 {
@@ -11,11 +11,11 @@ namespace UnityModStudio.Common.Options
         {
         }
 
-        public static GameMatchResult Create(IReadOnlyList<Game> games, string ambiguousMessage) =>
+        public static GameMatchResult Create(IReadOnlyCollection<Game> games, string ambiguousMessage) =>
             games.Count switch
             {
                 0 => new NoMatch(),
-                1 => new Match(games[0]),
+                1 => new Match(games.First()),
                 _ => new AmbiguousMatch(games, ambiguousMessage)
             };
 

@@ -243,14 +243,7 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
         RefreshProperties();
     }
 
-    protected override bool ValidateGamePath()
-    {
-        var result = base.ValidateGamePath();
-
-        RefreshProperties();
-
-        return result;
-    }
+    protected override void OnValidGamePathChanged() => RefreshProperties();
 
     protected override void RefreshProperties()
     {

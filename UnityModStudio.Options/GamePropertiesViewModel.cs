@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
@@ -10,48 +11,34 @@ namespace UnityModStudio.Options
 {
     public class GamePropertiesViewModel : GamePropertiesViewModelBase
     {
-        private string _displayName = "";
-        private ModDeploymentMode _modDeploymentMode;
-        private bool _deploySourceCode;
-        private DoorstopMode _doorstopMode;
-        private bool _useAlternateDoorstopDllName;
-        private IGameManager? _gameManager;
-
         public string DisplayName
         {
-            get => _displayName;
-            set
-            {
-                if (!SetProperty(ref _displayName, value))
-                    return;
-                
-                ValidateDisplayName();
-                NotifyErrorsChanged();
-            }
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public ModDeploymentMode ModDeploymentMode
         {
-            get => _modDeploymentMode;
-            set => SetProperty(ref _modDeploymentMode, value);
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public bool DeploySourceCode
         {
-            get => _deploySourceCode;
-            set => SetProperty(ref _deploySourceCode, value);
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public DoorstopMode DoorstopMode
         {
-            get => _doorstopMode;
-            set => SetProperty(ref _doorstopMode, value);
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public bool UseAlternateDoorstopDllName
         {
-            get => _useAlternateDoorstopDllName;
-            set => SetProperty(ref _useAlternateDoorstopDllName, value);
+            get;
+            set => SetProperty(ref field, value);
         }
 
         public ICommand BrowseForGamePathCommand { get; }
@@ -64,15 +51,15 @@ namespace UnityModStudio.Options
         [Import]
         public IGameManager? GameManager
         {
-            get => _gameManager;
+            get;
             set
             {
-                SetProperty(ref _gameManager, value);
+                SetProperty(ref field, value);
 
-                ValidateDisplayName();
+                Validate(nameof(DisplayName));
+                Validate(nameof(GameVersion));
             }
         }
-
 
         public GamePropertiesViewModel(Game game)
         {
@@ -85,6 +72,13 @@ namespace UnityModStudio.Options
             
             BrowseForGamePathCommand = new DelegateCommand(BrowseForGamePath, null, ThreadHelper.JoinableTaskFactory);
             BrowseForModsPathCommand = new DelegateCommand(BrowseForModsPath, null, ThreadHelper.JoinableTaskFactory);
+
+            AddRule(() => DisplayName, displayName => !string.IsNullOrWhiteSpace(displayName), "Display name must not be empty.");
+            AddRule(() => DisplayName, displayName => GameManager is null || !GameManager.GameRegistry.FindGamesByDisplayName(displayName).Except([Game]).Any(), 
+                "Display name must be unique.");
+            AddRule(() => GameVersion, 
+                gameVersion => GameName is null || GameManager is null || !GameManager.GameRegistry.FindGamesByGameNameAndVersion(GameName, gameVersion).Except([Game]).Any(), 
+                "Game version must be unique across games with same game name.");
         }
 
         private void BrowseForGamePath()
@@ -109,25 +103,10 @@ namespace UnityModStudio.Options
                 ModsPath = selectedPath;
         }
 
-        private void ValidateDisplayName()
+        protected override void OnValidGamePathChanged()
         {
-            ClearErrors(nameof(DisplayName));
-
-            if (string.IsNullOrWhiteSpace(DisplayName))
-                AddError("Display name must not be empty.", nameof(DisplayName));
-            else if(GameManager?.GameRegistry.FindGameByDisplayName(DisplayName) is { } other && other != Game)
-                AddError("Display name must be unique.", nameof(DisplayName));
-        }
-
-        protected override bool ValidateGamePath()
-        {
-            if (!base.ValidateGamePath())
-                return false;
-
             if (string.IsNullOrWhiteSpace(DisplayName))
                 DisplayName = GameName ?? "";
-
-            return true;
         }
 
         protected override void OnConfirm()

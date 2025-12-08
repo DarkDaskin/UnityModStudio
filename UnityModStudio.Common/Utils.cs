@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.IO;
+using System.Linq.Expressions;
 using System.Numerics;
 using System.Text;
 
@@ -107,4 +108,11 @@ public static class Utils
             return exception.Data[ErrorCodeDataKey] as string;
         return null;
     }
+
+    public static string GetMemberName<T>(this Expression<T> expression) => expression.Body switch
+    {
+        MemberExpression m => m.Member.Name,
+        UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
+        _ => throw new ArgumentException("Expression does not represent a member access.", nameof(expression))
+    };
 }
