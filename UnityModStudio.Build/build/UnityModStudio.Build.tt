@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <UseGameRegistry Condition="'$(UseGameRegistry)' == ''">true</UseGameRegistry>
-    <DoorstopVersion Condition="'$(DoorstopVersion)' == ''">4.4.0</DoorstopVersion>
+    <DoorstopVersion Condition="'$(DoorstopVersion)' == ''">4.4.1</DoorstopVersion>
     <DoorstopSourcePath Condition="'$(DoorstopSourcePath)' == ''">$(BaseIntermediateOutputPath)Doorstop\</DoorstopSourcePath>
     <DoorstopSourcePath Condition="!HasTrailingSlash('$(DoorstopSourcePath)')">$(DoorstopSourcePath)\</DoorstopSourcePath>
     <UseProvidedDoorstop Condition="'$(UseProvidedDoorstop)' == ''">false</UseProvidedDoorstop>
