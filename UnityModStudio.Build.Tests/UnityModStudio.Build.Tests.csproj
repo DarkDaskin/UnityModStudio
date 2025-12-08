@@ -31,7 +31,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Projects\AmbientGame\NuGetReferences\Assemblies\" />
     <Folder Include="Projects\AmbientGame\MultipleGameVersions\Assemblies\" />
+    <Folder Include="Projects\AmbientGame\ExplicitReferences\Assemblies\" />
     <Folder Include="Projects\AmbientGame\WithGameVersion\Assemblies\" />
     <Folder Include="Projects\AmbientGame\WithGameName\Assemblies\" />
     <Folder Include="Projects\AmbientGame\WrongGameName\Assemblies\" />

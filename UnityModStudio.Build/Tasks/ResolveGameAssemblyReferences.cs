@@ -49,13 +49,17 @@ public class ResolveGameAssemblyReferences : Task
         var referencesToRemove = new List<ITaskItem>();
         foreach (var reference in ExistingReferences)
         {
+            var referenceName = reference.ItemSpec.Contains('\\') ?
+                Path.GetFileNameWithoutExtension(reference.ItemSpec) :
+                reference.ItemSpec;
             if (resolvedReferences.TryGetValue(reference.ItemSpec, out var path))
             {
                 reference.SetMetadata("HintPath", path);
                 reference.SetMetadata("Private", "false");
                 referencesToUpdate.Add(reference);
             }
-            else if (string.Equals(reference.GetMetadata("IsImplicitlyDefined"), "true", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(reference.GetMetadata("IsImplicitlyDefined"), "true", StringComparison.OrdinalIgnoreCase) ||
+                     referenceName != reference.ItemSpec && resolvedReferences.ContainsKey(referenceName))
                 referencesToRemove.Add(reference);
         }
 

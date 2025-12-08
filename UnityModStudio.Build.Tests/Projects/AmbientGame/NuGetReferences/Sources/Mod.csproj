@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutDir>..\Assemblies\</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RestoreAdditionalProjectSources>
+      $(RestoreAdditionalProjectSources);
+      https://nuget.bepinex.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnityModStudio.Build" Version="$(BuildPackageVersion)" />
+    <PackageReference Include="UnityEngine.Modules" Version="2018.4.36" IncludeAssets="compile" />
+  </ItemGroup>
+
+</Project>

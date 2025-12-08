@@ -10,7 +10,8 @@ public class AmbientGameBuildTests : BuildTestsBase
     public void TestInitialize()
     {
         ProjectOptions.GlobalProperties["RestoreAdditionalProjectSources"] =
-            Path.GetFullPath(@$"..\..\..\..\UnityModStudio.Build\bin\{Configuration}\");
+            Path.GetFullPath(@$"..\..\..\..\UnityModStudio.Build\bin\{Configuration}\") +
+            ";https://nuget.bepinex.dev/v3/index.json";
     }
 
     [TestMethod]
@@ -200,5 +201,51 @@ public class AmbientGameBuildTests : BuildTestsBase
         Assert.IsFalse(File.Exists(Path.Combine(gamePath, "winhttp.dll")));
         Assert.IsFalse(File.Exists(Path.Combine(gamePath, "version.dll")));
         Assert.IsFalse(File.Exists(Path.Combine(gamePath, "doorstop_config.ini")));
+    }
+
+    [TestMethod]
+    public void WhenProjectHasExplicitReferences_Build()
+    {
+        var gamePath = MakeGameCopy("2018-net4-v1.0");
+        var modPath = Path.Combine(gamePath, @"Mods\Mod");
+        Directory.CreateDirectory(modPath);
+        TestUtils.CopyDirectory(@"Projects\AmbientGame\ExplicitReferences", modPath);
+        var projectPath = Path.Combine(modPath, @"Sources\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(projectPath);
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.IsEmpty(logger.BuildErrors);
+        Assert.IsEmpty(logger.BuildWarnings);
+        Assert.IsTrue(File.Exists(Path.Combine(modPath, @"Assemblies\Mod.dll")));
+        Assert.IsTrue(File.Exists(Path.Combine(gamePath, "winhttp.dll")));
+        Assert.IsFalse(File.Exists(Path.Combine(gamePath, "version.dll")));
+        var doorstopConfigPath = Path.Combine(gamePath, "doorstop_config.ini");
+        Assert.IsTrue(File.Exists(doorstopConfigPath));
+        Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mods\Mod\Assemblies\Mod.dll"));
+    }
+
+    [TestMethod]
+    public void WhenProjectHasNuGetReferences_Build()
+    {
+        var gamePath = MakeGameCopy("2018-net4-v1.0");
+        var modPath = Path.Combine(gamePath, @"Mods\Mod");
+        Directory.CreateDirectory(modPath);
+        TestUtils.CopyDirectory(@"Projects\AmbientGame\NuGetReferences", modPath);
+        var projectPath = Path.Combine(modPath, @"Sources\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(projectPath);
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.IsEmpty(logger.BuildErrors);
+        Assert.IsEmpty(logger.BuildWarnings);
+        Assert.IsTrue(File.Exists(Path.Combine(modPath, @"Assemblies\Mod.dll")));
+        Assert.IsTrue(File.Exists(Path.Combine(gamePath, "winhttp.dll")));
+        Assert.IsFalse(File.Exists(Path.Combine(gamePath, "version.dll")));
+        var doorstopConfigPath = Path.Combine(gamePath, "doorstop_config.ini");
+        Assert.IsTrue(File.Exists(doorstopConfigPath));
+        Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mods\Mod\Assemblies\Mod.dll"));
     }
 }
