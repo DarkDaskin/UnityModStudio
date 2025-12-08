@@ -3,7 +3,7 @@
 ![NuGet Downloads](https://img.shields.io/nuget/dt/UnityModStudio.Build?logo=nuget)
 
 # Unity Mod Studio
-Allows creating mods for Unity games using Visual Studio 2022.
+Allows creating mods for Unity games using Visual Studio 2022+.
 
 ## Implemented features
 - Creating a new project.
@@ -25,7 +25,7 @@ Allows creating mods for Unity games using Visual Studio 2022.
   - RimWorld project template.
 
 ## Visual Studio support
-Release 1.1 is the last release which supports Visual Studio 2019. New development will be focused on Visual Studio 2022.
+Release 1.1 is the last release which supports Visual Studio 2019. New development will be focused on Visual Studio 2022+.
 
 Visual Studio 17.10 or newer is required.
 
@@ -36,5 +36,5 @@ Required workloads:
 Additionally you may need to install targeting packs for .NET versions your games use.
 
 # Contents
-- A [Visual Studio 2022 extension](https://marketplace.visualstudio.com/items?itemName=darkdaskin.UnityModStudio2022) containing the project template and its wizard, options page for managing the game registry, and the debugger.
+- A [Visual Studio 2022+ extension](https://marketplace.visualstudio.com/items?itemName=darkdaskin.UnityModStudio2022) containing the project template and its wizard, options page for managing the game registry, and the debugger.
 - The [`UnityModStudio.Build`](https://www.nuget.org/packages/UnityModStudio.Build/) NuGet package which resolves game assembly references and helps building and debugging the mod.

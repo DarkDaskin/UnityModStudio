@@ -10,20 +10,20 @@
         <Tags>unity; bepinex; mod</Tags>
     </Metadata>
     <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.10, 18.0)">
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.10, 19.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
     </Installation>
     <Dependencies>
         <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
-        <Dependency d:Source="Installed" Id="VSTU17.0.b6546c9c-e5fe-4095-8d39-c080d9bd6a85" DisplayName="Visual Studio 2022 Tools for Unity" Version="[17.0,18.0)" d:InstallSource="Download" />
+        <Dependency d:Source="Installed" Id="VSTU17.0.b6546c9c-e5fe-4095-8d39-c080d9bd6a85" DisplayName="Visual Studio 2022 Tools for Unity" Version="[17.0,19.0)" d:InstallSource="Download" />
         <Dependency d:Source="Project" d:ProjectName="UnityModStudio" d:InstallSource="Download" DisplayName="|UnityModStudio;VSIXNameProjectOutputGroup|" Id="|UnityModStudio;VSIXIdentifierProjectOutputGroup|" Version="[3.0,4.0)" />
     </Dependencies>
     <Prerequisites>
-        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
-        <Prerequisite Id="Microsoft.VisualStudio.Component.NuGet" Version="[17.0,18.0)" DisplayName="NuGet package manager" />
-        <Prerequisite Id="Microsoft.Component.MSBuild" Version="[17.0,18.0)" DisplayName="MSBuild" />
-        <Prerequisite Id="Microsoft.NetCore.Component.SDK" Version="[17.0,18.0)" DisplayName=".NET Core SDK" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,19.0)" DisplayName="Visual Studio core editor" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.NuGet" Version="[17.0,19.0)" DisplayName="NuGet package manager" />
+        <Prerequisite Id="Microsoft.Component.MSBuild" Version="[17.0,19.0)" DisplayName="MSBuild" />
+        <Prerequisite Id="Microsoft.NetCore.Component.SDK" Version="[17.0,19.0)" DisplayName=".NET Core SDK" />
     </Prerequisites>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
