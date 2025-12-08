@@ -16,6 +16,7 @@
     <DoorstopSourcePath Condition="'$(DoorstopSourcePath)' == ''">$(BaseIntermediateOutputPath)Doorstop\</DoorstopSourcePath>
     <DoorstopSourcePath Condition="!HasTrailingSlash('$(DoorstopSourcePath)')">$(DoorstopSourcePath)\</DoorstopSourcePath>
     <UseProvidedDoorstop Condition="'$(UseProvidedDoorstop)' == ''">false</UseProvidedDoorstop>
+    <IsNoGameBuildAllowed Condition="'$(IsNoGameBuildAllowed)' == ''">true</IsNoGameBuildAllowed>
     <_PrimaryDoorstopDllName>winhttp.dll</_PrimaryDoorstopDllName>
     <_AlternateDoorstopDllName>version.dll</_AlternateDoorstopDllName>
     <_DoorstopConfigFileName>doorstop_config.ini</_DoorstopConfigFileName>
@@ -304,26 +305,32 @@
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
     <ResolveGameProperties LookupProperties="@(GameLookupProperty)" BuildingInsideVisualStudio="$(BuildingInsideVisualStudio)" ProjectDirectory="$(MSBuildProjectDirectory)" 
-                           IsAmbientGameResolutionAllowed="$(_IsAmbientGameResolutionAllowed)" StorePath="$(GameRegistryPath)">
+                           ExistingReferences="@(Reference)" IsAmbientGameResolutionAllowed="$(_IsAmbientGameResolutionAllowed)" IsNoGameBuildAllowed="$(IsNoGameBuildAllowed)" StorePath="$(GameRegistryPath)">
 <# foreach (var property in gameProperties) { #>
       <Output TaskParameter="<#= property #>" PropertyName="_Resolved<#= property #>" />
 <# } #>
       <Output TaskParameter="IsAmbientGame" PropertyName="_IsAmbientGame" />
+      <Output TaskParameter="IsNoGameBuild" PropertyName="_IsNoGameBuild" />
     </ResolveGameProperties>
 
-    <Error Text="Building multi-version mod for an ambient game is not supported." Condition="'$(_IsAmbientGame)' == 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'" />
+    <Error Code="UMS0016" Text="Building multi-version mod for an ambient game is not supported." Condition="'$(_IsAmbientGame)' == 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'" />
+    <Error Code="UMS0017" Text="Building multi-version mod without game directory is not supported." Condition="'$(_IsNoGameBuild)' == 'true' and '$(_SpecifiedGameVersionType)' == 'Multiple'" />
 
     <PropertyGroup Condition="'$(_IsAmbientGame)' == 'true'">
       <_ResolvedDoorstopMode>$(_AmbientGamesDoorstopMode)</_ResolvedDoorstopMode>
       <_ResolvedUseAlternateDoorstopDllName>$(_UseAlternateDoorstopDllNameForAmbientGames)</_ResolvedUseAlternateDoorstopDllName>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(_IsNoGameBuild)' == 'true'">
+      <_ResolvedDoorstopMode>Disabled</_ResolvedDoorstopMode>
+      <_ResolvedModDeploymentMode>Disabled</_ResolvedModDeploymentMode>
     </PropertyGroup>
     <ItemGroup>
 <# foreach (var property in gameProperties) { #>
       <_ResolvedProperty Include="_Resolved<#= property #>" Value="$(_Resolved<#= property #>)" Condition="'$(_Resolved<#= property #>)' != ''" />
 <# } #>
     </ItemGroup>
-    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" />
-    <Touch Files="$(_ResolvedPropertiesProjectFilePath)" />
+    <UpdateProjectFile ProjectFile="$(_ResolvedPropertiesProjectFilePath)" Properties="@(_ResolvedProperty)" Condition="'$(_IsNoGameBuild)' != 'true'" />
+    <Touch Files="$(_ResolvedPropertiesProjectFilePath)" Condition="'$(_IsNoGameBuild)' != 'true'" />
 
     <PropertyGroup>
       <_GamePathChanged Condition="'$(_ResolvedGamePath)' != '$(_PreviousGamePath)'">true</_GamePathChanged>
@@ -343,8 +350,11 @@
     <Touch Files="$(_GamePropertiesChangeTimestampFilePath)" AlwaysCreate="true" />
   </Target>
 
+  <!-- HACK: by some reason without this target the condition on the next one does not evaluate properly. -->
+  <Target Name="PreResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" />
+
   <Target Name="ResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" 
-          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildAllProjects)" Outputs="$(_ResolvedReferencesProjectFilePath)" Condition="'$(_EffectiveGameVersionType)' != 'Multiple'">
+          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildAllProjects)" Outputs="$(_ResolvedReferencesProjectFilePath)" Condition="'$(_EffectiveGameVersionType)' != 'Multiple' and '$(_IsNoGameBuild)' != 'true'">
     <CreateProperty Value="true">
       <Output TaskParameter="ValueSetByTask" PropertyName="_ResolveGameAssemblyReferencesIsRunning" />
     </CreateProperty>
@@ -384,7 +394,7 @@
 
   <Target Name="GameAssemblyReferencesResolved" />
 
-  <Target Name="_PrepareModPathsRegular" DependsOnTargets="GamePropertiesResolved" Condition="'$(_IsAmbientGame)' != 'true'">
+  <Target Name="_PrepareModPathsRegular" DependsOnTargets="GamePropertiesResolved" Condition="'$(_IsAmbientGame)' != 'true' and '$(_IsNoGameBuild)' != 'true'">
     <PropertyGroup>
       <GameModsPath Condition="'$(GameModsPath)' == ''">.\</GameModsPath>
     </PropertyGroup>

@@ -44,6 +44,9 @@
     <Folder Include="Projects\Correct\MultiVersionWithModSourcePath\1.0\Assemblies\" />
     <Folder Include="Projects\Correct\SingleVersionWithModSourcePath\1.0\Assemblies\" />
     <Folder Include="Projects\Correct\NonVersionedWithModSourcePath\Assemblies\" />
+    <Folder Include="Projects\NoGame\MultiVersion\Assemblies\" />
+    <Folder Include="Projects\NoGame\SingleVersion\Assemblies\" />
+    <Folder Include="Projects\NoGame\NonVersioned\Assemblies\" />
   </ItemGroup>
 
   <Import Project="..\GameTest.targets" />

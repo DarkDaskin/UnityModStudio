@@ -17,7 +17,11 @@ namespace UnityModStudio.Build.Tasks
 
         public bool BuildingInsideVisualStudio { get; set; }
 
+        public ITaskItem[] ExistingReferences { get; set; } = [];
+
         public bool IsAmbientGameResolutionAllowed { get; set; } = true;
+
+        public bool IsNoGameBuildAllowed { get; set; } = true;
 
         [Output]
         public string? GamePath { get; private set; }
@@ -45,6 +49,9 @@ namespace UnityModStudio.Build.Tasks
 
         [Output]
         public bool IsAmbientGame { get; private set; }
+
+        [Output]
+        public bool IsNoGameBuild { get; private set; }
 
         public override bool Execute()
         {
@@ -77,7 +84,7 @@ namespace UnityModStudio.Build.Tasks
                     return true;
 
                 case GameMatchResult.NoMatch:
-                    if (ResolveAmbientGame(properties))
+                    if (ResolveAmbientGame(properties) || ResolveNoGameBuild())
                         return true;
 
                     LogGameRegistryError(NoMatchCode, NoMatchMessage);
@@ -125,6 +132,17 @@ namespace UnityModStudio.Build.Tasks
             }
 
             return false;
+        }
+
+        private bool ResolveNoGameBuild()
+        {
+            if (!IsNoGameBuildAllowed || !Directory.Exists(ProjectDirectory))
+                return false;
+
+            var normalizedReferenceNames = ExistingReferences.Select(reference =>
+                reference.ItemSpec.Contains('\\') ? Path.GetFileNameWithoutExtension(reference.ItemSpec) : reference.ItemSpec);
+            IsNoGameBuild = normalizedReferenceNames.Contains("UnityEngine.CoreModule");
+            return IsNoGameBuild;
         }
     }
 }

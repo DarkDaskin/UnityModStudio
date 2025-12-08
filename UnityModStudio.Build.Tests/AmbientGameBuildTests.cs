@@ -122,6 +122,7 @@ public class AmbientGameBuildTests : BuildTestsBase
 
         Assert.IsFalse(success);
         Assert.HasCount(1, logger.BuildErrors);
+        Assert.AreEqual("UMS0016", logger.BuildErrors[0].Code);
         Assert.AreEqual("Building multi-version mod for an ambient game is not supported.", logger.BuildErrors[0].Message);
         Assert.IsEmpty(logger.BuildWarnings);
         Assert.IsFalse(File.Exists(Path.Combine(modPath, @"Assemblies\Mod.dll")));

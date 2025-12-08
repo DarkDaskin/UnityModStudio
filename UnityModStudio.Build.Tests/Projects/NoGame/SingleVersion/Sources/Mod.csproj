@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutDir>..\Assemblies\</OutDir>
+    <GameName>RimWorld by Ludeon Studies</GameName>
+    <GameVersion>1.6</GameVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnityModStudio.Build" Version="$(BuildPackageVersion)" />
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4633" />
+  </ItemGroup>
+
+</Project>

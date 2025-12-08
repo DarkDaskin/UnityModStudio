@@ -120,6 +120,8 @@ public abstract class BuildTestsBase
         return scratchDir.FullName;
     }
 
+    protected string GetScratchPath() => CreateScratchDir().FullName;
+
     private DirectoryInfo CreateScratchDir()
     {
         var scratchDir = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
