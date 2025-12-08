@@ -32,6 +32,7 @@
       <CustomParameter Name="$TargetFramework$" Value=""/>
       <CustomParameter Name="$TargetFrameworks$" Value=""/>
       <CustomParameter Name="$BuildPackageVersion$" Value=""/>
+      <CustomParameter Name="$IsBasicTemplate$" Value="true"/>
     </CustomParameters>
   </TemplateContent>
   <WizardExtension>

@@ -17,6 +17,7 @@
 
   <Window.Resources>
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <local:SimpleMarkdownConverter x:Key="SimpleMarkdownConverter" />
 
     <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
       <Setter Property="Margin" Value="4" />
@@ -64,6 +65,7 @@
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Grid.Column="0">
@@ -98,7 +100,14 @@
             Content="Update…" />
         </Grid>
 
-        <Grid Grid.Row="1">
+        <ContentControl
+          Grid.Row="1"
+          Content="{Binding TemplateRecommendations, Converter={StaticResource SimpleMarkdownConverter}}"
+          Foreground="Orange"
+          Visibility="{Binding AreTemplateRecommendationsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+
+        <Grid Grid.Row="2">
           <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />

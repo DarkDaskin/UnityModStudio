@@ -1,10 +1,10 @@
 ﻿using System.Collections.Specialized;
 using System.IO;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Data;
 using Moq;
 using UnityModStudio.Common;
+using UnityModStudio.Common.GameSpecific;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Options;
 using UnityModStudio.Options.Tests;
@@ -32,6 +32,10 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
         Assert.IsFalse(vm.IsMultiVersionPanelVisible);
         Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.IsNull(vm.TemplateRecommendations);
+        Assert.IsFalse(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsFalse(vm.IsBasicTemplate);
         Assert.IsNull(vm.Game);
         Assert.IsNull(vm.GamePath);
         Assert.IsNull(vm.ModsPath);
@@ -58,7 +62,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         {
             DisplayName = "Game 1"
         };
-        var vm = new ProjectWizardViewModel { GameManager = SetupGameManager(game) };
+        var vm = new ProjectWizardViewModel { GameManager = SetupGameManager(game), GameExtensionResolvers = [] };
 
         Assert.AreEqual("", vm.Error);
         Assert.AreEqual(Visibility.Visible, vm.ErrorVisibility);
@@ -72,6 +76,10 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
         Assert.IsFalse(vm.IsMultiVersionPanelVisible);
         Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.IsNull(vm.TemplateRecommendations);
+        Assert.IsFalse(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsFalse(vm.IsBasicTemplate);
         Assert.IsNull(vm.Game);
         Assert.IsNull(vm.GamePath);
         Assert.IsNull(vm.ModsPath);
@@ -119,6 +127,10 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
         Assert.IsFalse(vm.IsMultiVersionPanelVisible);
         Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.IsNull(vm.TemplateRecommendations);
+        Assert.IsFalse(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsFalse(vm.IsBasicTemplate);
         Assert.AreEqual(game.Path, vm.GamePath);
         Assert.IsNull(vm.ModsPath);
         Assert.IsNull(vm.GameVersion);
@@ -187,6 +199,10 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
         Assert.IsFalse(vm.IsMultiVersionPanelVisible);
         Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.IsNull(vm.TemplateRecommendations);
+        Assert.IsFalse(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsFalse(vm.IsBasicTemplate);
         Assert.AreEqual(game.Path, vm.GamePath);
         Assert.IsNull(vm.ModsPath);
         Assert.IsNull(vm.GameVersion);
@@ -262,7 +278,6 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
     public void WhenNewGameIsInvoked_ShowDialogAndAddGameAndNotify()
     {
         var changedProperties = new List<string>();
-        var gamesChangeNotifications = new List<NotifyCollectionChangedEventArgs>();
         var games = new List<Game>();
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad() };
         vm.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
@@ -280,7 +295,6 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Mock.Get(vm.GameManager.GameRegistry)
             .SetupGet(gameRegistry => gameRegistry.Games)
             .Returns(games);
-        CollectionViewSource.GetDefaultView(vm.Games).CollectionChanged += (_, args) => gamesChangeNotifications.Add(args);
 
         vm.NewGameCommand.Execute(null);
 
@@ -295,9 +309,8 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             nameof(ProjectWizardViewModel.Game),
             nameof(ProjectWizardViewModel.GamePath),
             nameof(ProjectWizardViewModel.HasValidGamePath),
+            nameof(ProjectWizardViewModel.Games),
         ]));
-        Assert.AreEqual(1, gamesChangeNotifications.Count);
-        Assert.AreEqual(NotifyCollectionChangedAction.Reset, gamesChangeNotifications[0].Action);
         Mock.Get(vm.GameManager).VerifyAll();
         Mock.Get(vm.GameManager).VerifyNoOtherCalls();
     }
@@ -331,14 +344,14 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
     [TestMethod]
     public void WhenUpdateGameIsInvoked_ShowDialogAndUpdateGameAndNotify()
     {
-        var gamesChangeNotifications = new List<NotifyCollectionChangedEventArgs>();
+        var changedProperties = new List<string>();
         var game = new Game
         {
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
         var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
-        CollectionViewSource.GetDefaultView(vm.Games).CollectionChanged += (_, args) => gamesChangeNotifications.Add(args);
+        vm.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
         Mock.Get(vm.GameManager)
             .Setup(gameManager => gameManager.ShowEditDialog(It.IsNotNull<Game>()))
             .Returns(true)
@@ -351,8 +364,9 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.AreEqual("New name", game.DisplayName);
         Assert.IsTrue(vm.HasValidGamePath);
         Assert.IsFalse(vm.HasErrors);
-        Assert.AreEqual(1, gamesChangeNotifications.Count);
-        Assert.AreEqual(NotifyCollectionChangedAction.Reset, gamesChangeNotifications[0].Action);
+        Assert.IsTrue(changedProperties.ToHashSet().IsSupersetOf([
+            nameof(ProjectWizardViewModel.Games),
+        ]));
         Mock.Get(vm.GameManager).VerifyAll();
         Mock.Get(vm.GameManager).VerifyNoOtherCalls();
     }
@@ -425,6 +439,257 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsTrue(closedInvocations.SequenceEqual([false]));
         Mock.Get(vm.GameManager.GameRegistry).Verify(gameRegistry => gameRegistry.SaveAsync(), Times.Never);
         // Mock.Get(vm.GameManager).VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void WhenModLoaderIdIsSet_FilterGames()
+    {
+        var game1 = new Game { DisplayName = "Game 1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var game2 = new Game { DisplayName = "Game 2", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1") };
+        var game3 = new Game { DisplayName = "Game 3", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0") };
+        var resolver = Mock.Of<IGameExtensionResolver>(r =>
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker == "net472")) == new[]
+            {
+                new GameExtension
+                {
+                    ExtensionName = "ModLoader",
+                    TemplateName = "ModLoader",
+                    ModLoaderId = "ModLoader",
+                }
+            } &&
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker != "net472")) == Array.Empty<GameExtension>());
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(game1, game2, game3), 
+            GameExtensionResolvers = [resolver],
+            ModLoaderId = "ModLoader",
+        };
+
+        Assert.AreEqual("", vm.Error);
+        Assert.AreEqual(Visibility.Visible, vm.ErrorVisibility);
+        Assert.AreEqual(Visibility.Hidden, vm.GameInformationVisibility);
+        Assert.IsTrue(vm.Games.SequenceEqual([game1, game2]));
+        Assert.AreEqual("", vm.ModDeploymentModeString);
+        Assert.AreEqual("", vm.DeploySourceCodeString);
+        Assert.AreEqual("", vm.DoorstopModeString);
+        Assert.AreEqual("", vm.DoorstopDllName);
+        Assert.IsFalse(vm.IsDoorstopDllNameVisible);
+        Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
+        Assert.IsFalse(vm.IsMultiVersionPanelVisible);
+        Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.IsNull(vm.TemplateRecommendations);
+        Assert.IsFalse(vm.AreTemplateRecommendationsVisible);
+        Assert.AreEqual("ModLoader", vm.ModLoaderId);
+        Assert.IsFalse(vm.IsBasicTemplate);
+        Assert.IsNull(vm.Game);
+        Assert.IsNull(vm.GamePath);
+        Assert.IsNull(vm.ModsPath);
+        Assert.IsNull(vm.GameVersion);
+        Assert.IsNull(vm.GameName);
+        Assert.IsNull(vm.Architecture);
+        Assert.IsNull(vm.UnityVersion);
+        Assert.IsNull(vm.MonoProfile);
+        Assert.IsNull(vm.TargetFrameworkMoniker);
+        Assert.IsNull(vm.GameExecutableFileName);
+        Assert.IsNull(vm.GameIcon);
+        Assert.IsFalse(vm.HasValidGamePath);
+        Assert.IsFalse(vm.HasErrors);
+        Assert.IsTrue(vm.NewGameCommand.CanExecute(null));
+        Assert.IsFalse(vm.UpdateGameCommand.CanExecute(null));
+        Assert.IsFalse(vm.ConfirmCommand.CanExecute(null));
+        Assert.IsTrue(vm.CancelCommand.CanExecute(null));
+    }
+
+    [TestMethod]
+    public void WhenIsBasicTemplateAndValidGameIsSelected_ShowGameInfoAndRecommendExtensions()
+    {
+        var game = new Game { DisplayName = "Game 1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var resolver = Mock.Of<IGameExtensionResolver>(r =>
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker == "net472")) == new[]
+            {
+                new GameExtension
+                {
+                    ExtensionName = "ModLoader",
+                    TemplateName = "ModLoader",
+                    ModLoaderId = "ModLoader",
+                }
+            } &&
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker != "net472")) == Array.Empty<GameExtension>());
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(game), 
+            GameExtensionResolvers = [resolver],
+            IsBasicTemplate = true,
+        };
+
+        vm.Game = game;
+
+        Assert.AreEqual("", vm.Error);
+        Assert.AreEqual(Visibility.Collapsed, vm.ErrorVisibility);
+        Assert.AreEqual(Visibility.Visible, vm.GameInformationVisibility);
+        Assert.IsTrue(vm.Games.SequenceEqual([game]));
+        Assert.AreEqual("Copy", vm.ModDeploymentModeString);
+        Assert.AreEqual("No", vm.DeploySourceCodeString);
+        Assert.AreEqual("Use for debugging", vm.DoorstopModeString);
+        Assert.AreEqual("winhttp.dll", vm.DoorstopDllName);
+        Assert.IsTrue(vm.IsDoorstopDllNameVisible);
+        Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
+        Assert.IsFalse(vm.IsMultiVersionPanelVisible);
+        Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.AreEqual("The selected game can be used with a mod loader.\n" +
+                        "The following template is recommended to use instead:\n" +
+                        "- **ModLoader** (from the **ModLoader** extension)", vm.TemplateRecommendations);
+        Assert.IsTrue(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsTrue(vm.IsBasicTemplate);
+        Assert.AreEqual(game.Path, vm.GamePath);
+        Assert.IsNull(vm.ModsPath);
+        Assert.IsNull(vm.GameVersion);
+        Assert.AreEqual("Unity2018Test", vm.GameName);
+        Assert.AreEqual("X64", vm.Architecture);
+        Assert.AreEqual("2018.4.36f1", vm.UnityVersion);
+        Assert.AreEqual(".NET 4.7.2", vm.MonoProfile);
+        Assert.AreEqual("net472", vm.TargetFrameworkMoniker);
+        Assert.AreEqual("Unity2018Test.exe", vm.GameExecutableFileName);
+        Assert.IsNotNull(vm.GameIcon);
+        Assert.IsTrue(vm.HasValidGamePath);
+        Assert.IsFalse(vm.HasErrors);
+        Assert.IsTrue(vm.NewGameCommand.CanExecute(null));
+        Assert.IsTrue(vm.UpdateGameCommand.CanExecute(null));
+        Assert.IsTrue(vm.ConfirmCommand.CanExecute(null));
+        Assert.IsTrue(vm.CancelCommand.CanExecute(null));
+    }
+
+    [TestMethod]
+    public void WhenIsBasicTemplateAndValidGameWithModLoaderIsSelected_ShowGameInfoAndRecommendExtensions()
+    {
+        var game = new Game { DisplayName = "Game 1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var resolver = Mock.Of<IGameExtensionResolver>(r =>
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker == "net472")) == new[]
+            {
+                new GameExtension
+                {
+                    ExtensionName = "ModLoader",
+                    TemplateName = "ModLoader",
+                    ModLoaderId = "ModLoader",
+                    IsModLoaderInstalled = true,
+                }
+            } &&
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker != "net472")) == Array.Empty<GameExtension>());
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(game), 
+            GameExtensionResolvers = [resolver],
+            IsBasicTemplate = true,
+        };
+
+        vm.Game = game;
+
+        Assert.AreEqual("", vm.Error);
+        Assert.AreEqual(Visibility.Collapsed, vm.ErrorVisibility);
+        Assert.AreEqual(Visibility.Visible, vm.GameInformationVisibility);
+        Assert.IsTrue(vm.Games.SequenceEqual([game]));
+        Assert.AreEqual("Copy", vm.ModDeploymentModeString);
+        Assert.AreEqual("No", vm.DeploySourceCodeString);
+        Assert.AreEqual("Use for debugging", vm.DoorstopModeString);
+        Assert.AreEqual("winhttp.dll", vm.DoorstopDllName);
+        Assert.IsTrue(vm.IsDoorstopDllNameVisible);
+        Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
+        Assert.IsFalse(vm.IsMultiVersionPanelVisible);
+        Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.AreEqual("The selected game has a mod loader installed.\n" +
+                        "The following template is recommended to use instead:\n" +
+                        "- **ModLoader** (from the **ModLoader** extension)", vm.TemplateRecommendations);
+        Assert.IsTrue(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsTrue(vm.IsBasicTemplate);
+        Assert.AreEqual(game.Path, vm.GamePath);
+        Assert.IsNull(vm.ModsPath);
+        Assert.IsNull(vm.GameVersion);
+        Assert.AreEqual("Unity2018Test", vm.GameName);
+        Assert.AreEqual("X64", vm.Architecture);
+        Assert.AreEqual("2018.4.36f1", vm.UnityVersion);
+        Assert.AreEqual(".NET 4.7.2", vm.MonoProfile);
+        Assert.AreEqual("net472", vm.TargetFrameworkMoniker);
+        Assert.AreEqual("Unity2018Test.exe", vm.GameExecutableFileName);
+        Assert.IsNotNull(vm.GameIcon);
+        Assert.IsTrue(vm.HasValidGamePath);
+        Assert.IsFalse(vm.HasErrors);
+        Assert.IsTrue(vm.NewGameCommand.CanExecute(null));
+        Assert.IsTrue(vm.UpdateGameCommand.CanExecute(null));
+        Assert.IsTrue(vm.ConfirmCommand.CanExecute(null));
+        Assert.IsTrue(vm.CancelCommand.CanExecute(null));
+    }
+
+    [TestMethod]
+    public void WhenIsBasicTemplateAndValidGameWithNativeModSupportIsSelected_ShowGameInfoAndRecommendExtensions()
+    {
+        var game = new Game { DisplayName = "Game 1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var resolver1 = Mock.Of<IGameExtensionResolver>(r =>
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker == "net472")) == new[]
+            {
+                new GameExtension
+                {
+                    ExtensionName = "ModLoader",
+                    TemplateName = "ModLoader",
+                    ModLoaderId = "ModLoader",
+                }
+            } &&
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.TargetFrameworkMoniker != "net472")) == Array.Empty<GameExtension>());
+        var resolver2 = Mock.Of<IGameExtensionResolver>(r =>
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.Name == "Unity2018Test")) == new[]
+            {
+                new GameExtension
+                {
+                    ExtensionName = "NativeGame",
+                    TemplateName = "NativeGame",
+                    HasNativeModSupport = true,
+                }
+            } &&
+            r.GetGameExtensions(It.Is<GameInformation>(gi => gi.Name != "Unity2018Test")) == Array.Empty<GameExtension>());
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(game), 
+            GameExtensionResolvers = [resolver1, resolver2],
+            IsBasicTemplate = true,
+        };
+
+        vm.Game = game;
+
+        Assert.AreEqual("", vm.Error);
+        Assert.AreEqual(Visibility.Collapsed, vm.ErrorVisibility);
+        Assert.AreEqual(Visibility.Visible, vm.GameInformationVisibility);
+        Assert.IsTrue(vm.Games.SequenceEqual([game]));
+        Assert.AreEqual("Copy", vm.ModDeploymentModeString);
+        Assert.AreEqual("No", vm.DeploySourceCodeString);
+        Assert.AreEqual("Use for debugging", vm.DoorstopModeString);
+        Assert.AreEqual("winhttp.dll", vm.DoorstopDllName);
+        Assert.IsTrue(vm.IsDoorstopDllNameVisible);
+        Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
+        Assert.IsFalse(vm.IsMultiVersionPanelVisible);
+        Assert.AreEqual("<default>", vm.GameVersionString);
+        Assert.AreEqual("The selected game has native mod support.\n" +
+                        "The following template is recommended to use instead:\n" +
+                        "- **NativeGame** (from the **NativeGame** extension)", vm.TemplateRecommendations);
+        Assert.IsTrue(vm.AreTemplateRecommendationsVisible);
+        Assert.IsNull(vm.ModLoaderId);
+        Assert.IsTrue(vm.IsBasicTemplate);
+        Assert.AreEqual(game.Path, vm.GamePath);
+        Assert.IsNull(vm.ModsPath);
+        Assert.IsNull(vm.GameVersion);
+        Assert.AreEqual("Unity2018Test", vm.GameName);
+        Assert.AreEqual("X64", vm.Architecture);
+        Assert.AreEqual("2018.4.36f1", vm.UnityVersion);
+        Assert.AreEqual(".NET 4.7.2", vm.MonoProfile);
+        Assert.AreEqual("net472", vm.TargetFrameworkMoniker);
+        Assert.AreEqual("Unity2018Test.exe", vm.GameExecutableFileName);
+        Assert.IsNotNull(vm.GameIcon);
+        Assert.IsTrue(vm.HasValidGamePath);
+        Assert.IsFalse(vm.HasErrors);
+        Assert.IsTrue(vm.NewGameCommand.CanExecute(null));
+        Assert.IsTrue(vm.UpdateGameCommand.CanExecute(null));
+        Assert.IsTrue(vm.ConfirmCommand.CanExecute(null));
+        Assert.IsTrue(vm.CancelCommand.CanExecute(null));
     }
 
     [TestMethod]

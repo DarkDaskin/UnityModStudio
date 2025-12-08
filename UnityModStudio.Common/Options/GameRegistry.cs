@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -39,7 +40,10 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
             return;
 
         if (!GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _, out _))
+        {
+            Debug.WriteLine($"EnsureAllGameProperties failed to resolve game information for path '{game.Path}'.");
             return;
+        }
 
         game.GameName = gameInformation!.Name;
         game.GameExecutableFileName = gameInformation.GameExecutableFile.Name;

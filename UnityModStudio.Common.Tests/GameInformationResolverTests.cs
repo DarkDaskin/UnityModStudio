@@ -158,6 +158,7 @@ public sealed class GameInformationResolverTests
         Assert.IsNotNull(gameInformation);
         if (gameType[0] is not ('3' or '4'))
             Assert.AreEqual("DefaultCompany", gameInformation.Company);
+        Assert.AreEqual(Path.Combine(SampleGameInfo.DownloadPath, gameType), gameInformation.GameDirectory.FullName);
         if (gameType[..4] is "2018" or "2022")
         {
             Assert.AreEqual(Path.Combine(SampleGameInfo.DownloadPath, $@"{gameType}\{gameInformation.Name}.exe"), gameInformation.GameExecutableFile.FullName);

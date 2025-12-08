@@ -15,6 +15,7 @@ namespace UnityModStudio.ProjectWizard
     public class UnityModProjectWizard : IWizard
     {
         private IComponentModel? _componentModel;
+        private bool _isBasicTemplate;
         private Game? _game;
         private Game[] _selectedGames = [];
 
@@ -23,8 +24,9 @@ namespace UnityModStudio.ProjectWizard
             ThreadHelper.ThrowIfNotOnUIThread();
 
             _componentModel = (IComponentModel) Package.GetGlobalService(typeof(SComponentModel));
+            _isBasicTemplate = replacementsDictionary.TryGetValue("$IsBasicTemplate$", out var s) && bool.TryParse(s, out var v) && v;
 
-            if(!TryInvokeWizard(runKind, replacementsDictionary))
+            if (!TryInvokeWizard(runKind, replacementsDictionary))
                 throw new WizardBackoutException();
         }
 
@@ -55,6 +57,7 @@ namespace UnityModStudio.ProjectWizard
 
         public bool ShouldAddProjectItem(string filePath) => filePath switch
         {
+            _ when !_isBasicTemplate => true,
             "Class1.cs" => _game?.DoorstopMode != DoorstopMode.DebuggingAndModLoading,
             "ModInit.cs" => _game?.DoorstopMode == DoorstopMode.DebuggingAndModLoading,
             _ => true
@@ -71,13 +74,18 @@ namespace UnityModStudio.ProjectWizard
 
             var window = new ProjectWizardWindow();
             var viewModel = window.ViewModel;
+            viewModel.IsBasicTemplate = _isBasicTemplate;
             _componentModel!.DefaultCompositionService.SatisfyImportsOnce(viewModel);
+
+            if (replacementsDictionary.TryGetValue("$ModLoaderId$", out var modLoaderId))
+                viewModel.ModLoaderId = modLoaderId;
+
             if (!window.ShowModal() ?? false)
                 return false;
 
             _game = viewModel.Game;
             _selectedGames = viewModel.GetSelectedGames();
-            
+
             // Target framework(s) must be set here, in ProjectFinishedGenerating it's too late.
             var targetFrameworks = _selectedGames.Select(game => game.TargetFrameworkMoniker).Distinct().ToArray();
             replacementsDictionary["$TargetFramework$"] = targetFrameworks.Length == 1 ? targetFrameworks[0] : "";

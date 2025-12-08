@@ -15,6 +15,7 @@ namespace UnityModStudio.Common
         public string TargetFrameworkMoniker { get; set; } = null!;
         public bool IsSubsetProfile { get; set; }
 
+        public DirectoryInfo GameDirectory { get; set; } = null!;
         public FileInfo GameExecutableFile { get; set; } = null!;
         public DirectoryInfo GameDataDirectory { get; set; } = null!;
         public IReadOnlyCollection<FileInfo> FrameworkAssemblyFiles { get; set; } = null!;

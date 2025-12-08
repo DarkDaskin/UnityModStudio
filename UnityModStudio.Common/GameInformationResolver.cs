@@ -27,7 +27,8 @@ namespace UnityModStudio.Common
                     return false;
                 }
 
-                if (!TryGetGameDataDirectory(new DirectoryInfo(gamePath!), out var gameExecutableFile, out var gameDataDirectory, out error, out errorCode))
+                var gameDirectory = new DirectoryInfo(gamePath);
+                if (!TryGetGameDataDirectory(gameDirectory, out var gameExecutableFile, out var gameDataDirectory, out error, out errorCode))
                     return false;
 
                 if (!TryGetGameManagedDirectory(gameDataDirectory, out var gameManagedDirectory, out error, out errorCode))
@@ -49,6 +50,7 @@ namespace UnityModStudio.Common
                     UnityVersion = GetUnityVersion(gameExecutableFile),
                     TargetFrameworkMoniker = moniker,
                     IsSubsetProfile = isSubset,
+                    GameDirectory = gameDirectory,
                     GameExecutableFile = gameExecutableFile,
                     GameDataDirectory = gameDataDirectory,
                     FrameworkAssemblyFiles = frameworkAssemblyFiles,
