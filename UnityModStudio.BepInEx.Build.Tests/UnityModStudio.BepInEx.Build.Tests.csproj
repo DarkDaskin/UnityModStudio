@@ -1,0 +1,41 @@
+﻿<Project Sdk="MSTest.Sdk/3.10.1">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      Displays error on console in addition to the log file. Note that this feature comes with a performance impact.
+      For more information, visit https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-integration-dotnet-test#show-failure-per-test
+      -->
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+    <UseDefaultSampleGames>false</UseDefaultSampleGames>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Projects\**" />
+    <None Update="Projects\**" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="Projects\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="17.10.46" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.9.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UnityModStudio.BepInEx.Build\UnityModStudio.BepInEx.Build.csproj" ExcludeAssets="all" />
+    <ProjectReference Include="..\UnityModStudio.Build.Tests\UnityModStudio.Build.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SampleGameType Include="2018-net4-v1.0" />
+    <SampleGameType Include="2018-net4-v1.1" />
+    <SampleGameType Include="2018-netstandard20-v2.0" />
+  </ItemGroup>
+
+  <Import Project="..\GameTest.targets" />
+
+</Project>

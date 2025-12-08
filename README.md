@@ -12,20 +12,23 @@ Allows creating mods for Unity games using Visual Studio 2022.
 - Referencing game assemblies.
 - Deploying the mod into the game.
   - Deploying and configuring the [Unity Doorstop](https://github.com/NeighTools/UnityDoorstop) mod loader.
+  - Deploying mod content files along compiled binaries.
 - Resolving the game path from built-in game registry.
 - Importing games from the list of installed programs or Steam.
 - Debugging the mod.
+- Building mods supporting multiple game versions.
+- Game-specific templates and features (in separate extensions).
+  - BepInEx 5 project template.
 
 ## Planned features
-- Deploying mod content files along compiled binaries.
-- Support for mods supporting multiple game versions.
 - Game-specific templates and features (in separate extensions).
+  - BepInEx 6 project template.
   - RimWorld project template.
 
 ## Visual Studio support
 Release 1.1 is the last release which supports Visual Studio 2019. New development will be focused on Visual Studio 2022.
 
-Visual Studio 17.4 or newer is required.
+Visual Studio 17.10 or newer is required.
 
 Required workloads:
 - .NET desktop development

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ProjectCapability Include="UnityModStudio.BepInEx" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GameModsPath>BepInEx\plugins\</GameModsPath>
+    <DoorstopMode>DebuggingAndModLoading</DoorstopMode>
+  </PropertyGroup>
+</Project>

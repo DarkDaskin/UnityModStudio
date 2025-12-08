@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <DeployBepInEx Condition="'$(DeployBepInEx)' == ''">true</DeployBepInEx>
+    <UseProvidedBepInEx Condition="'$(UseProvidedBepInEx)' == ''">false</UseProvidedBepInEx>
+    <BepInExSourcePath Condition="'$(BepInExSourcePath)' == ''">$(BaseIntermediateOutputPath)BepInEx\</BepInExSourcePath>
+    <BepInExSourcePath Condition="!HasTrailingSlash('$(BepInExSourcePath)')">$(BepInExSourcePath)\</BepInExSourcePath>
+  </PropertyGroup>
+
+  <Target Name="ResolveBepInExVersion">
+    <PropertyGroup>
+      <BepInExMajorVersion Condition="'%(PackageReference.Identity)' == 'BepInEx.Core' and $([System.String]::new('%(PackageReference.Version)').StartsWith('5.'))">5</BepInExMajorVersion>
+      <BepInExMajorVersion Condition="'%(PackageReference.Identity)' == 'BepInEx.Unity.Mono' and $([System.String]::new('%(PackageReference.Version)').StartsWith('6.'))">6</BepInExMajorVersion>
+      <_SpecificVersionRegex>^(\w+[.\-+]?)+$</_SpecificVersionRegex>
+      <BepInExVersion Condition="'$(BepInExVersion)' == '' and '$(BepInExMajorVersion)' == '5' and '%(PackageReference.Identity)' == 'BepInEx.Core' and $([System.Text.RegularExpressions.Regex]::IsMatch('%(PackageReference.Version)', '$(_SpecificVersionRegex)'))">%(PackageReference.Version)</BepInExVersion>
+      <BepInExVersion Condition="'$(BepInExVersion)' == '' and '$(BepInExMajorVersion)' == '6' and '%(PackageReference.Identity)' == 'BepInEx.Unity.Mono' and $([System.Text.RegularExpressions.Regex]::IsMatch('%(PackageReference.Version)', '$(_SpecificVersionRegex)'))">%(PackageReference.Version)</BepInExVersion>
+      <BepInExVersion Condition="'$(BepInExVersion)' == '' and '$(BepInExMajorVersion)' == '5'">5.4.23.4</BepInExVersion>
+      <BepInExVersion Condition="'$(BepInExVersion)' == '' and '$(BepInExMajorVersion)' == '6'">6.0.0-pre.2</BepInExVersion>
+      <_BepInExPreloaderPath Condition="'$(BepInExMajorVersion)' == '5'">BepInEx\core\BepInEx.Preloader.dll</_BepInExPreloaderPath>
+      <_BepInExPreloaderPath Condition="'$(BepInExMajorVersion)' == '6'">BepInEx\core\BepInEx.Unity.Mono.Preloader.dll</_BepInExPreloaderPath>    
+    </PropertyGroup>
+    <Error Code="UMSBIE0001" Text="BepInEx version is not specified and can't be determined from referenced package version."
+           Condition="'$(BepInExVersion)' == ''" />  
+
+    <PropertyGroup>
+      <!-- These are minimum versions which support Doorstop 4. -->
+      <_MinBepInExVersion Condition="'$(BepInExMajorVersion)' == '5'">5.4.23.2</_MinBepInExVersion>
+      <_MinBepInExVersion Condition="'$(BepInExMajorVersion)' == '6'">6.0.0-pre.2</_MinBepInExVersion>
+    </PropertyGroup>
+    <Error Code="UMSBIE0002" Text="Specified BepInEx version ($(BepInExVersion)) is less than minimum supported version ($(_MinBepInExVersion))."
+           Condition="$([MSBuild]::VersionLessThan('$(BepInExVersion)', '$(_MinBepInExVersion)'))" />
+  </Target>
+
+  <Target Name="_CheckProvidedBepInEx" DependsOnTargets="ResolveBepInExVersion" Condition="'$(UseProvidedBepInEx)' == 'true'">
+    <Error Code="UMSBIE0003" Text="BepInEx not found at '$(BepInExSourcePath)'."
+           Condition="!Exists('$(BepInExSourcePath)$(_BepInExPreloaderPath)')" />      
+  </Target>
+
+  <Target Name="_GetExistingBepInExVersion" DependsOnTargets="ResolveBepInExVersion">
+    <GetFileVersion Path="$(BepInExSourcePath)$(_BepInExPreloaderPath)" Condition="Exists('$(BepInExSourcePath)$(_BepInExPreloaderPath)')">
+      <Output TaskParameter="FileVersion" PropertyName="_ExistingBepInExVersion" />
+    </GetFileVersion>
+  </Target>
+
+  <Target Name="DownloadBepInEx" DependsOnTargets="ResolveBepInExVersion;_GetExistingBepInExVersion" 
+          Condition="'$(UseProvidedBepInEx)' != 'true' and ('$(_ExistingBepInExVersion)' == '' or $([MSBuild]::VersionNotEquals('$(_ExistingBepInExVersion)', '$(BepInExVersion)')))">
+    <PropertyGroup>
+      <_BepInExReleaseFileName Condition="'$(BepInExMajorVersion)' == '5'">BepInEx_win_x64_$(BepInExVersion).zip</_BepInExReleaseFileName>
+      <_BepInExReleaseFileName Condition="'$(BepInExMajorVersion)' == '6'">BepInEx-Unity.Mono-win-x64-$(BepInExVersion).zip</_BepInExReleaseFileName>
+      <_BepInExReleaseUrl>https://github.com/BepInEx/BepInEx/releases/download/v$(BepInExVersion)/$(_BepInExReleaseFileName)</_BepInExReleaseUrl>
+    </PropertyGroup>
+    <ItemGroup>
+      <_BepInExOldFiles Include="$(BepInExSourcePath)**\*" />
+    </ItemGroup>
+    <Delete Files="@(_BepInExOldFiles)" />
+    <DownloadFile SourceUrl="$(_BepInExReleaseUrl)" DestinationFolder="$(BepInExSourcePath)" />
+    <Unzip SourceFiles="$(BepInExSourcePath)$(_BepInExReleaseFileName)" DestinationFolder="$(BepInExSourcePath)" />
+    <Delete Files="$(BepInExSourcePath)$(_BepInExReleaseFileName)" />
+    <ItemGroup>
+      <FileWrites Include="$(BepInExSourcePath)**\*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetBepInExSourceFiles" DependsOnTargets="ResolveBepInExVersion;_CheckProvidedBepInEx;_GetExistingBepInExVersion;DownloadBepInEx">
+    <ItemGroup>
+      <_BepInExSourceFiles Include="$(BepInExSourcePath)BepInEx\**" Exclude="$(BepInExSourcePath)BepInEx\core\*.xml" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="DeployBepInEx" AfterTargets="DeployDoorstop" DependsOnTargets="_GetBepInExSourceFiles" Condition="'$(DeployBepInEx)' == 'true'" 
+          Inputs="@(_BepInExSourceFiles)" Outputs="@(_BepInExSourceFiles->'$(GamePath)BepInEx\%(RecursiveDir)%(Filename)%(Extension)')">
+    <Copy SourceFiles="@(_BepInExSourceFiles)" DestinationFolder="$(GamePath)BepInEx\%(RecursiveDir)" />
+  </Target>
+
+  <Target Name="SetDoorstopTargetAssemblyPath" BeforeTargets="ConfigureDoorstop">
+    <PropertyGroup>
+      <DoorstopTargetAssemblyPath>$(GamePath)$(_BepInExPreloaderPath)</DoorstopTargetAssemblyPath>
+    </PropertyGroup>
+  </Target>
+</Project>
