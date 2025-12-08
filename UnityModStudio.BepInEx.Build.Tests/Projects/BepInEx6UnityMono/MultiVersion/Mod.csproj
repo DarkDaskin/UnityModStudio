@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
+    <GameName>Unity2018Test</GameName>
+    <GameVersions>1.0;1.1</GameVersions>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RestoreAdditionalProjectSources>
+      $(RestoreAdditionalProjectSources);
+      https://nuget.bepinex.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Unity.Mono" Version="6.0.0-be.*" IncludeAssets="compile" />
+    <PackageReference Include="UnityModStudio.BepInEx.Build" Version="$(BuildPackageVersion)" />
+  </ItemGroup>
+
+</Project>

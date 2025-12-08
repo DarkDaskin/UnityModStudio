@@ -50,6 +50,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.BepInEx.V5.P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.BepInEx.Build.Tests", "UnityModStudio.BepInEx.Build.Tests\UnityModStudio.BepInEx.Build.Tests.csproj", "{51025A47-3EE4-4226-B041-0697B24A8906}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityModStudio.BepInEx.V6.Unity.Mono.ProjectTemplate.CSharp", "UnityModStudio.BepInEx.V6.Unity.Mono.ProjectTemplate.CSharp\UnityModStudio.BepInEx.V6.Unity.Mono.ProjectTemplate.CSharp.csproj", "{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,6 +118,10 @@ Global
 		{51025A47-3EE4-4226-B041-0697B24A8906}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51025A47-3EE4-4226-B041-0697B24A8906}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51025A47-3EE4-4226-B041-0697B24A8906}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +136,7 @@ Global
 		{5A39987F-FBFB-1E3E-743F-0921EF64F3AD} = {702C8863-28F5-4BF9-AC1F-6B7F70E69DD6}
 		{FE36CF96-968D-4A47-B12A-D3B26DCEB5FA} = {702C8863-28F5-4BF9-AC1F-6B7F70E69DD6}
 		{51025A47-3EE4-4226-B041-0697B24A8906} = {702C8863-28F5-4BF9-AC1F-6B7F70E69DD6}
+		{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3} = {702C8863-28F5-4BF9-AC1F-6B7F70E69DD6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B2F1C7D6-4B1F-46DA-BFD9-C45A049B562E}

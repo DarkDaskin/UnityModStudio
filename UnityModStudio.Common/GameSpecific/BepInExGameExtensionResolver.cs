@@ -25,10 +25,22 @@ public class BepInExGameExtensionResolver : IGameExtensionResolver
                 }
             }
         }
+        var bepInExUnityMonoAssembly = coreDirectory?.EnumerateFiles("BepInEx.Unity.Mono.dll").SingleOrDefault();
+        if (bepInExUnityMonoAssembly is not null)
+        {
+            if (Version.TryParse(FileVersionInfo.GetVersionInfo(bepInExUnityMonoAssembly.FullName).FileVersion, out var bepInExVersion))
+            {
+                switch (bepInExVersion.Major)
+                {
+                    case 6:
+                        return [GetBepInExV6UnityMonoExtension(true)];
+                }
+            }
+        }
 
         // BepInEx can be installed into any Unity Mono game.
         if (gameInformation.GameAssemblyFiles.Any())
-            return [GetBepInExV5Extension(false)];
+            return [GetBepInExV5Extension(false), GetBepInExV6UnityMonoExtension(false)];
 
         return [];
     }
@@ -39,6 +51,15 @@ public class BepInExGameExtensionResolver : IGameExtensionResolver
             ExtensionName = ExtensionName,
             TemplateName = "BepInEx 5 mod (C#)",
             ModLoaderId = "BepInEx5",
+            IsModLoaderInstalled = isInstalled,
+        };
+
+    private static GameExtension GetBepInExV6UnityMonoExtension(bool isInstalled) =>
+        new GameExtension
+        {
+            ExtensionName = ExtensionName,
+            TemplateName = "BepInEx 6 Unity Mono mod (C#)",
+            ModLoaderId = "BepInEx6",
             IsModLoaderInstalled = isInstalled,
         };
 }

@@ -18,11 +18,10 @@ Allows creating mods for Unity games using Visual Studio 2022.
 - Debugging the mod.
 - Building mods supporting multiple game versions.
 - Game-specific templates and features (in separate extensions).
-  - BepInEx 5 project template.
+  - BepInEx 5/6 project templates.
 
 ## Planned features
 - Game-specific templates and features (in separate extensions).
-  - BepInEx 6 project template.
   - RimWorld project template.
 
 ## Visual Studio support

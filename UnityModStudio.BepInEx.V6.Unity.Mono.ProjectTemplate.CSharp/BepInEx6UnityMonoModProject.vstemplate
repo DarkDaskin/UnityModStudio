@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <Name>BepInEx 6 Unity Mono mod (C#)</Name>
+    <Description>A project for building and deploying a Unity Mono game BepInEx 6 mod.</Description>
+    <Icon>BepInEx6UnityMonoModProject.CSharp.ico</Icon>
+    <ProjectType>CSharp</ProjectType>
+    <LanguageTag>CSharp</LanguageTag>
+    <PlatformTag>Windows</PlatformTag>
+    <PlatformTag>Linux</PlatformTag>
+    <PlatformTag>macOS</PlatformTag>
+    <ProjectTypeTag>Library</ProjectTypeTag>
+    <ProjectTypeTag>Games</ProjectTypeTag>
+    <ProjectTypeTag>Extension</ProjectTypeTag>
+    <SortOrder>1000</SortOrder>
+    <TemplateID>9f0b0873-c3f5-4beb-ab71-34cdd853fd72</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>BepInEx6UnityMonoMod</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
+    <CreateInPlace>true</CreateInPlace>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="BepInEx6UnityMonoModProject.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Plugin.cs</ProjectItem>
+      <Folder Name="Properties">
+        <ProjectItem>launchSettings.json</ProjectItem>
+      </Folder>
+    </Project>
+    <CustomParameters>
+      <CustomParameter Name="$TargetFramework$" Value=""/>
+      <CustomParameter Name="$TargetFrameworks$" Value=""/>
+      <CustomParameter Name="$BuildPackageVersion$" Value=""/>
+      <CustomParameter Name="$ModLoaderId$" Value="BepInEx6"/>
+    </CustomParameters>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>UnityModStudio.ProjectWizard, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
+    <FullClassName>UnityModStudio.ProjectWizard.UnityModProjectWizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

@@ -79,6 +79,13 @@
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
+    <ProjectReference Include="..\UnityModStudio.BepInEx.V6.Unity.Mono.ProjectTemplate.CSharp\UnityModStudio.BepInEx.V6.Unity.Mono.ProjectTemplate.CSharp.csproj">
+      <Project>{B8B1DB02-18EC-4AB6-82E8-286BF7D50CC3}</Project>
+      <Name>UnityModStudio.BepInEx.V6.Unity.Mono.ProjectTemplate.CSharp</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
     <ProjectReference Include="..\UnityModStudio\UnityModStudio.csproj">
       <Project>{1089A657-6DF7-41E5-8872-D1C5C60130F2}</Project>
       <Name>UnityModStudio</Name>
