@@ -14,4 +14,7 @@ public abstract class GameManagerTestBase
     protected static IGameManager SetupGameManager(params Game[] games) =>
         Mock.Of<IGameManager>(gameManager =>
             gameManager.GameRegistry == Mock.Of<IGameRegistry>(gameRegistry => gameRegistry.Games == games));
+
+    protected static IGeneralSettingsManager SetupGeneralSettingsManager(GeneralSettings? settings = null) =>
+        Mock.Of<IGeneralSettingsManager>(gsm => gsm.Settings == (settings ?? new GeneralSettings()));
 }

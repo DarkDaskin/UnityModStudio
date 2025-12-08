@@ -20,16 +20,18 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         var vm = new ProjectWizardViewModel();
 
         Assert.IsNull(vm.GameManager);
+        Assert.IsEmpty(vm.GameExtensionResolvers);
+        Assert.IsNull(vm.GeneralSettingsManager);
         Assert.AreEqual("", vm.Error);
         Assert.AreEqual(Visibility.Visible, vm.ErrorVisibility);
         Assert.AreEqual(Visibility.Hidden, vm.GameInformationVisibility);
-        Assert.IsTrue(vm.Games.SequenceEqual([]));
+        Assert.IsEmpty(vm.Games);
         Assert.AreEqual("", vm.ModDeploymentModeString);
         Assert.AreEqual("", vm.DeploySourceCodeString);
         Assert.AreEqual("", vm.DoorstopModeString);
         Assert.AreEqual("", vm.DoorstopDllName);
         Assert.IsFalse(vm.IsDoorstopDllNameVisible);
-        Assert.IsTrue(vm.GameVersions.SequenceEqual([]));
+        Assert.IsEmpty(vm.GameVersions);
         Assert.IsFalse(vm.IsMultiVersionPanelVisible);
         Assert.AreEqual("<default>", vm.GameVersionString);
         Assert.IsNull(vm.TemplateRecommendations);
@@ -56,13 +58,22 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
     }
 
     [TestMethod]
-    public void WhenInitialized_InitialStateIsCorrect()
+    public void WhenInitialized_InitialStateIsCorrectAndStoresAreLoaded()
     {
         var game = new Game
         {
             DisplayName = "Game 1"
         };
-        var vm = new ProjectWizardViewModel { GameManager = SetupGameManager(game), GameExtensionResolvers = [] };
+        var gameManager = SetupGameManager(game);
+        Mock.Get(gameManager.GameRegistry).Setup(gameRegistry => gameRegistry.LoadAsync()).Returns(Task.CompletedTask);
+        var generalSettingsManager = SetupGeneralSettingsManager();
+        Mock.Get(generalSettingsManager).Setup(gsm => gsm.LoadAsync()).Returns(Task.CompletedTask);
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = gameManager, 
+            GameExtensionResolvers = [],
+            GeneralSettingsManager = generalSettingsManager,
+        };
 
         Assert.AreEqual("", vm.Error);
         Assert.AreEqual(Visibility.Visible, vm.ErrorVisibility);
@@ -97,6 +108,11 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.IsFalse(vm.UpdateGameCommand.CanExecute(null));
         Assert.IsFalse(vm.ConfirmCommand.CanExecute(null));
         Assert.IsTrue(vm.CancelCommand.CanExecute(null));
+
+        Mock.Get(vm.GameManager).VerifyAll();
+        Mock.Get(vm.GameManager).VerifyNoOtherCalls();
+        Mock.Get(vm.GeneralSettingsManager).VerifyAll();
+        Mock.Get(vm.GeneralSettingsManager).VerifyNoOtherCalls();
     }
 
     [TestMethod]
@@ -401,7 +417,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
     }
 
     [TestMethod]
-    public void WhenConfirmIsInvoked_SaveGameRegistryAndCloseWindow()
+    public void WhenConfirmIsInvoked_SaveStoresAndCloseWindow()
     {
         var closedInvocations = new List<bool>();
         var game = new Game
@@ -409,17 +425,26 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
-        var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManagerWithLoad(game),
+            GeneralSettingsManager = SetupGeneralSettingsManager(),
+            Game = game
+        };
         vm.Closed += success => closedInvocations.Add(success);
         Mock.Get(vm.GameManager.GameRegistry).Setup(gameRegistry => gameRegistry.SaveAsync()).Returns(Task.CompletedTask);
+        Mock.Get(vm.GeneralSettingsManager).Setup(gsm => gsm.SaveAsync()).Returns(Task.CompletedTask);
 
         vm.ConfirmCommand.Execute(null);
 
         Assert.IsTrue(closedInvocations.SequenceEqual([true]));
         Mock.Get(vm.GameManager).VerifyAll();
         Mock.Get(vm.GameManager).VerifyNoOtherCalls();
+        Mock.Get(vm.GeneralSettingsManager).VerifyAll();
+        Mock.Get(vm.GeneralSettingsManager).VerifyNoOtherCalls();
         foreach (var gameVersionViewModel in vm.GameVersions)
             Assert.IsNotNull(gameVersionViewModel.Game.TargetFrameworkMoniker);
+        Assert.AreEqual(game.Id, vm.GeneralSettingsManager.Settings.LastSelectedGameId);
     }
 
     [TestMethod]
@@ -431,14 +456,21 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         };
-        var vm = new ProjectWizardViewModel { GameManager = SetupGameManagerWithLoad(game), Game = game };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManagerWithLoad(game),
+            GeneralSettingsManager = SetupGeneralSettingsManager(),
+            Game = game
+        };
         vm.Closed += success => closedInvocations.Add(success);
 
         vm.CancelCommand.Execute(null);
 
+        Assert.IsNull(vm.GeneralSettingsManager.Settings.LastSelectedGameId);
         Assert.IsTrue(closedInvocations.SequenceEqual([false]));
         Mock.Get(vm.GameManager.GameRegistry).Verify(gameRegistry => gameRegistry.SaveAsync(), Times.Never);
         // Mock.Get(vm.GameManager).VerifyNoOtherCalls();
+        Mock.Get(vm.GeneralSettingsManager).Verify(gsm => gsm.SaveAsync(), Times.Never);
     }
 
     [TestMethod]
@@ -766,6 +798,34 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.AreEqual(2, selectedGames.Length);
         Assert.AreEqual(game10, selectedGames[0]);
         Assert.AreEqual(game11, selectedGames[1]);
+    }
+
+    [TestMethod]
+    public void WhenExistingGameIsLastSelected_PreselectGame()
+    {
+        var game1 = new Game { DisplayName = "Game 1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var game2 = new Game { DisplayName = "Game 2", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1") };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(game1, game2),
+            GeneralSettingsManager = SetupGeneralSettingsManager(new GeneralSettings{LastSelectedGameId = game1.Id}),
+        };
+
+        Assert.AreEqual(game1, vm.Game);
+    }
+
+    [TestMethod]
+    public void WhenNonExistingGameIsLastSelected_PreselectNothing()
+    {
+        var game1 = new Game { DisplayName = "Game 1", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0") };
+        var game2 = new Game { DisplayName = "Game 2", Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.1") };
+        var vm = new ProjectWizardViewModel
+        {
+            GameManager = SetupGameManager(game1, game2),
+            GeneralSettingsManager = SetupGeneralSettingsManager(new GeneralSettings { LastSelectedGameId = Guid.NewGuid() }),
+        };
+
+        Assert.IsNull(vm.Game);
     }
 
     private static IGameManager SetupGameManagerWithLoad(params Game[] games)

@@ -1,8 +1,11 @@
-﻿namespace UnityModStudio.Common.Options;
+﻿using System;
+
+namespace UnityModStudio.Common.Options;
 
 public class GeneralSettings
 {
     public AmbientGameSettings AmbientGame { get; set; } = new();
+    public Guid? LastSelectedGameId { get; set; }
 
     public class AmbientGameSettings
     {

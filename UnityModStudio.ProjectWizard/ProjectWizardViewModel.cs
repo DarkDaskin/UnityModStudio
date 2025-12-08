@@ -18,12 +18,6 @@ namespace UnityModStudio.ProjectWizard;
 public class ProjectWizardViewModel : GamePropertiesViewModelBase
 {
     private readonly Dictionary<Game, GameAssociatedInfo> _gameAssociatedInfo = [];
-    private IReadOnlyList<Game> _games = [];
-    private string? _templateRecommendations;
-    private bool _isBasicTemplate;
-    private string? _modLoaderId;
-    private IGameManager? _gameManager;
-    private IGameExtensionResolver[] _gameExtensionResolvers = [];
     private Game? _previousGame;
 
     public string? Error => string.Join("\n", GetErrors(nameof(GamePath)));
@@ -32,9 +26,9 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
 
     public IReadOnlyList<Game> Games
     {
-        get => _games;
-        private set => SetProperty(ref _games, value);
-    }
+        get;
+        private set => SetProperty(ref field, value);
+    } = [];
 
     public string ModDeploymentModeString => Game?.ModDeploymentMode.ToString() ?? "";
 
@@ -70,18 +64,18 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
 
     public string? TemplateRecommendations
     {
-        get => _templateRecommendations;
-        set => SetProperty(ref _templateRecommendations, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool AreTemplateRecommendationsVisible => !string.IsNullOrEmpty(TemplateRecommendations);
 
     public string? ModLoaderId
     {
-        get => _modLoaderId;
+        get;
         set
         {
-            SetProperty(ref _modLoaderId, value);
+            SetProperty(ref field, value);
 
             FillGames();
         }
@@ -89,10 +83,10 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
 
     public bool IsBasicTemplate
     {
-        get => _isBasicTemplate;
+        get;
         set
         {
-            SetProperty(ref _isBasicTemplate, value);
+            SetProperty(ref field, value);
 
             FillRecommendations();
         }
@@ -104,13 +98,13 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
     [Import]
     public IGameManager? GameManager
     {
-        get => _gameManager;
+        get;
         set
         {
-            SetProperty(ref _gameManager, value);
+            SetProperty(ref field, value);
 
-            if (_gameManager != null)
-                ThreadHelper.JoinableTaskFactory.Run(_gameManager.GameRegistry.LoadSafeAsync);
+            if (field != null)
+                ThreadHelper.JoinableTaskFactory.Run(field.GameRegistry.LoadSafeAsync);
 
             FillGames();
         }
@@ -119,15 +113,30 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
     [ImportMany]
     public IGameExtensionResolver[] GameExtensionResolvers
     {
-        get => _gameExtensionResolvers;
+        get;
         set
         {
-            SetProperty(ref _gameExtensionResolvers, value);
+            SetProperty(ref field, value);
 
             FillGames();
         }
+    } = [];
+
+    [Import]
+    public IGeneralSettingsManager? GeneralSettingsManager
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+
+            if (field != null)
+                ThreadHelper.JoinableTaskFactory.Run(field.LoadSafeAsync);
+
+            SelectLastGame();
+        }
     }
-    
+
     public ProjectWizardViewModel()
     {
         NewGameCommand = new DelegateCommand(NewGame, null, ThreadHelper.JoinableTaskFactory);
@@ -145,6 +154,16 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
             games = games.Where(SupportsModLoader);
 
         Games = games.ToList();
+
+        SelectLastGame();
+    }
+
+    private void SelectLastGame()
+    {
+        if (GeneralSettingsManager is null)
+            return;
+
+        Game ??= Games.FirstOrDefault(game => game.Id == GeneralSettingsManager.Settings.LastSelectedGameId);
     }
 
     private bool SupportsModLoader(Game game) => GetGameExtensions(game).Any(extension => extension.ModLoaderId == ModLoaderId);
@@ -336,10 +355,13 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
     {
         base.OnConfirm();
 
-        if (GameManager == null)
+        if (GameManager is null || GeneralSettingsManager is null)
             return;
 
         ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveSafeAsync);
+
+        GeneralSettingsManager.Settings.LastSelectedGameId = Game?.Id;
+        ThreadHelper.JoinableTaskFactory.Run(GeneralSettingsManager.SaveSafeAsync);
     }
 
     public Game[] GetSelectedGames()
