@@ -14,6 +14,7 @@ public class GeneralSettingsManagerTests : StoreTestsBase
         Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
         Assert.AreEqual(DoorstopMode.Debugging, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
         Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.IsNull(generalSettingsManager.Settings.LastSelectedGameId);
         Assert.IsFalse(generalSettingsManager.WatchForChanges);
     }
 
@@ -27,6 +28,7 @@ public class GeneralSettingsManagerTests : StoreTestsBase
         Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
         Assert.AreEqual(DoorstopMode.Debugging, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
         Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.IsNull(generalSettingsManager.Settings.LastSelectedGameId);
         Assert.IsFalse(generalSettingsManager.WatchForChanges);
     }
 
@@ -41,6 +43,7 @@ public class GeneralSettingsManagerTests : StoreTestsBase
         Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
         Assert.AreEqual(DoorstopMode.Debugging, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
         Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.IsNull(generalSettingsManager.Settings.LastSelectedGameId);
         Assert.IsFalse(generalSettingsManager.WatchForChanges);
     }
 
@@ -64,6 +67,7 @@ public class GeneralSettingsManagerTests : StoreTestsBase
         Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
         Assert.AreEqual(DoorstopMode.DebuggingAndModLoading, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
         Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.AreEqual(new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6"), generalSettingsManager.Settings.LastSelectedGameId);
     }
 
     [TestMethod]
@@ -74,6 +78,7 @@ public class GeneralSettingsManagerTests : StoreTestsBase
         generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed = false;
         generalSettingsManager.Settings.AmbientGame.DoorstopMode = DoorstopMode.DebuggingAndModLoading;
         generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName = true;
+        generalSettingsManager.Settings.LastSelectedGameId = new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6");
         await generalSettingsManager.SaveAsync();
 
         VerifyStoreEquals("GeneralSettings.json");
