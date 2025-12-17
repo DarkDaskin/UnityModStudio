@@ -8,7 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="RimWordFont.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="..\UnityModStudio.RimWorld\UnityModStudio-RimWorld.ico" Link="UnityModStudio-RimWorld.ico" />
+    <EmbeddedResource Include="RimWordFont.ttf" />
   </ItemGroup>
 
   <ItemGroup>

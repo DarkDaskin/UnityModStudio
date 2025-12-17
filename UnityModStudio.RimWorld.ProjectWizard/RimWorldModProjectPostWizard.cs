@@ -35,6 +35,13 @@ public class RimWorldModProjectPostWizard : IWizard
         var solution = project.DTE.Solution;
         var solutionFilePath = solution.FullName;
 
+        if (!string.IsNullOrWhiteSpace(_modName))
+        {
+            var previewFilePath = Path.Combine(Path.GetDirectoryName(projectFilePath)!, @"Assets\About\Preview.png");
+            if (File.Exists(previewFilePath))
+                RimWorldFileGenerator.UpdatePreviewImage(previewFilePath, _modName!);
+        }
+
         ProjectLayoutManager.ApplyLayout(_projectLayout, projectFilePath, solutionFilePath, 
             out var newProjectFilePath, out var startupCsPath, out var aboutXmlPath);
 

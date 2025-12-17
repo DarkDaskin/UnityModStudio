@@ -50,6 +50,23 @@ public class RimWorldFileGeneratorTests
         Assert.AreEqual(File.ReadAllText(@"TestFiles\About_WithHarmony.xml"), ToStringFull(document));
     }
 
+    [TestMethod]
+    public void WhenUpdatePreviewImageInvoked_DrawModName()
+    {
+        var newImagePath = Path.GetTempFileName();
+        File.Replace(@"TestFiles\Preview_Initial.png", newImagePath, null);
+
+        RimWorldFileGenerator.UpdatePreviewImage(newImagePath, "My Awesome Mod");
+
+        var newImageFile = new FileInfo(newImagePath);
+        using var newImageStream = newImageFile.OpenRead();
+        var expectedImageFile = new FileInfo(@"TestFiles\Preview_Updated.png");
+        using var expectedImageStream = expectedImageFile.OpenRead();
+        Assert.IsTrue(newImageFile.Exists);
+        Assert.AreEqual(expectedImageFile.Length, newImageFile.Length);
+        Assert.IsTrue(Utils.AreStreamsEqual(expectedImageStream, newImageStream));
+    }
+
     private static string ToStringFull(XDocument document)
     {
         var writer = new Utf8StringWriter();
