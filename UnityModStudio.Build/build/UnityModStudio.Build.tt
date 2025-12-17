@@ -449,7 +449,7 @@
   <!-- Not so fun fact: formerly named CopyModToGame, that name broke MSBuild somehow -->
   <Target Name="CopyModFilesToGame" AfterTargets="PrepareForRun" DependsOnTargets="PrepareModPaths" Condition="'$(ModDeploymentMode)' == 'Copy'">
     <ItemGroup>
-      <_ModCompiledOutput Include="$(TargetDir)**\*" />
+      <_ModCompiledOutput Include="$(TargetDir)**\*" Exclude="$(TargetDir)**\*.json" />
       <_ModContentFile Include="@(Content)" />
       <ModExcludedFile />
       <ModFile Include="%(_ModCompiledOutput.FullPath)" KeepDuplicates="false" />
