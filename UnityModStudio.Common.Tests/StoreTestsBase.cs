@@ -2,6 +2,8 @@
 
 public abstract class StoreTestsBase
 {
+    protected static Type ResourceType { get; set; } = typeof(StoreTestsBase);
+
     protected string StorePath { get; private set; } = null!;
 
     [TestInitialize]
@@ -32,6 +34,6 @@ public abstract class StoreTestsBase
     }
 
     protected static Stream GetResourceStream(string fileName) =>
-        typeof(GameRegistryTests).Assembly.GetManifestResourceStream($"UnityModStudio.Common.Tests.Resources.{fileName}") ??
+        ResourceType.Assembly.GetManifestResourceStream(ResourceType, $"Resources.{fileName}") ??
         throw new ArgumentException("Resource not found.", nameof(fileName));
 }

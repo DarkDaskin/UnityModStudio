@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -115,4 +116,13 @@ public static class Utils
         UnaryExpression { Operand: MemberExpression m } => m.Member.Name,
         _ => throw new ArgumentException("Expression does not represent a member access.", nameof(expression))
     };
+
+    public static string? GetString(this Dictionary<string, string?> dictionary, string key) =>
+        dictionary.TryGetValue(key, out var s) ? s : null;
+
+    public static bool? GetBoolean(this Dictionary<string, string?> dictionary, string key) =>
+        dictionary.TryGetValue(key, out var s) && bool.TryParse(s, out var b) ? b : null;
+
+    public static TEnum? GetEnum<TEnum>(this Dictionary<string, string?> dictionary, string key) where TEnum : struct =>
+        dictionary.TryGetValue(key, out var s) && Enum.TryParse<TEnum>(s, out var e) ? e : null;
 }

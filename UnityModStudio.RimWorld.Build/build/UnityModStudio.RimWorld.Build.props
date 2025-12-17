@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ProjectCapability Include="UnityModStudio.RimWorld" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GameModsPath>Mods\</GameModsPath>
+    <AssetsFolderName>Assets</AssetsFolderName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ModSourcePath Condition="Exists('..\About\About.xml')">..\</ModSourcePath>
+    <ModSourcePath Condition="Exists('..\..\About\About.xml')">..\..\</ModSourcePath>
+    <ModSourcePath Condition="Exists('$(AssetsFolderName)\About\About.xml')">$(AssetsFolderName)\</ModSourcePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="$(ModSourcePath)About\**\*" LinkBase="$(AssetsFolderName)\About\" />
+    <Content Include="$(ModSourcePath)Defs\**\*" LinkBase="$(AssetsFolderName)\Defs\" />
+    <Content Include="$(ModSourcePath)Languages\**\*" LinkBase="$(AssetsFolderName)\Languages\" />
+    <Content Include="$(ModSourcePath)Patches\**\*" LinkBase="$(AssetsFolderName)\Patches\" />
+    <Content Include="$(ModSourcePath)Sounds\**\*" LinkBase="$(AssetsFolderName)\Sounds\" />
+    <Content Include="$(ModSourcePath)Textures\**\*" LinkBase="$(AssetsFolderName)\Textures\" />
+    <Content Include="$(ModSourcePath)1.*\**\*" Exclude="$(ModSourcePath)1.*\Assemblies\**\*" LinkBase="$(AssetsFolderName)\" />
+    <Content Include="$(ModSourcePath)Common\**\*" Exclude="$(ModSourcePath)Common\Assemblies\**\*" LinkBase="$(AssetsFolderName)\Common\" />
+    <Content Include="$(ModSourcePath)LoadFolders.xml" Condition="Exists('$(ModSourcePath)LoadFolders.xml')" LinkBase="$(AssetsFolderName)\" />
+  </ItemGroup>
+
+</Project>

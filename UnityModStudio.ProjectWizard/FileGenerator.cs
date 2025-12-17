@@ -14,7 +14,7 @@ using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.ProjectWizard;
 
-internal static class FileGenerator
+public static class FileGenerator
 {
     public static async Task UpdateJsonFileAsync(string path, Action<JsonObject> action)
     {
@@ -25,23 +25,16 @@ internal static class FileGenerator
         await JsonSerializer.SerializeAsync(stream, root, new JsonSerializerOptions { WriteIndented = true });
     }
          
-    public static void UpdateLaunchSettings(JsonObject root, string gameDisplayName, IReadOnlyDictionary<string, string> gameVersions)
+    public static void UpdateLaunchSettings(JsonObject root, IReadOnlyDictionary<string, string> gameVersions)
     {
         var profiles = GetOrAddChild(root, "profiles");
 
-        if (gameVersions.Count == 0)
+        foreach (var version in gameVersions)
         {
-            var profile = GetOrAddChild(profiles, gameDisplayName);
+            var profile = GetOrAddChild(profiles, version.Key);
             profile["commandName"] = "Executable";
-        }
-        else
-        {
-            foreach (var version in gameVersions)
-            {
-                var profile = GetOrAddChild(profiles, version.Key);
-                profile["commandName"] = "Executable";
+            if (!string.IsNullOrEmpty(version.Value))
                 profile["gameVersion"] = version.Value;
-            }
         }
     }
 
@@ -124,7 +117,7 @@ internal static class FileGenerator
             .ToArray();
     }
 
-    private static IEnumerable<XNode> AddWhitespace(IEnumerable<XElement> elements, XElement reference)
+    public static IEnumerable<XNode> AddWhitespace(IEnumerable<XElement> elements, XElement reference)
     {
         var indent = reference.PreviousNode is XText textNode ? textNode.Value.Split('\n').Last() : "";
         var isFirst = true;
@@ -137,10 +130,13 @@ internal static class FileGenerator
         }
     }
 
-    private static IEnumerable<XNode> IncludeWhitespace(XElement element)
+    public static IEnumerable<XNode> IncludeWhitespace(XElement element)
     {
         yield return element;
         if (element.PreviousNode is XText textNode && string.IsNullOrWhiteSpace(textNode.Value))
             yield return textNode;
     }
+
+    public static XElement GetElementSafe(XElement parent, XName name) => 
+        parent.Element(name) ?? throw new XmlException($"Element '{name}' not found in XML document.");
 }

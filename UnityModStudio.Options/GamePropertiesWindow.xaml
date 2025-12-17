@@ -10,6 +10,7 @@
   Title="Game properties"
   Width="500"
   d:DataContext="{d:DesignInstance local:GamePropertiesViewModel}"
+  Icon="UnityModStudio.ico"
   ShowInTaskbar="False"
   SizeToContent="Height"
   mc:Ignorable="d">
@@ -26,12 +27,8 @@
       <Setter Property="Margin" Value="4" />
     </Style>
 
-    <Style
-      x:Key="ErrorTextStyle"
-      BasedOn="{StaticResource {x:Type TextBlock}}"
-      TargetType="TextBlock">
-      <Setter Property="Foreground" Value="Red" />
-      <Setter Property="TextWrapping" Value="Wrap" />
+    <Style BasedOn="{StaticResource {x:Type local:ContentControlWithValidation}}" TargetType="local:ContentControlWithValidation">
+      <Setter Property="Margin" Value="4" />
     </Style>
 
     <Style TargetType="HeaderedContentControl">
@@ -73,9 +70,6 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
@@ -88,59 +82,41 @@
           Grid.Column="0"
           Content="Display name:"
           Target="{Binding ElementName=DisplayNameText}" />
-        <TextBox
-          Name="DisplayNameText"
+        <local:ContentControlWithValidation
           Grid.Row="0"
           Grid.Column="1"
-          Grid.ColumnSpan="2"
-          Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
-
-        <TextBlock
-          Grid.Row="1"
-          Grid.Column="1"
-          Grid.ColumnSpan="2"
-          Style="{StaticResource ErrorTextStyle}"
-          Text="{Binding ElementName=DisplayNameText, Path=(Validation.Errors)[0].ErrorContent}"
-          Visibility="{Binding ElementName=DisplayNameText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
+          Grid.ColumnSpan="2">
+          <TextBox Name="DisplayNameText" Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged, Delay=200, NotifyOnValidationError=True}" />
+        </local:ContentControlWithValidation>
 
         <Label
-          Grid.Row="2"
+          Grid.Row="1"
           Grid.Column="0"
           Content="Game path:"
           Target="{Binding ElementName=GamePathText}" />
-        <TextBox
-          Name="GamePathText"
-          Grid.Row="2"
-          Grid.Column="1"
-          Text="{Binding GamePath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
+        <local:ContentControlWithValidation Grid.Row="1" Grid.Column="1">
+          <TextBox Name="GamePathText" Text="{Binding GamePath, UpdateSourceTrigger=PropertyChanged, Delay=200, NotifyOnValidationError=True}" />
+        </local:ContentControlWithValidation>
         <Button
-          Grid.Row="2"
+          Grid.Row="1"
           Grid.Column="2"
           Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
           Command="{Binding BrowseForGamePathCommand}"
           Content="…"
           ToolTip="Browse" />
 
-        <TextBlock
-          Grid.Row="3"
-          Grid.Column="1"
-          Grid.ColumnSpan="2"
-          Style="{StaticResource ErrorTextStyle}"
-          Text="{Binding ElementName=GamePathText, Path=(Validation.Errors)[0].ErrorContent}"
-          Visibility="{Binding ElementName=GamePathText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
-
         <Label
-          Grid.Row="4"
+          Grid.Row="2"
           Grid.Column="0"
           Content="Mods path:"
           Target="{Binding ElementName=ModsPathText}" />
         <TextBox
           Name="ModsPathText"
-          Grid.Row="4"
+          Grid.Row="2"
           Grid.Column="1"
           Text="{Binding ModsPath, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
         <Button
-          Grid.Row="4"
+          Grid.Row="2"
           Grid.Column="2"
           Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
           Command="{Binding BrowseForModsPathCommand}"
@@ -148,27 +124,19 @@
           ToolTip="Browse" />
 
         <Label
-          Grid.Row="5"
+          Grid.Row="3"
           Grid.Column="0"
           Content="Game version:"
           Target="{Binding ElementName=GameVersionText}" />
-        <TextBox
-          Name="GameVersionText"
-          Grid.Row="5"
+        <local:ContentControlWithValidation
+          Grid.Row="3"
           Grid.Column="1"
-          Grid.ColumnSpan="2"
-          Text="{Binding GameVersion, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
-
-        <TextBlock
-          Grid.Row="6"
-          Grid.Column="1"
-          Grid.ColumnSpan="2"
-          Style="{StaticResource ErrorTextStyle}"
-          Text="{Binding ElementName=GameVersionText, Path=(Validation.Errors)[0].ErrorContent}"
-          Visibility="{Binding ElementName=GameVersionText, Path=(Validation.HasError), Converter={StaticResource BooleanToVisibilityConverter}}" />
+          Grid.ColumnSpan="2">
+          <TextBox Name="GameVersionText" Text="{Binding GameVersion, UpdateSourceTrigger=PropertyChanged, Delay=200, NotifyOnValidationError=True}" />
+        </local:ContentControlWithValidation>
 
         <Grid
-          Grid.Row="7"
+          Grid.Row="4"
           Grid.Column="0"
           Grid.ColumnSpan="3"
           d:DataContext=""

@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="..\UnityModStudio.ico" Link="UnityModStudio.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
     <PackageReference Include="Microsoft.VisualStudio.ComponentModelHost" Version="17.10.191" />
     <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="17.10.40170" />

@@ -1,0 +1,29 @@
+﻿<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:options="clr-namespace:UnityModStudio.Options">
+
+  <Style TargetType="options:ContentControlWithValidation">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="options:ContentControlWithValidation">
+          <StackPanel>
+            <ContentPresenter />
+            <TextBlock
+              Margin="0,2,0,0"
+              Foreground="Red"
+              Text="{TemplateBinding ErrorText}"
+              Visibility="{TemplateBinding ErrorVisibility}" />
+          </StackPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+
+    <Style.Resources>
+      <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
+        <Setter Property="Margin" Value="0" />
+      </Style>
+    </Style.Resources>
+  </Style>
+
+</ResourceDictionary>

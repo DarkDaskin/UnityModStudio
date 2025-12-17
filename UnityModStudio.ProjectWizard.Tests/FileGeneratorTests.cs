@@ -60,7 +60,7 @@ public class FileGeneratorTests
             }
         };
 
-        FileGenerator.UpdateLaunchSettings(root, "TestGame", new Dictionary<string, string>
+        FileGenerator.UpdateLaunchSettings(root,new Dictionary<string, string>
         {
             ["Version1"] = "1.0",
             ["Version2"] = "2.0"
@@ -105,7 +105,7 @@ public class FileGeneratorTests
             }
         };
 
-        FileGenerator.UpdateLaunchSettings(root, "TestGame", ImmutableDictionary<string, string>.Empty);
+        FileGenerator.UpdateLaunchSettings(root, ImmutableDictionary<string, string>.Empty);
 
         var expectedRoot = new JsonObject
         {

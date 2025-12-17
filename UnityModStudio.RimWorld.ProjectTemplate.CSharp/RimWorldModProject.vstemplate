@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <Name>RimWorld mod (C#)</Name>
+    <Description>A project for building and deploying a RimWorld mod.</Description>
+    <Icon>RimWorldModProject.ico</Icon>
+    <ProjectType>CSharp</ProjectType>
+    <LanguageTag>CSharp</LanguageTag>
+    <PlatformTag>Windows</PlatformTag>
+    <PlatformTag>Linux</PlatformTag>
+    <PlatformTag>macOS</PlatformTag>
+    <ProjectTypeTag>Library</ProjectTypeTag>
+    <ProjectTypeTag>Games</ProjectTypeTag>
+    <ProjectTypeTag>Extension</ProjectTypeTag>
+    <SortOrder>1000</SortOrder>
+    <TemplateID>fd9357e7-c6ff-4f26-8510-0dd3ca0ad4ff</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>RimWorldModProject</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
+    <CreateInPlace>true</CreateInPlace>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="RimWorldModProject.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Startup.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Startup.cs" OpenInEditor="true">Startup.Harmony.cs</ProjectItem>
+      <Folder Name="Properties">
+        <ProjectItem>launchSettings.json</ProjectItem>
+      </Folder>
+      <Folder Name="Assets">
+        <Folder Name="About">
+          <ProjectItem OpenInEditor="true">About.xml</ProjectItem>
+          <ProjectItem>Preview.png</ProjectItem>
+        </Folder>
+      </Folder>
+    </Project>
+    <CustomParameters>
+      <CustomParameter Name="$SelectedGameIds$" Value=""/>
+      <CustomParameter Name="$DontAddProjectToSolution$" Value="true"/>
+    </CustomParameters>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>UnityModStudio.RimWorld.ProjectWizard, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
+    <FullClassName>UnityModStudio.RimWorld.ProjectWizard.RimWorldModProjectPreWizard</FullClassName>
+  </WizardExtension>  
+  <WizardExtension>
+    <Assembly>UnityModStudio.ProjectWizard, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
+    <FullClassName>UnityModStudio.ProjectWizard.UnityModProjectWizard</FullClassName>
+  </WizardExtension>
+  <WizardExtension>
+    <Assembly>UnityModStudio.RimWorld.ProjectWizard, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b76f113e9a347f0e</Assembly>
+    <FullClassName>UnityModStudio.RimWorld.ProjectWizard.RimWorldModProjectPostWizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

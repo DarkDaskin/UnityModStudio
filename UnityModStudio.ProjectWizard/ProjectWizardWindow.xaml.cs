@@ -1,21 +1,20 @@
-﻿namespace UnityModStudio.ProjectWizard
+﻿namespace UnityModStudio.ProjectWizard;
+
+public partial class ProjectWizardWindow
 {
-    public partial class ProjectWizardWindow
+    public ProjectWizardViewModel ViewModel { get; }
+
+    public ProjectWizardWindow()
     {
-        public ProjectWizardViewModel ViewModel { get; }
+        InitializeComponent();
 
-        public ProjectWizardWindow()
+        ViewModel = new ProjectWizardViewModel();
+        DataContext = ViewModel;
+
+        ViewModel.Closed += success =>
         {
-            InitializeComponent();
-
-            ViewModel = new ProjectWizardViewModel();
-            DataContext = ViewModel;
-
-            ViewModel.Closed += success =>
-            {
-                DialogResult = success;
-                Close();
-            };
-        }
+            DialogResult = success;
+            Close();
+        };
     }
 }

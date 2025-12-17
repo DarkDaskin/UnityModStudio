@@ -9,77 +9,85 @@ public class GeneralSettingsManagerTests : StoreTestsBase
     [TestMethod]
     public void WhenCreated_UseDefaults()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
 
-        Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
-        Assert.AreEqual(DoorstopMode.Debugging, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
-        Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
-        Assert.IsNull(generalSettingsManager.Settings.LastSelectedGameId);
-        Assert.IsFalse(generalSettingsManager.WatchForChanges);
+        Assert.IsNotNull(settingsManager.Settings);
+        Assert.IsNotNull(settingsManager.Settings.AmbientGame);
+        Assert.AreEqual(true, settingsManager.Settings.AmbientGame.IsResolutionAllowed);
+        Assert.AreEqual(DoorstopMode.Debugging, settingsManager.Settings.AmbientGame.DoorstopMode);
+        Assert.AreEqual(false, settingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.IsNull(settingsManager.Settings.LastSelectedGameId);
+        Assert.IsFalse(settingsManager.WatchForChanges);
     }
 
     [TestMethod]
     public async Task WhenLoadedFromEmptyFile_UseDefaults()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
 
-        await generalSettingsManager.LoadAsync();
+        await settingsManager.LoadAsync();
 
-        Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
-        Assert.AreEqual(DoorstopMode.Debugging, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
-        Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
-        Assert.IsNull(generalSettingsManager.Settings.LastSelectedGameId);
-        Assert.IsFalse(generalSettingsManager.WatchForChanges);
+        Assert.IsNotNull(settingsManager.Settings);
+        Assert.IsNotNull(settingsManager.Settings.AmbientGame);
+        Assert.AreEqual(true, settingsManager.Settings.AmbientGame.IsResolutionAllowed);
+        Assert.AreEqual(DoorstopMode.Debugging, settingsManager.Settings.AmbientGame.DoorstopMode);
+        Assert.AreEqual(false, settingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.IsNull(settingsManager.Settings.LastSelectedGameId);
+        Assert.IsFalse(settingsManager.WatchForChanges);
     }
 
     [TestMethod]
     public async Task WhenLoadedFromNonExistingFile_UseDefaults()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
         File.Delete(StorePath);
 
-        await generalSettingsManager.LoadAsync();
+        await settingsManager.LoadAsync();
 
-        Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
-        Assert.AreEqual(DoorstopMode.Debugging, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
-        Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
-        Assert.IsNull(generalSettingsManager.Settings.LastSelectedGameId);
-        Assert.IsFalse(generalSettingsManager.WatchForChanges);
+        Assert.IsNotNull(settingsManager.Settings);
+        Assert.IsNotNull(settingsManager.Settings.AmbientGame);
+        Assert.AreEqual(true, settingsManager.Settings.AmbientGame.IsResolutionAllowed);
+        Assert.AreEqual(DoorstopMode.Debugging, settingsManager.Settings.AmbientGame.DoorstopMode);
+        Assert.AreEqual(false, settingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.IsNull(settingsManager.Settings.LastSelectedGameId);
+        Assert.IsFalse(settingsManager.WatchForChanges);
     }
 
     [TestMethod]
     public async Task WhenLoadedFromMalformedFile_Throw()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
         await File.WriteAllTextAsync(StorePath, "!@$%^&*()");
 
-        await Assert.ThrowsExactlyAsync<JsonException>(() => generalSettingsManager.LoadAsync());
+        await Assert.ThrowsExactlyAsync<JsonException>(() => settingsManager.LoadAsync());
     }
 
     [TestMethod]
     public async Task WhenLoadedFromValidFile_LoadSettings()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
         SetStoreFile("GeneralSettings.json");
 
-        await generalSettingsManager.LoadAsync();
+        await settingsManager.LoadAsync();
 
-        Assert.AreEqual(false, generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed);
-        Assert.AreEqual(DoorstopMode.DebuggingAndModLoading, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
-        Assert.AreEqual(true, generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
-        Assert.AreEqual(new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6"), generalSettingsManager.Settings.LastSelectedGameId);
+        Assert.IsNotNull(settingsManager.Settings);
+        Assert.IsNotNull(settingsManager.Settings.AmbientGame);
+        Assert.AreEqual(false, settingsManager.Settings.AmbientGame.IsResolutionAllowed);
+        Assert.AreEqual(DoorstopMode.DebuggingAndModLoading, settingsManager.Settings.AmbientGame.DoorstopMode);
+        Assert.AreEqual(true, settingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName);
+        Assert.AreEqual(new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6"), settingsManager.Settings.LastSelectedGameId);
     }
 
     [TestMethod]
     public async Task WhenSaving_WriteJson()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
 
-        generalSettingsManager.Settings.AmbientGame.IsResolutionAllowed = false;
-        generalSettingsManager.Settings.AmbientGame.DoorstopMode = DoorstopMode.DebuggingAndModLoading;
-        generalSettingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName = true;
-        generalSettingsManager.Settings.LastSelectedGameId = new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6");
-        await generalSettingsManager.SaveAsync();
+        settingsManager.Settings.AmbientGame.IsResolutionAllowed = false;
+        settingsManager.Settings.AmbientGame.DoorstopMode = DoorstopMode.DebuggingAndModLoading;
+        settingsManager.Settings.AmbientGame.UseAlternateDoorstopDllName = true;
+        settingsManager.Settings.LastSelectedGameId = new Guid("b875ba73-84e8-4a51-a305-20edfa5d58f6");
+        await settingsManager.SaveAsync();
 
         VerifyStoreEquals("GeneralSettings.json");
     }
@@ -87,25 +95,25 @@ public class GeneralSettingsManagerTests : StoreTestsBase
     [TestMethod]
     public void WhenEnablingWatchWithMissingGameRegistry_Succeed()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
         File.Delete(StorePath);
 
-        generalSettingsManager.WatchForChanges = true;
+        settingsManager.WatchForChanges = true;
 
-        Assert.IsTrue(generalSettingsManager.WatchForChanges);
+        Assert.IsTrue(settingsManager.WatchForChanges);
     }
 
     [TestMethod]
     public async Task WhenEnablingWatch_ReloadOnExternalChange()
     {
-        IGeneralSettingsManager generalSettingsManager = new GeneralSettingsManager(StorePath);
-        IGeneralSettingsManager generalSettingsManager2 = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager = new GeneralSettingsManager(StorePath);
+        using IGeneralSettingsManager settingsManager2 = new GeneralSettingsManager(StorePath);
 
-        generalSettingsManager.WatchForChanges = true;
-        generalSettingsManager2.Settings.AmbientGame.DoorstopMode = DoorstopMode.Disabled;
-        await generalSettingsManager2.SaveAsync();
+        settingsManager.WatchForChanges = true;
+        settingsManager2.Settings.AmbientGame.DoorstopMode = DoorstopMode.Disabled;
+        await settingsManager2.SaveAsync();
         await Task.Delay(200);
 
-        Assert.AreEqual(DoorstopMode.Disabled, generalSettingsManager.Settings.AmbientGame.DoorstopMode);
+        Assert.AreEqual(DoorstopMode.Disabled, settingsManager.Settings.AmbientGame.DoorstopMode);
     }
 }
