@@ -138,9 +138,15 @@
 
   <Target Name="_GetGameVersions" Returns="@(_AllGameVersions)" />
 
-  <Target Name="_RemoveNetStandardReferences" BeforeTargets="BeforeBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+  <Target Name="_RemoveNetStandard20References" AfterTargets="BeforeBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <ItemGroup>
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'NETStandard.Library'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_RemoveNetStandard21References" AfterTargets="ResolveTargetingPackAssets" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'NETStandard.Library.Ref'" />
     </ItemGroup>
   </Target>
 

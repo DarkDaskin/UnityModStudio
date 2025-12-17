@@ -234,12 +234,70 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     }
 
     [TestMethod]
-    public void WhenGameIsBuiltTwice_BuildAndDeploy()
+    public void WhenNet4GameIsBuiltTwice_BuildAndDeploy()
     {
         var game = new Game { Path = MakeGameCopy("2018-net4-v1.0") };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
         const string projectPath = @"Projects\Correct\NonVersioned\Mod.csproj";
+        var (project, logger) = GetProjectWithRestore(projectPath);
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+        Assert.IsTrue(success);
+
+        // Project must be reloaded, so resolved data files are imported.
+        AssemblyFixture.BinaryLogger.SetSuffix("_2");
+        project = ProjectInstance.FromFile(projectPath, ProjectOptions);
+        success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, logger.BuildErrors.Count);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"Mod\Mod.dll")));
+        Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "Mod"), false));
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
+        Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
+        var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
+        Assert.IsTrue(File.Exists(doorstopConfigPath));
+        Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mod\Mod.dll"));
+    }
+
+    [TestMethod]
+    public void WhenNetStandard20GameIsBuiltTwice_BuildAndDeploy()
+    {
+        var game = new Game { Path = MakeGameCopy("2018-netstandard20-v2.0") };
+        ResolveGameProperties(game);
+        SetupGameRegistry(game);
+        const string projectPath = @"Projects\Correct\NonVersionedNetStandard20\Mod.csproj";
+        var (project, logger) = GetProjectWithRestore(projectPath);
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+        Assert.IsTrue(success);
+
+        // Project must be reloaded, so resolved data files are imported.
+        AssemblyFixture.BinaryLogger.SetSuffix("_2");
+        project = ProjectInstance.FromFile(projectPath, ProjectOptions);
+        success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, logger.BuildErrors.Count);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"Mod\Mod.dll")));
+        Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "Mod"), false));
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
+        Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
+        var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
+        Assert.IsTrue(File.Exists(doorstopConfigPath));
+        Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mod\Mod.dll"));
+    }
+
+    [TestMethod]
+    public void WhenNetStandard21GameIsBuiltTwice_BuildAndDeploy()
+    {
+        var game = new Game { Path = MakeGameCopy("2022-netstandard21") };
+        ResolveGameProperties(game);
+        SetupGameRegistry(game);
+        const string projectPath = @"Projects\Correct\NonVersionedNetStandard21\Mod.csproj";
         var (project, logger) = GetProjectWithRestore(projectPath);
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
