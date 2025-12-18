@@ -19,10 +19,13 @@ Allows creating mods for Unity games using Visual Studio 2022+.
 - Building mods supporting multiple game versions.
 - Game-specific templates and features (in separate extensions).
   - BepInEx 5/6 project templates.
+  - RimWorld project template.
 
 ## Planned features
-- Game-specific templates and features (in separate extensions).
-  - RimWorld project template.
+### Core
+- Installing multiple versions of games in parallel from Steam.
+### RimWorld
+- XML files validation and IntelliSense.
 
 ## Visual Studio support
 Release 1.1 is the last release which supports Visual Studio 2019. New development will be focused on Visual Studio 2022+.
