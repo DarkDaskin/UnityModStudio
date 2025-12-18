@@ -60,10 +60,11 @@ public class FileGeneratorTests
             }
         };
 
-        FileGenerator.UpdateLaunchSettings(root,new Dictionary<string, string>
+        FileGenerator.UpdateLaunchSettings(root,new Dictionary<string, string?>
         {
             ["Version1"] = "1.0",
-            ["Version2"] = "2.0"
+            ["Version2"] = "2.0",
+            ["AnotherGame"] = null
         });
 
         var expectedRoot = new JsonObject
@@ -84,14 +85,18 @@ public class FileGeneratorTests
                 {
                     ["commandName"] = "Executable",
                     ["gameVersion"] = "2.0"
-                }
+                },
+                ["AnotherGame"] = new JsonObject
+                {
+                    ["commandName"] = "Executable"
+                },
             }
         };
         Assert.AreEqual(expectedRoot.ToJsonString(), root.ToJsonString());
     }
 
     [TestMethod]
-    public void WhenUpdateLaunchSettingsInvokedWithNoVersions_AppendProfile()
+    public void WhenUpdateLaunchSettingsInvokedWithNoVersions_DoNothing()
     {
         var root = new JsonObject
         {
@@ -105,7 +110,7 @@ public class FileGeneratorTests
             }
         };
 
-        FileGenerator.UpdateLaunchSettings(root, ImmutableDictionary<string, string>.Empty);
+        FileGenerator.UpdateLaunchSettings(root, ImmutableDictionary<string, string?>.Empty);
 
         var expectedRoot = new JsonObject
         {
@@ -115,10 +120,6 @@ public class FileGeneratorTests
                 ["ExistingProfile"] = new JsonObject
                 {
                     ["commandName"] = "ExistingCommand"
-                },
-                ["TestGame"] = new JsonObject
-                {
-                    ["commandName"] = "Executable"
                 }
             }
         };

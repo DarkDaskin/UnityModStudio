@@ -49,7 +49,7 @@ public class UnityModProjectWizard : IWizard
         var launchSettingsPath = Path.Combine(Path.GetDirectoryName(projectPath)!, @"Properties\launchSettings.json");
         if (File.Exists(launchSettingsPath))
         {
-            var gameVersions = _selectedGames.ToDictionary(game => game.DisplayName, game => game.Version!);
+            var gameVersions = _selectedGames.ToDictionary(game => game.DisplayName, game => game.Version);
             ThreadHelper.JoinableTaskFactory.Run(() => FileGenerator.UpdateJsonFileAsync(launchSettingsPath,
                 root => FileGenerator.UpdateLaunchSettings(root, gameVersions)));
         }

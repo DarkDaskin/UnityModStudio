@@ -25,7 +25,7 @@ public static class FileGenerator
         await JsonSerializer.SerializeAsync(stream, root, new JsonSerializerOptions { WriteIndented = true });
     }
          
-    public static void UpdateLaunchSettings(JsonObject root, IReadOnlyDictionary<string, string> gameVersions)
+    public static void UpdateLaunchSettings(JsonObject root, IReadOnlyDictionary<string, string?> gameVersions)
     {
         var profiles = GetOrAddChild(root, "profiles");
 
