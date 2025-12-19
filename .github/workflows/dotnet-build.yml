@@ -34,6 +34,14 @@ jobs:
       run: dotnet test --no-build -c Release ./UnityModStudio.ProjectWizard.Tests/
     - name: Test UnityModStudio.Build
       run: dotnet test --no-build -c Release ./UnityModStudio.Build.Tests/
+    - name: Test UnityModStudio.BepInEx.Build
+      run: dotnet test --no-build -c Release ./UnityModStudio.BepInEx.Build.Tests/
+    - name: Test UnityModStudio.RimWorld.Common
+      run: dotnet test --no-build -c Release ./UnityModStudio.RimWorld.Common.Tests/
+    - name: Test UnityModStudio.RimWorld.ProjectWizard
+      run: dotnet test --no-build -c Release ./UnityModStudio.RimWorld.ProjectWizard.Tests/
+    - name: Test UnityModStudio.RimWorld.Build
+      run: dotnet test --no-build -c Release ./UnityModStudio.RimWorld.Build.Tests/
     - name: Upload NuGet artifacts
       uses: actions/upload-artifact@v4
       with:
