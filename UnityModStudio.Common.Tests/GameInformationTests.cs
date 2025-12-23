@@ -3,7 +3,8 @@
 [TestClass]
 public sealed class GameInformationTests
 {
-    [DataTestMethod]
+    [TestMethod]
+    [DataRow(null, false, "<unknown>")]
     [DataRow("", false, "<unknown>")]
     [DataRow("^&#*(", false, "<unknown>")]
     [DataRow("net", false, "<unknown>")]

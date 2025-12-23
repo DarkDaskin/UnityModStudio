@@ -20,9 +20,7 @@ internal class VersionInfo
 
         return Marshal.PtrToStringUni(valuePtr);
     }
-
-    private static Exception GetExceptionForLastWin32Error() => Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
-
+    
     [DllImport("version.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern int GetFileVersionInfoSize(string lptstrFilename, IntPtr lpdwHandle);
 

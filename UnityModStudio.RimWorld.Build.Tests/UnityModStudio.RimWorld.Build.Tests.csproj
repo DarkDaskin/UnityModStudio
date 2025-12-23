@@ -1,0 +1,119 @@
+﻿<Project Sdk="MSTest.Sdk/3.10.1">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      Displays error on console in addition to the log file. Note that this feature comes with a performance impact.
+      For more information, visit https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-integration-dotnet-test#show-failure-per-test
+      -->
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Projects\**" />
+    <None Update="Projects\**" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="Projects\**\*.cs" />
+    <Compile Remove="Projects\AssetsAtTopLevel\NewFolder\**" />
+    <EmbeddedResource Remove="Projects\AssetsAtTopLevel\NewFolder\**" />
+    <None Remove="Projects\AssetsAtTopLevel\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="17.10.46" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.9.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
+    <ProjectReference Include="..\UnityModStudio.RimWorld.Build\UnityModStudio.RimWorld.Build.csproj" ExcludeAssets="all" />
+    <ProjectReference Include="..\UnityModStudio.Build.Tests\UnityModStudio.Build.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <RimRefVersion Include="1.6.4633" UnityVersion="2022.3.35.4614" />
+    <RimRefVersion Include="1.5.4409" UnityVersion="2019.4.30.51345" />
+    <RimRefVersion Include="1.4.3901" UnityVersion="2019.4.30.51345" />
+  </ItemGroup>
+
+  <Target Name="_ResolveFakeRimWorldPath">
+    <PropertyGroup>
+      <FakeRimWorldPath Condition="'$(FakeRimWorldPath)' == ''">$(BaseIntermediateOutputPath)FakeRimWorld\</FakeRimWorldPath>
+      <FakeRimWorldPath>$([MSBuild]::EnsureTrailingSlash($([MSBuild]::NormalizePath('$(FakeRimWorldPath)'))))</FakeRimWorldPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="PrepareFakeRimWorld" BeforeTargets="PrepareForRun" DependsOnTargets="_ResolveFakeRimWorldPath" Inputs="$(MSBuildAllProjects)" Outputs="@(RimRefVersion->'$(FakeRimWorldPath)%(Identity)\RimWorldWin64.exe')">
+    <PropertyGroup>
+      <_RimRefPath>$(FakeRimWorldPath)RimRef\</_RimRefPath>
+      <_AppInfoContents>Ludeon Studios
+RimWorld by Ludeon Studios</_AppInfoContents>
+    </PropertyGroup>
+    <ItemGroup>
+      <_RimRefUrl Include="https://www.nuget.org/api/v2/package/Krafs.Rimworld.Ref/%(RimRefVersion.Identity)" Version="%(RimRefVersion.Identity)" />
+      <_MainExeProject Include="@(RimRefVersion)">
+        <ProjectContent>
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup>
+              <TargetFramework>net472</TargetFramework>
+              <OutputType>WinExe</OutputType>
+              <FileVersion>%(RimRefVersion.UnityVersion)</FileVersion>
+              <OutDir>.</OutDir>
+              <DebugSymbols>false</DebugSymbols>
+              <DebugType>None</DebugType>
+              <GenerateSupportedRuntime>false</GenerateSupportedRuntime>
+            </PropertyGroup>
+          </Project>
+        </ProjectContent>
+        <DirectoryBuildPropsContent>
+          <Project />
+        </DirectoryBuildPropsContent>
+        <ProgramContent>class Program { static void Main() { } }</ProgramContent>
+      </_MainExeProject>
+    </ItemGroup>
+    <DownloadFile SourceUrl="%(_RimRefUrl.Identity)" DestinationFolder="$(_RimRefPath)" DestinationFileName="krafs.rimworld.ref.%(_RimRefUrl.Version).nupkg" />
+    <Unzip SourceFiles="$(_RimRefPath)krafs.rimworld.ref.%(RimRefVersion.Identity).nupkg" DestinationFolder="$(_RimRefPath)%(RimRefVersion.Identity)\" />
+    <ItemGroup>
+      <_RimRefAssemblies Include="$(_RimRefPath)%(RimRefVersion.Identity)\ref\net472\*.dll" Destination="$(FakeRimWorldPath)%(RimRefVersion.Identity)\RimWorldWin64_Data\Managed\" />
+    </ItemGroup>
+    <MakeDir Directories="$(FakeRimWorldPath)%(RimRefVersion.Identity)\RimWorldWin64_Data\Managed\" />
+    <Copy SourceFiles="%(_RimRefAssemblies.Identity)" DestinationFolder="%(_RimRefAssemblies.Destination)" />
+    <WriteLinesToFile File="$(FakeRimWorldPath)%(RimRefVersion.Identity)\RimWorldWin64_Data\app.info" Lines="$(_AppInfoContents)" Overwrite="true" />
+    <WriteLinesToFile File="$(FakeRimWorldPath)%(_MainExeProject.Identity)\RimWorldWin64.csproj" Lines="%(_MainExeProject.ProjectContent)" Overwrite="true" />
+    <WriteLinesToFile File="$(FakeRimWorldPath)%(_MainExeProject.Identity)\Directory.Build.props" Lines="%(_MainExeProject.DirectoryBuildPropsContent)" Overwrite="true" />
+    <WriteLinesToFile File="$(FakeRimWorldPath)%(_MainExeProject.Identity)\Program.cs" Lines="%(_MainExeProject.ProgramContent)" Overwrite="true" />
+    <MSBuild Projects="$(FakeRimWorldPath)%(_MainExeProject.Identity)\RimWorldWin64.csproj" Targets="Restore;Build" />
+    <ItemGroup>
+      <_FileToRemove Include="$(FakeRimWorldPath)%(_MainExeProject.Identity)\*" Exclude="$(FakeRimWorldPath)%(_MainExeProject.Identity)\*.exe" />
+      <_DirectoryToRemove Include="$(FakeRimWorldPath)%(_MainExeProject.Identity)\obj\" />
+      <_DirectoryToRemove Include="$(_RimRefPath)" />
+    </ItemGroup>
+    <Delete Files="@(_FileToRemove)" />
+    <RemoveDir Directories="@(_DirectoryToRemove)" />
+  </Target>
+
+  <Target Name="GenerateGameInfo" BeforeTargets="BeforeCompile" DependsOnTargets="_ResolveFakeRimWorldPath">
+    <PropertyGroup>
+      <_GameInfoText>
+        <![CDATA[
+namespace $(RootNamespace)%3B
+
+internal static class GameInfo
+{
+    public const string Path = @"$(FakeRimWorldPath)"%3B
+}
+      ]]>
+      </_GameInfoText>
+      <_GameInfoFilePath>$(IntermediateOutputPath)GameInfo.cs</_GameInfoFilePath>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_GameInfoFilePath)" Lines="$(_GameInfoText)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+    <ItemGroup>
+      <Compile Include="$(_GameInfoFilePath)" />
+      <FileWrites Include="$(_GameInfoFilePath)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

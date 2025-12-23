@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;netstandard2.1</TargetFrameworks>
+    <GameName>RimWorld by Ludeon Studios</GameName>
+    <GameVersion Condition="'$(TargetFramework)' == 'net472'">1.5</GameVersion>
+    <GameVersion Condition="'$(TargetFramework)' == 'netstandard2.1'">1.6</GameVersion>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnityModStudio.RimWorld.Build" Version="$(BuildPackageVersion)" />
+  </ItemGroup>
+
+</Project>

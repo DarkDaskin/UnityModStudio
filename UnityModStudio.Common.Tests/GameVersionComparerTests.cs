@@ -3,13 +3,13 @@
 [TestClass]
 public sealed class GameVersionComparerTests
 {
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(null, "1", -1)]
     [DataRow("1", null, 1)]
     [DataRow(null, null, 0)]
     public void Null_CompareAsLesser(string? x, string? y, int expectedResult) => ExecuteCommonTest(x, y, expectedResult);
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("1.0", "1.0", 0)]
     [DataRow("1.0", "2.0", -1)]
     [DataRow("2.1", "2.0", 1)]
@@ -18,7 +18,7 @@ public sealed class GameVersionComparerTests
     [DataRow("2.1", "2.2.1", -1)]
     public void NumericVersion_ComparePartsNumerically(string x, string y, int expectedResult) => ExecuteCommonTest(x, y, expectedResult);
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("1.0-pre", "1.0-pre", 0)]
     [DataRow("1.0-pre.1", "1.0-pre.11", -1)]
     [DataRow("1.0", "1.0-pre", 1)]
@@ -27,7 +27,7 @@ public sealed class GameVersionComparerTests
     [DataRow("1.1-alpha", "1.0-beta", 1)]
     public void PreReleaseVersion_ComparePartsNumericallyWhenPossible(string x, string y, int expectedResult) => ExecuteCommonTest(x, y, expectedResult);
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("^*(%^)", "^*(%^)", 0)]
     [DataRow("^=(%^)", "^*(%^)", 1)]
     public void MalformedVersion_CompareLexically(string x, string y, int expectedResult) => ExecuteCommonTest(x, y, expectedResult);

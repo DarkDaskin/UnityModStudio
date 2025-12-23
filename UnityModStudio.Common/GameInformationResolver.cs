@@ -116,12 +116,12 @@ namespace UnityModStudio.Common
 
         private static FileInfo[] GetAssemblies(DirectoryInfo gameManagedDirectory) => gameManagedDirectory.GetFiles("*.dll");
 
-        private static (string moniker, bool isSubset) GetTargetFrameworkInfo(IReadOnlyCollection<FileInfo> assemblyFiles)
+        private static (string? moniker, bool isSubset) GetTargetFrameworkInfo(IReadOnlyCollection<FileInfo> assemblyFiles)
         {
             var mscorlibFile = GetAssemblyFile(assemblyFiles, "mscorlib.dll");
             if (mscorlibFile == null)
                 throw new NotSupportedException("'mscorlib.dll' is missing.").WithErrorCode("UMS1005");
-            var mscorlibVersion = Version.Parse(FileVersionInfo.GetVersionInfo(mscorlibFile.FullName).FileVersion);
+            var mscorlibVersion = GetVersion(mscorlibFile);
             var systemCoreFile = GetAssemblyFile(assemblyFiles, "System.Core.dll");
             var systemXmlFile = GetAssemblyFile(assemblyFiles, "System.Xml.dll");
             var unityEngineCoreFile = GetAssemblyFile(assemblyFiles, "UnityEngine.CoreModule.dll");
@@ -129,11 +129,9 @@ namespace UnityModStudio.Common
             var hasSystemCore = systemCoreFile != null;
             var hasSystemXml = systemXmlFile != null;
             var hasUnityEngineCore = unityEngineCoreFile != null;
-            var netStandardVersion = netstandardFile is null
-                ? null
-                : Version.Parse(FileVersionInfo.GetVersionInfo(netstandardFile.FullName).FileVersion);
+            var netStandardVersion = GetVersion(netstandardFile);
 
-            return mscorlibVersion.Major switch
+            return mscorlibVersion?.Major switch
             {
                 // Unity 2021.x+ .NET Standard 2.1 profile (actually it's also .NET 4.8)
                 4 when netStandardVersion is { Major: 2, Minor: 1 } => ("netstandard2.1", false),
@@ -153,6 +151,7 @@ namespace UnityModStudio.Common
                 2 when hasSystemCore => ("net35", true),
                 // Unity 3.x .NET 2.0 profile
                 2 => ("net20", false),
+                null => default,
                 // Probably some future version of Unity.
                 _ => throw new NotSupportedException("Specified assembly set does not correspond to any known target framework.").WithErrorCode("UMS1006")
             };
@@ -160,6 +159,9 @@ namespace UnityModStudio.Common
 
         private static FileInfo? GetAssemblyFile(IEnumerable<FileInfo> assemblyFiles, string name) =>
             assemblyFiles.SingleOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+        private static Version? GetVersion(FileInfo? file) =>
+            file != null && Version.TryParse(FileVersionInfo.GetVersionInfo(file.FullName).FileVersion, out var v) ? v : null;
 
         private static (IReadOnlyCollection<FileInfo> frameworkAssemblyFiles, IReadOnlyCollection<FileInfo> gameAssemblyFiles)
             GroupAssemblies(IReadOnlyCollection<FileInfo> assemblyFiles)
@@ -204,13 +206,14 @@ namespace UnityModStudio.Common
             };
         }
 
-        private static string GetUnityVersion(FileInfo gameExecutableFile)
+        private static string? GetUnityVersion(FileInfo gameExecutableFile)
         {
             var unityVersion = VersionInfo.GetStringFileInfo(gameExecutableFile.FullName, "Unity Version");
             if (unityVersion != null)
                 return unityVersion.Split('_').First();
 
-            return FileVersionInfo.GetVersionInfo(gameExecutableFile.FullName).ProductVersion.Split(' ').First();
+            var fileVersion = FileVersionInfo.GetVersionInfo(gameExecutableFile.FullName).ProductVersion?.Split(' ').First();
+            return string.IsNullOrEmpty(fileVersion) ? null : fileVersion;
         }
 
         private static (string? gameName, string? company) GetAppInfo(DirectoryInfo gameDataDirectory)

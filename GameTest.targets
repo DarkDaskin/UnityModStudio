@@ -36,7 +36,7 @@
   </Target>
 
   <Target Name="DownloadSampleGames" DependsOnTargets="_ResolveSampleGameDownloadPath"  BeforeTargets="BeforeCompile"
-          Inputs="@(SampleGameType)" Outputs="@(SampleGameType->'$(SampleGameDownloadPath)%(Identity)\%(Identity).exe')">
+          Inputs="$(MSBuildAllProjects)" Outputs="@(SampleGameType->'$(SampleGameDownloadPath)%(Identity)\%(Identity).exe')">
     <ItemGroup>
       <_SampleGameZipFileName Include="@(SampleGameType->'UnityGame-%(Identity).zip')" />
       <_SampleGameZipUrl Include="@(_SampleGameZipFileName->'$(SampleGameRepositoryUrl)releases/download/$(SampleGameRepositoryTag)/%(Identity)')" />

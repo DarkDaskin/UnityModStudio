@@ -11,8 +11,8 @@ namespace UnityModStudio.Common
         public string? Company { get; set; }
 
         public Architecture Architecture { get; set; }
-        public string UnityVersion { get; set; } = null!;
-        public string TargetFrameworkMoniker { get; set; } = null!;
+        public string? UnityVersion { get; set; }
+        public string? TargetFrameworkMoniker { get; set; }
         public bool IsSubsetProfile { get; set; }
 
         public DirectoryInfo GameDirectory { get; set; } = null!;
@@ -23,13 +23,16 @@ namespace UnityModStudio.Common
         
         public string GetMonoProfileString()
         {
-            var match = Regex.Match(TargetFrameworkMoniker, @"(?<NetStandard>netstandard(?<Version>\d+\.\d+))|(?<NetFull>net(?<Version>\d+))");
+            if (TargetFrameworkMoniker is not null)
+            {
+                var match = Regex.Match(TargetFrameworkMoniker, @"(?<NetStandard>netstandard(?<Version>\d+\.\d+))|(?<NetFull>net(?<Version>\d+))");
 
-            if (match.Groups["NetStandard"].Success)
-                return ".NET Standard " + match.Groups["Version"].Value;
+                if (match.Groups["NetStandard"].Success)
+                    return ".NET Standard " + match.Groups["Version"].Value;
 
-            if (match.Groups["NetFull"].Success)
-                return ".NET " + string.Join(".", match.Groups["Version"].Value.ToCharArray()) + (IsSubsetProfile ? " Subset" : "");
+                if (match.Groups["NetFull"].Success)
+                    return ".NET " + string.Join(".", match.Groups["Version"].Value.ToCharArray()) + (IsSubsetProfile ? " Subset" : "");
+            }
 
             return "<unknown>";
         }
