@@ -68,7 +68,7 @@ public class BuildLoggerProvider(ConfiguredProject configuredProject) : IBuildLo
             {
                 case TaskParameterEventArgs {
                     Kind: TaskParameterMessageKind.TaskOutput, 
-                    ItemType: "_ReEvaluationRequired",
+                    ItemType: "ReEvaluationRequired",
                     Items: [ITaskItem taskItem]
                 } when bool.TryParse(taskItem.ItemSpec, out var v) && v:
                     _shouldTriggerEvaluation = true;

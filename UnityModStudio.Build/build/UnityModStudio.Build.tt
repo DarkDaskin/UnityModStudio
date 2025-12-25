@@ -394,7 +394,7 @@
 
     <UpdateProjectFile ProjectFile="$(_ResolvedReferencesProjectFilePath)" Properties="@(_ResolvedReferenceProperty)" Items="@(_GameReferenceToSave)" ItemNames="Reference">
       <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
-      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_ReEvaluationRequired" />
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="ReEvaluationRequired" />
     </UpdateProjectFile>
   </Target>
 
@@ -585,7 +585,7 @@
     </ItemGroup>
     <UpdateProjectFile ProjectFile="$(_GameSpecificPropertiesProjectFilePath)" Properties="@(_GameSpecificProperty)">
       <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
-      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_ReEvaluationRequired" />
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="ReEvaluationRequired" />
     </UpdateProjectFile>
   </Target>
 

@@ -16,9 +16,6 @@
     <None Include="Projects\**" />
     <None Update="Projects\**" CopyToOutputDirectory="PreserveNewest" />
     <Compile Remove="Projects\**\*.cs" />
-    <Compile Remove="Projects\AssetsAtTopLevel\NewFolder\**" />
-    <EmbeddedResource Remove="Projects\AssetsAtTopLevel\NewFolder\**" />
-    <None Remove="Projects\AssetsAtTopLevel\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>

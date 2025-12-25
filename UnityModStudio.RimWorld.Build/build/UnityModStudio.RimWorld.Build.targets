@@ -7,4 +7,65 @@
     <TargetDir>$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
     <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <UnityModStudioRimWorldTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.RimWorld.Build.dll</UnityModStudioRimWorldTasksAssembly>
+    <_LoadFoldersFilePath>$(ModSourcePath)LoadFolders.xml</_LoadFoldersFilePath>
+    <_LoadFoldersContentProjectFilePath>$(FullBaseIntermediateOutputPath)LoadFoldersContent.targets</_LoadFoldersContentProjectFilePath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="GetLoadFolders" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
+
+  <ItemGroup>
+    <Content Include="$(ModSourcePath)About\**\*" LinkBase="$(AssetsFolderName)\About\" />
+    <Content Include="$(_LoadFoldersFilePath)" Condition="Exists('$(_LoadFoldersFilePath)')" LinkBase="$(AssetsFolderName)\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ContentSubDirectory Include="Defs" />
+    <ContentSubDirectory Include="Languages" />
+    <ContentSubDirectory Include="Patches" />
+    <ContentSubDirectory Include="Sounds" />
+    <ContentSubDirectory Include="Textures" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!Exists('$(_LoadFoldersFilePath)')">
+    <LoadFolder Include="." />
+    <LoadFolder Include="1.%2A" />
+    <LoadFolder Include="Common" />
+  </ItemGroup>
+
+  <Import Project="$(_LoadFoldersContentProjectFilePath)" Condition="Exists('$(_LoadFoldersContentProjectFilePath)')" />
+
+  <Target Name="ResolveLoadFoldersContent" BeforeTargets="BeforeCompile;CompileDesignTime" DependsOnTargets="PrepareForBuild"
+          Inputs="$(MSBuildAllProjects);$(_LoadFoldersFilePath)" Outputs="$(_LoadFoldersContentProjectFilePath)">
+    <CreateProperty Value="true">
+      <Output TaskParameter="ValueSetByTask" PropertyName="_ResolveLoadFoldersContentIsRunning" />
+    </CreateProperty>
+
+    <GetLoadFolders LoadFoldersFilePath="$(_LoadFoldersFilePath)">
+      <Output TaskParameter="LoadFolders" ItemName="LoadFolder" />
+    </GetLoadFolders>
+
+    <ItemGroup Condition="'@(LoadFolder)' != ''">
+      <_ContentDirectory Include="@(LoadFolder)" SubDirectory="%(ContentSubDirectory.Identity)" />
+      <Content Include="$(ModSourcePath)%(_ContentDirectory.SubDirectory)\**\*" LinkBase="$(AssetsFolderName)\%(_ContentDirectory.SubDirectory)"
+               Condition="'%(_ContentDirectory.Identity)' == '.'" />
+      <Content Include="$(ModSourcePath)%(_ContentDirectory.Identity)\%(_ContentDirectory.SubDirectory)\**\*" LinkBase="$(AssetsFolderName)\%(_ContentDirectory.Identity)\%(_ContentDirectory.SubDirectory)"
+               Condition="'%(_ContentDirectory.Identity)' != '.' and !$([System.String]::new('%(_ContentDirectory.Identity)').Contains('%2A'))" />
+      <Content Include="$(ModSourcePath)$([MSBuild]::Unescape('%(_ContentDirectory.Identity)'))\%(_ContentDirectory.SubDirectory)\**\*" LinkBase="$(AssetsFolderName)\"
+               Condition="$([System.String]::new('%(_ContentDirectory.Identity)').Contains('%2A'))" />
+      <_ContentToSave Include="%24(ModSourcePath)%(_ContentDirectory.SubDirectory)\%2A%2A\%2A" LinkBase="%24(AssetsFolderName)\%(_ContentDirectory.SubDirectory)"
+                      ItemName="Content" ItemAction="Include" IncludeMetadata="LinkBase" Condition="'%(_ContentDirectory.Identity)' == '.'" />
+      <_ContentToSave Include="%24(ModSourcePath)%(_ContentDirectory.Identity)\%(_ContentDirectory.SubDirectory)\%2A%2A\%2A" LinkBase="%24(AssetsFolderName)\%(_ContentDirectory.Identity)\%(_ContentDirectory.SubDirectory)"
+                      ItemName="Content" ItemAction="Include" IncludeMetadata="LinkBase" Condition="'%(_ContentDirectory.Identity)' != '.' and !$([System.String]::new('%(_ContentDirectory.Identity)').Contains('%2A'))" />
+      <_ContentToSave Include="%24(ModSourcePath)%(_ContentDirectory.Identity)\%(_ContentDirectory.SubDirectory)\%2A%2A\%2A" LinkBase="%24(AssetsFolderName)\"
+                      ItemName="Content" ItemAction="Include" IncludeMetadata="LinkBase" Condition="$([System.String]::new('%(_ContentDirectory.Identity)').Contains('%2A'))" />
+    </ItemGroup>
+
+    <UpdateProjectFile ProjectFile="$(_LoadFoldersContentProjectFilePath)" Items="@(_ContentToSave)" ItemNames="Content">
+      <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="ReEvaluationRequired" />
+    </UpdateProjectFile>
+  </Target>
 </Project>

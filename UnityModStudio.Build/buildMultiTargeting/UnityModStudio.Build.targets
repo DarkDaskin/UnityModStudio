@@ -4,7 +4,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\build\UnityModStudio.Common.targets" />
 
   <PropertyGroup>
-    <_AllGameVersionsProjectFilePath>$(_FullBaseIntermediateOutputPath)$(MSBuildProjectName).AllGameVersions.targets</_AllGameVersionsProjectFilePath>
+    <_AllGameVersionsProjectFilePath>$(FullBaseIntermediateOutputPath)$(MSBuildProjectName).AllGameVersions.targets</_AllGameVersionsProjectFilePath>
   </PropertyGroup>
 
   <Import Project="$(_GameSpecificPropertiesProjectFilePath)" Condition="Exists('$(_GameSpecificPropertiesProjectFilePath)')" />
@@ -50,7 +50,7 @@
     </ItemGroup>
     <UpdateProjectFile ProjectFile="$(_GameSpecificPropertiesProjectFilePath)" Properties="@(_GameSpecificProperty)">
       <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
-      <Output TaskParameter="HasWrittenProjectFile" PropertyName="_ReEvaluationRequired" />
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="ReEvaluationRequired" />
     </UpdateProjectFile>
   </Target>
 

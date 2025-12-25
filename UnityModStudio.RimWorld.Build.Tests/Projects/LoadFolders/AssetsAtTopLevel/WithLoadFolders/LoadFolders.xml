@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<loadFolders>
+  <v1.5>
+    <li>/</li>
+    <li>Old</li>
+  </v1.5>
+  <v1.6>
+    <li>/</li>
+    <li>New</li>
+  </v1.6>
+</loadFolders>

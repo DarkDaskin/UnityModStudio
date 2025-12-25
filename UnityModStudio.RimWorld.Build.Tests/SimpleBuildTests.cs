@@ -1,11 +1,9 @@
-﻿using UnityModStudio.Build.Tests;
-using UnityModStudio.Common.Options;
-using UnityModStudio.Common.Tests;
+﻿using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.RimWorld.Build.Tests;
 
 [TestClass]
-public sealed class BuildTests : BuildTestsBase
+public sealed class SimpleBuildTests : BuildTestsBase
 {
     [TestMethod]
     public void WhenProjectIsAtTopLevelAndHasSingleVersion_BuildAndDeploy()
@@ -13,7 +11,7 @@ public sealed class BuildTests : BuildTestsBase
         var game = new Game { Path = MakeGameCopy("1.6.4633"), Version = "1.6" };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
-        var (project, logger) = GetProjectWithRestore(@"Projects\ProjectAtTopLevel\SingleVersion\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\ProjectAtTopLevel\SingleVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -35,7 +33,7 @@ public sealed class BuildTests : BuildTestsBase
         ResolveGameProperties(game14);
         ResolveGameProperties(game15);
         SetupGameRegistry(game14, game15);
-        var (project, logger) = GetProjectWithRestore(@"Projects\ProjectAtTopLevel\MultiVersion\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\ProjectAtTopLevel\MultiVersion\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -64,7 +62,7 @@ public sealed class BuildTests : BuildTestsBase
         ResolveGameProperties(game15);
         ResolveGameProperties(game16);
         SetupGameRegistry(game15, game16);
-        var (project, logger) = GetProjectWithRestore(@"Projects\ProjectAtTopLevel\MultiVersionMultiTarget\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\ProjectAtTopLevel\MultiVersionMultiTarget\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -91,7 +89,7 @@ public sealed class BuildTests : BuildTestsBase
         var game = new Game { Path = MakeGameCopy("1.6.4633"), Version = "1.6" };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
-        var (project, logger) = GetProjectWithRestore(@"Projects\AssetsAtTopLevel\SingleVersion\Sources\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\AssetsAtTopLevel\SingleVersion\Sources\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -111,7 +109,7 @@ public sealed class BuildTests : BuildTestsBase
         var game = new Game { Path = MakeGameCopy("1.6.4633"), Version = "1.6" };
         ResolveGameProperties(game);
         SetupGameRegistry(game);
-        var (project, logger) = GetProjectWithRestore(@"Projects\AssetsAtTopLevel\SingleVersionNested\Sources\Mod\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\AssetsAtTopLevel\SingleVersionNested\Sources\Mod\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -133,7 +131,7 @@ public sealed class BuildTests : BuildTestsBase
         ResolveGameProperties(game14);
         ResolveGameProperties(game15);
         SetupGameRegistry(game14, game15);
-        var (project, logger) = GetProjectWithRestore(@"Projects\AssetsAtTopLevel\MultiVersion\Sources\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\AssetsAtTopLevel\MultiVersion\Sources\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -162,7 +160,7 @@ public sealed class BuildTests : BuildTestsBase
         ResolveGameProperties(game15);
         ResolveGameProperties(game16);
         SetupGameRegistry(game15, game16);
-        var (project, logger) = GetProjectWithRestore(@"Projects\AssetsAtTopLevel\MultiVersionMultiTarget\Sources\Mod.csproj");
+        var (project, logger) = GetProjectWithRestore(@"Projects\Simple\AssetsAtTopLevel\MultiVersionMultiTarget\Sources\Mod.csproj");
 
         var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
 
@@ -181,14 +179,5 @@ public sealed class BuildTests : BuildTestsBase
         Assert.IsTrue(File.Exists(Path.Combine(game16.Path, "winhttp.dll")));
         Assert.IsFalse(File.Exists(Path.Combine(game16.Path, "version.dll")));
         Assert.IsTrue(File.Exists(Path.Combine(game16.Path, "doorstop_config.ini")));
-    }
-
-#pragma warning disable MSTEST0036
-    private new string MakeGameCopy(string version)
-#pragma warning restore MSTEST0036
-    {
-        var scratchDir = CreateScratchDir();
-        TestUtils.CopyDirectory(Path.Combine(GameInfo.Path, version), scratchDir.FullName);
-        return scratchDir.FullName;
     }
 }
