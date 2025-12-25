@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(ModSourcePath)' != ''">
-    <OutDir>$(ModSourcePath)$(GameVersion)\Assemblies\</OutDir>
-    <!--TODO: get rid of the properties below-->
-    <OutputPath>$(OutDir)</OutputPath>
-    <TargetDir>$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
-    <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
-  </PropertyGroup>
-
   <PropertyGroup>
     <UnityModStudioRimWorldTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.RimWorld.Build.dll</UnityModStudioRimWorldTasksAssembly>
     <_LoadFoldersFilePath>$(ModSourcePath)LoadFolders.xml</_LoadFoldersFilePath>
     <_LoadFoldersContentProjectFilePath>$(FullBaseIntermediateOutputPath)LoadFoldersContent.targets</_LoadFoldersContentProjectFilePath>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ModSourcePath)' != ''">
+    <OutDir>$(ModSourcePath)$(GameVersion)\Assemblies\</OutDir>
+  </PropertyGroup>
+
+  <Import Project="$(ApplyOutDirChangeTargetsFilePath)" />
 
   <UsingTask TaskName="GetLoadFolders" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
 

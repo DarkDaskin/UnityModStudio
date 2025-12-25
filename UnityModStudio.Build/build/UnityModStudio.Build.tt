@@ -130,11 +130,7 @@
     <GameModsPath>$([MSBuild]::EnsureTrailingSlash('$(GameModsPath)'))</GameModsPath>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputPath>$(OutDir)</OutputPath>
-    <TargetDir>$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
-    <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
-  </PropertyGroup>
+  <Import Project="$(ApplyOutDirChangeTargetsFilePath)" Condition="'$(TargetsOverrideOutDir)' != 'true'" />
 
   <Target Name="_GetGameVersions" Returns="@(_AllGameVersions)" />
 

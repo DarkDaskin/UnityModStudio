@@ -7,6 +7,7 @@
   <PropertyGroup>
     <GameModsPath>Mods\</GameModsPath>
     <AssetsFolderName>Assets</AssetsFolderName>
+    <TargetsOverrideOutDir>true</TargetsOverrideOutDir>
   </PropertyGroup>
 
   <PropertyGroup>

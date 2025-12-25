@@ -3,4 +3,8 @@
   <ItemGroup>
     <ProjectCapability Include="UnityModStudio" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <ApplyOutDirChangeTargetsFilePath>$(MSBuildThisFileDirectory)ApplyOutDirChange.targets</ApplyOutDirChangeTargetsFilePath>
+  </PropertyGroup>
 </Project>
