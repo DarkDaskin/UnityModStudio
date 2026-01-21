@@ -181,4 +181,37 @@ public class MultiVersionBuildTests : BuildTestsBase
         Assert.IsTrue(File.Exists(Path.Combine(game11.Path, @"Mod\Defs\Defs.xml")));
         Assert.IsFalse(Directory.Exists(Path.Combine(game11.Path, @"Mod\Sources")));
     }
+
+    [TestMethod]
+    public void WhenProjectHasModAssemblyTargetPath_BuildAndDeploy()
+    {
+        var game10 = new Game { Path = MakeGameCopy("2018-net4-v1.0"), Version = "1.0" };
+        var game11 = new Game { Path = MakeGameCopy("2018-net4-v1.1"), Version = "1.1" };
+        ResolveGameProperties(game10);
+        ResolveGameProperties(game11);
+        SetupGameRegistry(game10, game11);
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\MultiVersionWithModAssemblyTargetPath\Mod.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, logger.BuildErrors.Count);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+        foreach (var game in new[] { game10, game11 })
+        {
+            var modAssemblyPath10 = Path.Combine(game.Path, @"Mod\1.0\Assemblies\Mod.dll");
+            Assert.IsTrue(File.Exists(modAssemblyPath10));
+            VerifyModAssemblyGameVersion(modAssemblyPath10, "1.0");
+            var modAssemblyPath11 = Path.Combine(game.Path, @"Mod\1.1\Assemblies\Mod.dll");
+            Assert.IsTrue(File.Exists(modAssemblyPath11));
+            VerifyModAssemblyGameVersion(modAssemblyPath11, "1.1");
+            Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "Mod"), false));
+            Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
+            Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
+            var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
+            Assert.IsTrue(File.Exists(doorstopConfigPath));
+            Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mod\1.0\Assemblies\Mod.dll"));
+            Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mod\1.1\Assemblies\Mod.dll"));
+        }
+    }
 }

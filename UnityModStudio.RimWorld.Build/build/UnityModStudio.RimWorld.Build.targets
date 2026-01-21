@@ -6,11 +6,9 @@
     <_LoadFoldersContentProjectFilePath>$(FullBaseIntermediateOutputPath)LoadFoldersContent.targets</_LoadFoldersContentProjectFilePath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(ModSourcePath)' != ''">
-    <OutDir>$(ModSourcePath)$(GameVersion)\Assemblies\</OutDir>
+  <PropertyGroup>
+    <ModAssemblyTargetPath>$(GameVersion)\Assemblies\</ModAssemblyTargetPath>
   </PropertyGroup>
-
-  <Import Project="$(ApplyOutDirChangeTargetsFilePath)" />
 
   <UsingTask TaskName="GetLoadFolders" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
 

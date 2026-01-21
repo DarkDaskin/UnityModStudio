@@ -82,4 +82,28 @@ public class SingleVersionBuildTests : BuildTestsBase
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"Mod\Defs\Defs.xml")));
         Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"Mod\Sources\Mod.csproj")));
     }
+
+    [TestMethod]
+    public void WhenProjectHasModAssemblyTargetPath_BuildAndDeploy()
+    {
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0"), Version = "1.0" };
+        ResolveGameProperties(game);
+        SetupGameRegistry(game);
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\SingleVersionWithModAssemblyTargetPath\Mod.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, logger.BuildErrors.Count);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+        var modAssemblyPath = Path.Combine(game.Path, @"Mod\Assemblies\Mod.dll");
+        Assert.IsTrue(File.Exists(modAssemblyPath));
+        VerifyModAssemblyConstants(modAssemblyPath, "IsGame10", "IsGame10OrGreater");
+        Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "Mod"), false));
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
+        Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
+        var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
+        Assert.IsTrue(File.Exists(doorstopConfigPath));
+        Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mod\Assemblies\Mod.dll"));
+    }
 }

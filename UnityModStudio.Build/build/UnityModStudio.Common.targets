@@ -51,21 +51,17 @@
 
   <Target Name="_CopyOtherGameVersionsCompiledOutput">
     <ItemGroup>
-      <_AllModTargetPathsXAllTargetDirs Include="@(_AllModTargetPaths)" OtherTargetDir="%(_AllTargetDirs.Identity)" OtherGameVersion="%(_AllTargetDirs.GameVersion)" />
-    </ItemGroup>
-    <ResolveTargetPath RelativeToPath="%(_AllModTargetPathsXAllTargetDirs.ModSourcePath)" Input="@(_AllModTargetPathsXAllTargetDirs->'%(OtherTargetDir)')">
-      <Output TaskParameter="Output" ItemName="_ResolvedModOtherVersionPaths" />
-    </ResolveTargetPath>
-    <ItemGroup>
-      <_ResolvedModOtherVersionFiles Include="%(_ResolvedModOtherVersionPaths.Identity)**" DestinationFolder="$([MSBuild]::NormalizePath('%(_ResolvedModOtherVersionPaths.ModTargetPath)%(_ResolvedModOtherVersionPaths.TargetPath)'))"
-                                     GameVersion="%(_ResolvedModOtherVersionPaths.GameVersion)" OtherGameVersion="%(_ResolvedModOtherVersionPaths.OtherGameVersion)" />
-      <_ModFilesWithTargetPaths Include="@(_ResolvedModOtherVersionFiles->'%(DestinationFolder)%(Filename)%(Extension)')" RemoveMetadata="DestinationFolder;GameVersion;OtherGameVersion" KeepDuplicates="false" />
+      <_AllTargetDirsXAllModTargetPaths Include="@(_AllTargetDirs)" OtherModTargetPath="%(_AllModTargetPaths.Identity)" OtherGameVersion="%(_AllModTargetPaths.GameVersion)" />
+      <_ResolvedModFilesForX Include="%(_AllTargetDirsXAllModTargetPaths.Identity)**\*" Exclude="%(_AllTargetDirsXAllModTargetPaths.Identity)**\*.json"
+                             DestinationFolder="$([MSBuild]::NormalizePath('%(_AllTargetDirsXAllModTargetPaths.OtherModTargetPath)%(_AllTargetDirsXAllModTargetPaths.ModAssemblyTargetPath)'))"
+                             GameVersion="%(_AllTargetDirsXAllModTargetPaths.GameVersion)" OtherGameVersion="%(_AllTargetDirsXAllModTargetPaths.OtherGameVersion)" />
+      <_ModFilesWithTargetPaths Include="@(_ResolvedModFilesForX->'%(DestinationFolder)%(Filename)%(Extension)')" RemoveMetadata="DestinationFolder;GameVersion;OtherGameVersion" KeepDuplicates="false" />
     </ItemGroup>
     <PropertyGroup>
-      <_HasModFileClash Condition="@(_ResolvedModOtherVersionFiles->Count()) > @(_ModFilesWithTargetPaths->Count())">true</_HasModFileClash>
+      <_HasModFileClash Condition="@(_ResolvedModFilesForX->Count()) > @(_ModFilesWithTargetPaths->Count())">true</_HasModFileClash>
     </PropertyGroup>
-    <Copy SourceFiles="@(_ResolvedModOtherVersionFiles)" DestinationFolder="%(_ResolvedModOtherVersionFiles.DestinationFolder)" 
-          Condition="'$(_HasModFileClash)' != 'true' and '%(_ResolvedModOtherVersionFiles.GameVersion)' != '%(_ResolvedModOtherVersionFiles.OtherGameVersion)'" />
+    <Copy SourceFiles="@(_ResolvedModFilesForX)" DestinationFolder="%(_ResolvedModFilesForX.DestinationFolder)" 
+          Condition="'$(_HasModFileClash)' != 'true' and '%(_ResolvedModFilesForX.GameVersion)' != '%(_ResolvedModFilesForX.OtherGameVersion)'" />
   </Target>
 
   <Target Name="AddGameToRegistry">

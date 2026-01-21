@@ -234,6 +234,28 @@ public sealed class NonVersionedBuildTests : BuildTestsBase
     }
 
     [TestMethod]
+    public void WhenProjectHasModAssemblyTargetPath_BuildAndDeploy()
+    {
+        var game = new Game { Path = MakeGameCopy("2018-net4-v1.0") };
+        ResolveGameProperties(game);
+        SetupGameRegistry(game);
+        var (project, logger) = GetProjectWithRestore(@"Projects\Correct\NonVersionedWithModAssemblyTargetPath\Mod.csproj");
+
+        var success = project.Build([logger, AssemblyFixture.BinaryLogger]);
+
+        Assert.IsTrue(success);
+        Assert.AreEqual(0, logger.BuildErrors.Count);
+        Assert.AreEqual(0, logger.BuildWarnings.Count);
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, @"Mod\Assemblies\Mod.dll")));
+        Assert.IsNull(File.ResolveLinkTarget(Path.Combine(game.Path, "Mod"), false));
+        Assert.IsTrue(File.Exists(Path.Combine(game.Path, "winhttp.dll")));
+        Assert.IsFalse(File.Exists(Path.Combine(game.Path, "version.dll")));
+        var doorstopConfigPath = Path.Combine(game.Path, "doorstop_config.ini");
+        Assert.IsTrue(File.Exists(doorstopConfigPath));
+        Assert.IsFalse(File.ReadAllLines(doorstopConfigPath).Contains(@"target_assembly=Mod\Assemblies\Mod.dll"));
+    }
+
+    [TestMethod]
     public void WhenNet4GameIsBuiltTwice_BuildAndDeploy()
     {
         var game = new Game { Path = MakeGameCopy("2018-net4-v1.0") };
