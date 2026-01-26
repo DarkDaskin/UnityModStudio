@@ -34,6 +34,5 @@ public abstract class StoreTestsBase
     }
 
     protected static Stream GetResourceStream(string fileName) =>
-        ResourceType.Assembly.GetManifestResourceStream(ResourceType, $"Resources.{fileName}") ??
-        throw new ArgumentException("Resource not found.", nameof(fileName));
+        TestUtils.GetResourceStream(fileName, ResourceType);
 }

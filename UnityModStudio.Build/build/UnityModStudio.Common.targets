@@ -41,6 +41,7 @@
   <UsingTask TaskName="AddGameToRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="UpdateGameRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
   <UsingTask TaskName="RemoveGameFromRegistry" AssemblyFile="$(UnityModStudioTasksAssembly)" />
+  <UsingTask TaskName="ResolveSteamWorkshopContentPaths" AssemblyFile="$(UnityModStudioTasksAssembly)" />
 
   <Target Name="_ErrorOnSanitizedGameVersionClash" AfterTargets="_CollectGameVersions" Condition="('$(GameVersions)' != '' and '$(IsInnerBuild)' != 'true') or '$(IsCrossTargetingBuild)' == 'true'">
     <SanitizeGameVersion Version="%(_AllGameVersionsForAllTargetFrameworks.Identity)">

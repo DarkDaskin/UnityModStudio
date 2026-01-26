@@ -1,10 +1,8 @@
 ﻿using System;
-using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Gameloop.Vdf;
-using Gameloop.Vdf.Linq;
+using UnityModStudio.Steam;
 
 namespace UnityModStudio.Options;
 
@@ -12,56 +10,43 @@ public sealed class AddGamesFromSteamViewModel : AddGamesViewModelBase
 {
     protected override IEnumerable<GameEntry> FindGames()
     {
-        using var steamKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Valve\Steam");
-        if (steamKey == null)
+        SteamLibraryFolders? libraryFolders = null;
+        try
+        {
+            libraryFolders = SteamLibraryFolders.ForSteamInstallation();
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"Error while reading Steam library folders: {exception.Message}");
+        }
+
+        if (libraryFolders == null)
             yield break;
 
-        var steamPath = steamKey.GetValue("SteamPath") as string;
-        if (string.IsNullOrEmpty(steamPath))
-            yield break;
-
-        foreach (var libraryFolder in GetSteamLibraryFolders(steamPath!))
+        foreach (var libraryFolder in libraryFolders)
         foreach (var gameEntry in GetGames(libraryFolder))
             yield return gameEntry;
     }
 
-    private static IEnumerable<string> GetSteamLibraryFolders(string steamPath)
+    private static IEnumerable<GameEntry> GetGames(SteamLibraryFolder libraryFolder)
     {
-        var libraryFoldersFile = Path.Combine(steamPath, @"steamapps\libraryfolders.vdf");
-        var vdf = TryDeserialize(libraryFoldersFile);
-        if (vdf == null)
-            yield break;
-
-        foreach (var folder in vdf.Value.Children<VProperty>())
-            yield return folder.Value.Value<string>("path");
-    }
-
-    private static IEnumerable<GameEntry> GetGames(string libraryFolder)
-    {
-        foreach (var acfFile in Directory.EnumerateFiles(Path.Combine(libraryFolder, "steamapps"), "*.acf"))
+        foreach (var appId in libraryFolder.InstalledAppIds)
         {
-            var vdf = TryDeserialize(acfFile);
-            if (vdf == null)
+            SteamAppInfo? appInfo = null;
+            try
+            {
+                appInfo = libraryFolder.FindApplication(appId);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine($"Error while reading app info for {appId}: {exception.Message}");
+            }
+
+            if (appInfo == null)
                 continue;
 
-            var name = vdf.Value.Value<string>("name");
-            var installDir = vdf.Value.Value<string>("installdir");
-            if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(installDir))
-                yield return new GameEntry(name, Path.Combine(libraryFolder, @"steamapps\common", installDir));
-        }
-    }
-
-    private static VProperty? TryDeserialize(string path)
-    {
-        try
-        {
-            using var reader = new StreamReader(path);
-            return VdfConvert.Deserialize(reader);
-        }
-        catch (Exception exception)
-        {
-            Debug.WriteLine($"Error while reading '{path}': {exception.Message}");
-            return null;
+            if (!string.IsNullOrEmpty(appInfo.Name) && Directory.Exists(appInfo.InstallDirectory))
+                yield return new GameEntry(appInfo.Name, appInfo.InstallDirectory);
         }
     }
 }

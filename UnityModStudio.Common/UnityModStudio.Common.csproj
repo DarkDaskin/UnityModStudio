@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Unity Mod Studio common types.</Description>
-    <PackageTags>unity; mod</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

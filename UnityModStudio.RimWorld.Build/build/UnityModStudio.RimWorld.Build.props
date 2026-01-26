@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <SteamAppId>294100</SteamAppId>
     <GameModsPath>Mods\</GameModsPath>
     <AssetsFolderName>Assets</AssetsFolderName>
   </PropertyGroup>

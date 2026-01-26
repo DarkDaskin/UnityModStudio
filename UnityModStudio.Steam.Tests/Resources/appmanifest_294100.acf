@@ -1,0 +1,67 @@
+"AppState"
+{
+	"appid"		"294100"
+	"universe"		"1"
+	"LauncherPath"		"C:\\Program Files (x86)\\Steam\\steam.exe"
+	"name"		"RimWorld"
+	"StateFlags"		"4"
+	"installdir"		"RimWorld"
+	"LastUpdated"		"1762243503"
+	"LastPlayed"		"1765906320"
+	"SizeOnDisk"		"857763115"
+	"StagingSize"		"0"
+	"buildid"		"20659247"
+	"LastOwner"		"76561197994754411"
+	"DownloadType"		"2"
+	"UpdateResult"		"0"
+	"BytesToDownload"		"2434560"
+	"BytesDownloaded"		"2434560"
+	"BytesToStage"		"14011468"
+	"BytesStaged"		"14011468"
+	"TargetBuildID"		"0"
+	"AutoUpdateBehavior"		"0"
+	"AllowOtherDownloadsWhileRunning"		"0"
+	"ScheduledAutoUpdate"		"0"
+	"InstalledDepots"
+	{
+		"294104"
+		{
+			"manifest"		"2772688105937893244"
+			"size"		"576161411"
+		}
+		"1149644"
+		{
+			"manifest"		"1883707662054891831"
+			"size"		"60997635"
+			"dlcappid"		"1149640"
+		}
+		"294106"
+		{
+			"manifest"		"1227145614562470487"
+			"size"		"57132313"
+			"dlcappid"		"1392840"
+		}
+		"367684"
+		{
+			"manifest"		"5027583327039997575"
+			"size"		"69278535"
+			"dlcappid"		"1826140"
+		}
+		"294114"
+		{
+			"manifest"		"6581907861000077546"
+			"size"		"94193221"
+			"dlcappid"		"3022790"
+		}
+	}
+	"UserConfig"
+	{
+		"language"		"russian"
+		"BetaKey"		"public"
+	}
+	"MountedConfig"
+	{
+		"language"		"russian"
+		"BetaKey"		"public"
+	}
+}

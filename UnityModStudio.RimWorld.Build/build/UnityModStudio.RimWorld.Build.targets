@@ -2,15 +2,20 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <UnityModStudioRimWorldTasksAssembly>$(MSBuildThisFileDirectory)..\tools\UnityModStudio.RimWorld.Build.dll</UnityModStudioRimWorldTasksAssembly>
+    <_AboutFilePath>$(ModSourcePath)About\About.xml</_AboutFilePath>
     <_LoadFoldersFilePath>$(ModSourcePath)LoadFolders.xml</_LoadFoldersFilePath>
     <_LoadFoldersContentProjectFilePath>$(FullBaseIntermediateOutputPath)LoadFoldersContent.targets</_LoadFoldersContentProjectFilePath>
+    <_ResolvedModReferencesProjectFilePath>$(FullBaseIntermediateOutputPath)$(MSBuildProjectName).ResolvedModReferences$(ResolvedDataProjectsFileNameSuffix).targets</_ResolvedModReferencesProjectFilePath>
   </PropertyGroup>
 
   <PropertyGroup>
-    <ModAssemblyTargetPath>$(GameVersion)\Assemblies\</ModAssemblyTargetPath>
+    <ModAssemblyTargetPath Condition="'$(ModAssemblyTargetPath)' == ''">$(GameVersion)\Assemblies\</ModAssemblyTargetPath>
   </PropertyGroup>
 
   <UsingTask TaskName="GetLoadFolders" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
+  <UsingTask TaskName="GetModDependencies" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
+  <UsingTask TaskName="ResolveModReferencePaths" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
+  <UsingTask TaskName="ResolveModAssemblyReferences" AssemblyFile="$(UnityModStudioRimWorldTasksAssembly)" />
 
   <ItemGroup>
     <Content Include="$(ModSourcePath)About\**\*" LinkBase="$(AssetsFolderName)\About\" />
@@ -31,7 +36,19 @@
     <LoadFolder Include="Common" />
   </ItemGroup>
 
+  <ItemGroup>
+    <UpToDateCheckBuilt Include="$(_LoadFoldersContentProjectFilePath)" Original="$(_LoadFoldersFilePath)" />
+    <UpToDateCheckBuilt Include="$(_ResolvedModReferencesProjectFilePath)" Original="$(_AboutFilePath)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EffectiveGameVersionType)' != 'Multiple'">
+    <Clean Include="$(_LoadFoldersContentProjectFilePath)" />
+    <Clean Include="$(_ResolvedModReferencesProjectFilePath)" />
+  </ItemGroup>
+
   <Import Project="$(_LoadFoldersContentProjectFilePath)" Condition="Exists('$(_LoadFoldersContentProjectFilePath)')" />
+
+  <Import Project="$(_ResolvedModReferencesProjectFilePath)" Condition="'$(ShouldLoadResolvedGameData)' == 'true' and Exists('$(_ResolvedModReferencesProjectFilePath)')" />
 
   <Target Name="ResolveLoadFoldersContent" BeforeTargets="BeforeCompile;CompileDesignTime" DependsOnTargets="PrepareForBuild"
           Inputs="$(MSBuildAllProjects);$(_LoadFoldersFilePath)" Outputs="$(_LoadFoldersContentProjectFilePath)">
@@ -60,6 +77,66 @@
     </ItemGroup>
 
     <UpdateProjectFile ProjectFile="$(_LoadFoldersContentProjectFilePath)" Items="@(_ContentToSave)" ItemNames="Content">
+      <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
+      <Output TaskParameter="HasWrittenProjectFile" PropertyName="ReEvaluationRequired" />
+    </UpdateProjectFile>
+  </Target>
+
+  <Target Name="GetImplicitRimWorldModReferences" Condition="'$(DisableImplicitRimWorldModReferences)' != 'true'">
+    <PropertyGroup>
+      <_HasHarmonyPackageReference Condition="'%(PackageReference.Identity)' == 'Lib.Harmony' or '%(PackageReference.Identity)' == 'Lib.Harmony.Ref'">true</_HasHarmonyPackageReference>
+    </PropertyGroup>
+    <GetModDependencies AboutFilePath="$(_AboutFilePath)">
+      <Output TaskParameter="ModDependencies" ItemName="_RimWorldModDependencies" />
+    </GetModDependencies>
+    <ItemGroup>
+      <RimWorldModReference Include="@(_RimWorldModDependencies)" Condition="'%(_RimWorldModDependencies.GameVersion)' == '' or '%(_RimWorldModDependencies.GameVersion)' == '$(GameVersion)'" />
+      <RimWorldModReference Remove="brrainz.harmony" Condition="'$(_HasHarmonyPackageReference)' == 'true'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveLocalMods" DependsOnTargets="PrepareModPaths" Condition="'@(RimWorldModReference)' != ''">
+    <ResolveModReferencePaths ModsDirectoryPath="$(GameModsPath)" ModReferences="@(RimWorldModReference)">
+      <Output TaskParameter="ResolvedModReferences" ItemName="_ResolvedModReference" />
+      <Output TaskParameter="UnresolvedModReferences" ItemName="_UnresolvedLocalModReference" />
+    </ResolveModReferencePaths>
+  </Target>
+
+  <Target Name="ResolveWorkshopMods" Condition="'@(_UnresolvedLocalModReference)' != ''">
+    <ItemGroup>
+      <_WorkshopContentReference Include="%(_UnresolvedLocalModReference.SteamId)" PackageId="%(_UnresolvedLocalModReference.Identity)" Condition="'%(_UnresolvedLocalModReference.SteamId)' != ''" />
+    </ItemGroup>
+    <ResolveSteamWorkshopContentPaths SteamAppId="$(SteamAppId)" ContentReferences="@(_WorkshopContentReference)">
+      <Output TaskParameter="ResolvedContentReferences" ItemName="_ResolvedWorkshopContentReference" />
+      <Output TaskParameter="UnresolvedContentReferences" ItemName="_UnresolvedWorkshopContentReference" />
+    </ResolveSteamWorkshopContentPaths>
+    <ItemGroup>
+      <_ResolvedModReference Include="%(_ResolvedWorkshopContentReference.PackageId)" SteamId="%(_ResolvedWorkshopContentReference.Identity)" Path="%(_ResolvedWorkshopContentReference.Path)" Assemblies="%(_ResolvedWorkshopContentReference.Assemblies)" />
+      <_UnresolvedModReference Include="%(_UnresolvedWorkshopContentReference.PackageId)" SteamId="%(_UnresolvedWorkshopContentReference.Identity)" />
+      <_UnresolvedModReference Include="@(_UnresolvedLocalModReference)" Condition="'%(_UnresolvedLocalModReference.SteamId)' == ''" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_ErrorsOnUnresolvedModReferences" DependsOnTargets="ResolveLocalMods;ResolveWorkshopMods" Condition="'@(_UnresolvedModReference)' != ''">
+    <PropertyGroup>
+      <_LastUnresolvedModReference>%(_UnresolvedModReference.Identity)</_LastUnresolvedModReference>
+    </PropertyGroup>
+    <Error Code="UMSRW0007" Text="Could not resolve mod reference '%(_UnresolvedModReference.Identity)'." Condition="'%(_UnresolvedModReference.Identity)' != '$(_LastUnresolvedModReference)'" ContinueOnError="ErrorAndContinue" />
+    <Error Code="UMSRW0007" Text="Could not resolve mod reference '$(_LastUnresolvedModReference)'." />
+  </Target>
+
+  <Target Name="ResolveModAssemblyReferences" AfterTargets="ResolveGameAssemblyReferences" DependsOnTargets="GetImplicitRimWorldModReferences;ResolveLocalMods;ResolveWorkshopMods;_ErrorsOnUnresolvedModReferences" 
+          Inputs="$(MSBuildAllProjects);$(_AboutFilePath)" Outputs="$(_ResolvedModReferencesProjectFilePath)" Condition="'$(EffectiveGameVersionType)' != 'Multiple'">
+    <ResolveModAssemblyReferences GameVersion="$(GameVersion)" ModReferences="@(_ResolvedModReference)">
+      <Output TaskParameter="ResolvedAssemblyReferences" ItemName="_ResolvedModAssemblyReference" />
+    </ResolveModAssemblyReferences>
+
+    <ItemGroup>
+      <Reference Include="@(_ResolvedModAssemblyReference)" />
+      <_ModAssemblyReferenceToSave Include="@(_ResolvedModAssemblyReference)" ItemName="Reference" IncludeMetadata="HintPath;Private;IsImplicitlyDefined;IsImplicitlyDefinedModReference" />
+    </ItemGroup>
+
+    <UpdateProjectFile ProjectFile="$(_ResolvedReferencesProjectFilePath)" Items="@(_ModAssemblyReferenceToSave)" ItemNames="Reference">
       <!-- Property name must correspond to one in UnityModStudio.ProjectSystem.BuildLoggerProvider -->
       <Output TaskParameter="HasWrittenProjectFile" PropertyName="ReEvaluationRequired" />
     </UpdateProjectFile>

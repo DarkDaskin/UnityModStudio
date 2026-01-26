@@ -42,5 +42,6 @@
         "AddGameToRegistry",
         "UpdateGameRegistry",
         "RemoveGameFromRegistry",
+        "ResolveSteamWorkshopContentPaths",
     ];
 #>

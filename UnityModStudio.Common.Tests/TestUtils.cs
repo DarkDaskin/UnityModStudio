@@ -15,4 +15,11 @@ public static class TestUtils
             if (predicate?.Invoke(sourceSubDirectoryPath) ?? true)
                 CopyDirectory(sourceSubDirectoryPath, Path.Combine(destinationPath, Path.GetFileName(sourceSubDirectoryPath)), predicate);
     }
+
+    public static Stream GetResourceStream(string fileName, Type resourceType) =>
+        resourceType.Assembly.GetManifestResourceStream(resourceType, $"Resources.{fileName}") ??
+        throw new ArgumentException("Resource not found.", nameof(fileName));
+
+    internal static Stream GetResourceStream(string fileName) =>
+        GetResourceStream(fileName, typeof(TestUtils));
 }

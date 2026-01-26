@@ -30,7 +30,7 @@ public class GetLoadFolders : Task
 
             LoadFolders = document.Root.Elements()
                 .SelectMany(versionElement => versionElement.Elements("li")
-                    .Select(pathElement => pathElement.Value is "" or "/" or "\\" ? "." : pathElement.Value))
+                    .Select(pathElement => NormalizePath(pathElement.Value)))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Select(path => new TaskItem(path))
                 .ToArray<ITaskItem>();
@@ -43,4 +43,6 @@ public class GetLoadFolders : Task
 
         return true;
     }
+
+    internal static string NormalizePath(string path) => path is "" or "/" or "\\" ? "." : path;
 }
