@@ -290,7 +290,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsTrue(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.Match match);
+        var match = Assert.IsInstanceOfType<GameMatchResult.Match>(result);
         Assert.AreEqual(new Guid("91eda532-02c2-441c-808d-07a474692ede"), match.Game.Id);
     }
 
@@ -308,7 +308,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsTrue(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.Match match);
+        var match = Assert.IsInstanceOfType<GameMatchResult.Match>(result);
         Assert.AreEqual(new Guid("84d1866f-c4db-4d27-ad31-3b1fc9f34fd4"), match.Game.Id);
     }
 
@@ -325,7 +325,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsFalse(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.NoMatch _);
+        Assert.IsInstanceOfType<GameMatchResult.NoMatch>(result);
     }
 
     [TestMethod]
@@ -341,7 +341,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsFalse(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.AmbiguousMatch match);
+        var match = Assert.IsInstanceOfType<GameMatchResult.AmbiguousMatch>(result);
         Assert.AreEqual("", match.Message);
         Assert.AreEqual(2, match.Games.Count);
         Assert.AreEqual(new Guid("01144589-1c88-4c52-91a4-e6cc2998f35c"), match.Games.ElementAt(0).Id);
@@ -363,7 +363,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsTrue(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.Match match);
+        var match = Assert.IsInstanceOfType<GameMatchResult.Match>(result);
         Assert.AreEqual(new Guid("91eda532-02c2-441c-808d-07a474692ede"), match.Game.Id);
     }
 
@@ -381,7 +381,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, false);
 
         Assert.IsTrue(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.Match match);
+        var match = Assert.IsInstanceOfType<GameMatchResult.Match>(result);
         Assert.AreEqual(new Guid("91eda532-02c2-441c-808d-07a474692ede"), match.Game.Id);
     }
 
@@ -399,7 +399,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsFalse(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.NoMatch _);
+        Assert.IsInstanceOfType<GameMatchResult.NoMatch>(result);
     }
 
     [TestMethod]
@@ -416,7 +416,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, false);
 
         Assert.IsTrue(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.Match match);
+        var match = Assert.IsInstanceOfType<GameMatchResult.Match>(result);
         Assert.AreEqual(new Guid("91eda532-02c2-441c-808d-07a474692ede"), match.Game.Id);
     }
 
@@ -434,7 +434,7 @@ public sealed class GameRegistryTests : StoreTestsBase
         }, true);
 
         Assert.IsFalse(result.Success);
-        Assert.IsInstanceOfType(result, out GameMatchResult.NoMatch _);
+        Assert.IsInstanceOfType<GameMatchResult.NoMatch>(result);
     }
 
     [TestMethod]

@@ -12,7 +12,7 @@ public class TestBinaryLogger : ILogger, IEventSource
 
     public void InitializeTest(TestContext context)
     {
-        _testName = $"{context.ManagedType?.Split('.').Last()}.{context.TestName}";
+        _testName = $"{context.FullyQualifiedTestClassName.Split('.').Last()}.{context.TestName}";
         ReplaceLogger(null);
     }
 

@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Microsoft.Build.Locator;
 using UnityModStudio.Build.Tests;
 
 namespace UnityModStudio.BepInEx.Build.Tests;
@@ -10,8 +9,9 @@ public static class AssemblyFixture
     public static TestBinaryLogger BinaryLogger => 
         UnityModStudio.Build.Tests.AssemblyFixture.BinaryLogger;
 
-    //[ModuleInitializer]
-    //public static void ModuleInitializer() => MSBuildLocator.RegisterDefaults();
+    [ModuleInitializer]
+    public static void ModuleInitializer() =>
+        UnityModStudio.Build.Tests.AssemblyFixture.EnsureModuleInitializer();
 
     [AssemblyInitialize]
     public static void AssemblyInitialize(TestContext context) => 

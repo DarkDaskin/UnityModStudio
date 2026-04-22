@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.ComponentModelHost" Version="17.10.191" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="17.10.40170" />
+    <PackageReference Include="Microsoft.VisualStudio.ComponentModelHost" Version="17.12.215" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="17.12.40392" />
   </ItemGroup>
 
   <ItemGroup>

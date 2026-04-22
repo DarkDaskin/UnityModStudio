@@ -42,10 +42,10 @@ public sealed class GameVersionComparerTests
         switch (expectedResult)
         {
             case <0:
-                Assert.IsTrue(result < 0, "Expected value less than 0, got {0} instead.", result);
+                Assert.IsTrue(result < 0, $"Expected value less than 0, got {result} instead.");
                 break;
             case >0:
-                Assert.IsTrue(result > 0, "Expected value greater than 0, got {0} instead.", result);
+                Assert.IsTrue(result > 0, $"Expected value greater than 0, got {result} instead.");
                 break;
             default:
                 Assert.AreEqual(expectedResult, result);

@@ -35,7 +35,7 @@ Allows creating mods for Unity games using Visual Studio 2022+.
 ## Visual Studio support
 Release 1.1 is the last release which supports Visual Studio 2019. New development will be focused on Visual Studio 2022+.
 
-Visual Studio 17.10 or newer is required.
+Visual Studio 17.12 or newer is required.
 
 Required workloads:
 - .NET desktop development

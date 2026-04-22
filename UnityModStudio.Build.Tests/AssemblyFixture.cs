@@ -14,6 +14,8 @@ public static class AssemblyFixture
     [ModuleInitializer]
     public static void ModuleInitializer() => MSBuildLocator.RegisterDefaults();
 
+    public static void EnsureModuleInitializer() { }
+
     [AssemblyInitialize]
     public static void AssemblyInitialize(TestContext context)
     {
