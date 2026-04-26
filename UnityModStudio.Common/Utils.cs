@@ -125,4 +125,6 @@ public static class Utils
 
     public static TEnum? GetEnum<TEnum>(this Dictionary<string, string?> dictionary, string key) where TEnum : struct =>
         dictionary.TryGetValue(key, out var s) && Enum.TryParse<TEnum>(s, out var e) ? e : null;
+
+    public static string? NullIfEmpty(this string? input) => string.IsNullOrWhiteSpace(input) ? null : input;
 }

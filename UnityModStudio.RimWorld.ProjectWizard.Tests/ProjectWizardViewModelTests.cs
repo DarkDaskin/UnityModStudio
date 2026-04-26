@@ -57,7 +57,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         Assert.AreEqual("1.6", vm.GameVersions[1].Version);
         Assert.IsFalse(vm.GameVersions[1].IsSelected);
         Assert.IsFalse(vm.AreGameVersionsAbsent);
-        Assert.AreEqual("TestMod", vm.ModPackageId);
+        Assert.AreEqual($"{Environment.UserName}.TestMod", vm.ModPackageId);
         Assert.AreEqual(Environment.UserName, vm.ModAuthor);
         Assert.AreEqual("TestMod", vm.ModName);
         Assert.AreEqual("TestMod", vm.ModDescription);
@@ -75,7 +75,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
     }
 
     [TestMethod]
-    public void WhenProjectNameIsSetAndDefaultPackageIdPrefixIsNotSet_SetPackageIdToProjectName()
+    public void WhenProjectNameIsSetAndDefaultPackageIdPrefixIsNotSet_SetPackageIdToAuthorAndProjectName()
     {
         var vm = new ProjectWizardViewModel
         {
@@ -86,7 +86,7 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
         vm.ProjectName = "MyMod";
 
         Assert.IsFalse(vm.HasErrors);
-        Assert.AreEqual("MyMod", vm.ModPackageId);
+        Assert.AreEqual($"{Environment.UserName}.MyMod", vm.ModPackageId);
     }
 
     [TestMethod]

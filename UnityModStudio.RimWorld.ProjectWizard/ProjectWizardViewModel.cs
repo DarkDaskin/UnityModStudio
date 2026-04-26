@@ -145,14 +145,14 @@ public class ProjectWizardViewModel : ObservableObjectWithValidation
 
         UseHarmony = RimWorldSettingsManager.Settings.ProjectDefaults.UseHarmony;
         ProjectLayout = RimWorldSettingsManager.Settings.ProjectDefaults.ProjectLayout;
-        ModAuthor ??= RimWorldSettingsManager.Settings.ProjectDefaults.ModAuthor ?? Environment.UserName;
+        ModAuthor ??= RimWorldSettingsManager.Settings.ProjectDefaults.ModAuthor.NullIfEmpty() ?? Environment.UserName;
 
         ModPackageId ??= ProjectName;
         ModName ??= ProjectName;
         ModDescription ??= ProjectName;
 
-        var defaultPrefix = RimWorldSettingsManager.Settings.ProjectDefaults.ModPackageIdPrefix;
-        if (!string.IsNullOrWhiteSpace(defaultPrefix) && !ModPackageId.StartsWith(defaultPrefix, StringComparison.InvariantCultureIgnoreCase))
+        var defaultPrefix = RimWorldSettingsManager.Settings.ProjectDefaults.ModPackageIdPrefix.NullIfEmpty() ?? ModAuthor;
+        if (!string.IsNullOrWhiteSpace(defaultPrefix) && !ModPackageId.StartsWith($"{defaultPrefix}.", StringComparison.InvariantCultureIgnoreCase))
             ModPackageId = $"{defaultPrefix}.{ModPackageId}";
     }
 
