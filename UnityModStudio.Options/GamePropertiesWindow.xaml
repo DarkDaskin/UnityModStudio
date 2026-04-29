@@ -101,6 +101,8 @@
           Grid.Row="1"
           Grid.Column="2"
           Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
+          Height="{Binding ElementName=GamePathText, Path=ActualHeight}"
+          VerticalAlignment="Top"
           Command="{Binding BrowseForGamePathCommand}"
           Content="…"
           ToolTip="Browse" />
@@ -119,6 +121,8 @@
           Grid.Row="2"
           Grid.Column="2"
           Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}"
+          Height="{Binding ElementName=ModsPathText, Path=ActualHeight}"
+          VerticalAlignment="Top"
           Command="{Binding BrowseForModsPathCommand}"
           Content="…"
           ToolTip="Browse" />
