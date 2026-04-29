@@ -11,13 +11,13 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <_UserSpecifiedGameInstanceId Condition="'$(GameInstanceId)' != ''">$(GameInstanceId)</_UserSpecifiedGameInstanceId>
     <_UserSpecifiedGameDisplayName Condition="'$(GameDisplayName)' != ''">$(GameDisplayName)</_UserSpecifiedGameDisplayName>
     <_UserSpecifiedGameName Condition="'$(GameName)' != ''">$(GameName)</_UserSpecifiedGameName>
     <_UserSpecifiedGameVersion Condition="'$(GameVersion)' != ''">$(GameVersion)</_UserSpecifiedGameVersion>
     <_UserSpecifiedGamePath Condition="'$(GamePath)' != ''">$(GamePath)</_UserSpecifiedGamePath>
     <_UserSpecifiedGameModsPath Condition="'$(GameModsPath)' != ''">$(GameModsPath)</_UserSpecifiedGameModsPath>
     <_UserSpecifiedGameExecutableFileName Condition="'$(GameExecutableFileName)' != ''">$(GameExecutableFileName)</_UserSpecifiedGameExecutableFileName>
-    <_UserSpecifiedGameInstanceId Condition="'$(GameInstanceId)' != ''">$(GameInstanceId)</_UserSpecifiedGameInstanceId>
     <_UserSpecifiedModDeploymentMode Condition="'$(ModDeploymentMode)' != ''">$(ModDeploymentMode)</_UserSpecifiedModDeploymentMode>
     <_UserSpecifiedDeploySourceCode Condition="'$(DeploySourceCode)' != ''">$(DeploySourceCode)</_UserSpecifiedDeploySourceCode>
     <_UserSpecifiedDoorstopMode Condition="'$(DoorstopMode)' != ''">$(DoorstopMode)</_UserSpecifiedDoorstopMode>

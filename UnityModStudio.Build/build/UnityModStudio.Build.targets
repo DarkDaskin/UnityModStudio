@@ -116,7 +116,6 @@
     <GamePath Condition="'$(GamePath)' == ''">$(_ResolvedGamePath)</GamePath>
     <GameModsPath Condition="'$(GameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
     <GameExecutableFileName Condition="'$(GameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
-    <GameInstanceId Condition="'$(GameInstanceId)' == ''">$(_ResolvedGameInstanceId)</GameInstanceId>
     <ModDeploymentMode Condition="'$(ModDeploymentMode)' == ''">$(_ResolvedModDeploymentMode)</ModDeploymentMode>
     <DeploySourceCode Condition="'$(DeploySourceCode)' == ''">$(_ResolvedDeploySourceCode)</DeploySourceCode>
     <DoorstopMode Condition="'$(DoorstopMode)' == ''">$(_ResolvedDoorstopMode)</DoorstopMode>
@@ -187,7 +186,6 @@
       <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''" />
       <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == ''" />
       <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == ''" />
-      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == ''" />
       <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == ''" />
       <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == ''" />
       <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == ''" />
@@ -306,7 +304,6 @@
       <_PreviousGamePath>$(_ResolvedGamePath)</_PreviousGamePath>
     </PropertyGroup>
     <ItemGroup>
-      <GameLookupProperty Include="Id" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>
@@ -315,7 +312,6 @@
       <Output TaskParameter="GamePath" PropertyName="_ResolvedGamePath" />
       <Output TaskParameter="GameModsPath" PropertyName="_ResolvedGameModsPath" />
       <Output TaskParameter="GameExecutableFileName" PropertyName="_ResolvedGameExecutableFileName" />
-      <Output TaskParameter="GameInstanceId" PropertyName="_ResolvedGameInstanceId" />
       <Output TaskParameter="ModDeploymentMode" PropertyName="_ResolvedModDeploymentMode" />
       <Output TaskParameter="DeploySourceCode" PropertyName="_ResolvedDeploySourceCode" />
       <Output TaskParameter="DoorstopMode" PropertyName="_ResolvedDoorstopMode" />
@@ -339,7 +335,6 @@
       <_ResolvedProperty Include="_ResolvedGamePath" Value="$(_ResolvedGamePath)" Condition="'$(_ResolvedGamePath)' != ''" />
       <_ResolvedProperty Include="_ResolvedGameModsPath" Value="$(_ResolvedGameModsPath)" Condition="'$(_ResolvedGameModsPath)' != ''" />
       <_ResolvedProperty Include="_ResolvedGameExecutableFileName" Value="$(_ResolvedGameExecutableFileName)" Condition="'$(_ResolvedGameExecutableFileName)' != ''" />
-      <_ResolvedProperty Include="_ResolvedGameInstanceId" Value="$(_ResolvedGameInstanceId)" Condition="'$(_ResolvedGameInstanceId)' != ''" />
       <_ResolvedProperty Include="_ResolvedModDeploymentMode" Value="$(_ResolvedModDeploymentMode)" Condition="'$(_ResolvedModDeploymentMode)' != ''" />
       <_ResolvedProperty Include="_ResolvedDeploySourceCode" Value="$(_ResolvedDeploySourceCode)" Condition="'$(_ResolvedDeploySourceCode)' != ''" />
       <_ResolvedProperty Include="_ResolvedDoorstopMode" Value="$(_ResolvedDoorstopMode)" Condition="'$(_ResolvedDoorstopMode)' != ''" />
@@ -356,7 +351,6 @@
       <GamePath Condition="'$(_UserSpecifiedGamePath)' == ''">$(_ResolvedGamePath)</GamePath>
       <GameModsPath Condition="'$(_UserSpecifiedGameModsPath)' == ''">$(_ResolvedGameModsPath)</GameModsPath>
       <GameExecutableFileName Condition="'$(_UserSpecifiedGameExecutableFileName)' == ''">$(_ResolvedGameExecutableFileName)</GameExecutableFileName>
-      <GameInstanceId Condition="'$(_UserSpecifiedGameInstanceId)' == ''">$(_ResolvedGameInstanceId)</GameInstanceId>
       <ModDeploymentMode Condition="'$(_UserSpecifiedModDeploymentMode)' == ''">$(_ResolvedModDeploymentMode)</ModDeploymentMode>
       <DeploySourceCode Condition="'$(_UserSpecifiedDeploySourceCode)' == ''">$(_ResolvedDeploySourceCode)</DeploySourceCode>
       <DoorstopMode Condition="'$(_UserSpecifiedDoorstopMode)' == ''">$(_ResolvedDoorstopMode)</DoorstopMode>

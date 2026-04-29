@@ -302,7 +302,6 @@
       <_PreviousGamePath>$(_ResolvedGamePath)</_PreviousGamePath>
     </PropertyGroup>
     <ItemGroup>
-      <GameLookupProperty Include="Id" Value="$(GameInstanceId)" Condition="'$(GameInstanceId)' != ''" />
       <GameLookupProperty Include="GameName" Value="$(GameName)" Condition="'$(GameName)' != ''" />
       <GameLookupProperty Include="Version" Value="$(GameVersion)" Condition="'$(GameVersion)' != ''" />
     </ItemGroup>

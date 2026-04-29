@@ -7,8 +7,7 @@
     string[] gameProperties = [
         "GamePath",
         "GameModsPath",
-        "GameExecutableFileName",
-        "GameInstanceId",
+        "GameExecutableFileName",        
         "ModDeploymentMode",
         "DeploySourceCode",
         "DoorstopMode",
@@ -19,6 +18,7 @@
         "GameArchitecture"
     ];
     string[] userSpecifiedProperties = [
+        "GameInstanceId",
         "GameDisplayName",
         "GameName",
         "GameVersion",
