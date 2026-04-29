@@ -31,6 +31,7 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
         vm.GameManager = SetupGameManager();
+        vm.GameVersionResolvers = [];
 
         await WaitNoWarningAsync(vm.LoadingStarted);
 
@@ -58,6 +59,7 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
         vm.SelectedGames.CollectionChanged += (sender, args) => selectedGamesNotifications.Add(args);
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         vm.GameManager = SetupGameManager();
+        vm.GameVersionResolvers = [];
         await WaitNoWarningAsync(vm.LoadingFinished);
 
         vm.SelectAllCommand.Execute(null);
@@ -84,6 +86,7 @@ public sealed class AddGamesViewModelBaseTests : GameManagerTestBase
             DisplayName = "Unity2018Test",
             Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
         });
+        vm.GameVersionResolvers = [];
         await WaitNoWarningAsync(vm.LoadingFinished);
 
         Assert.AreEqual(1, vm.Games.Count);

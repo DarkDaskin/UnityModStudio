@@ -9,31 +9,41 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using UnityModStudio.Common;
+using UnityModStudio.Common.GameSpecific.Versions;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Options;
 
 public abstract class AddGamesViewModelBase : ObservableObject
 {
-    private IGameManager? _gameManager;
-    private bool _isLoading;
-
     [Import]
     public IGameManager? GameManager
     {
-        get => _gameManager;
+        get;
         set
         {
-            SetProperty(ref _gameManager, value);
-            
-            InitializeAsync().FileAndForget("UnityModStudio/AddGames/Initialize");
+            SetProperty(ref field, value);
+
+            InitializeIfReady();
+        }
+    }
+
+    [ImportMany]
+    public IGameVersionResolver[]? GameVersionResolvers
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+
+            InitializeIfReady();
         }
     }
 
     public bool IsLoading
     {
-        get => _isLoading;
-        set => SetProperty(ref _isLoading, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public SuspendableObservableCollection<Game> Games { get; } = [];
@@ -50,6 +60,14 @@ public abstract class AddGamesViewModelBase : ObservableObject
         SelectAllCommand = new DelegateCommand(SelectAll, null, ThreadHelper.JoinableTaskFactory);
         ConfirmCommand = new DelegateCommand(Confirm, () => SelectedGames.Count > 0, ThreadHelper.JoinableTaskFactory);
         CancelCommand = new DelegateCommand(Cancel, null, ThreadHelper.JoinableTaskFactory);
+    }
+
+    private void InitializeIfReady()
+    {
+        if (GameManager == null || GameVersionResolvers == null)
+            return;
+
+        InitializeAsync().FileAndForget("UnityModStudio/AddGames/Initialize");
     }
 
     private async Task InitializeAsync()
@@ -98,11 +116,14 @@ public abstract class AddGamesViewModelBase : ObservableObject
                 name = newName;
             }
 
+            var version = GameVersionResolvers!.ResolveGameVersion(gameInformation);
+
             yield return new Game
             {
                 DisplayName = name,
                 Path = gameEntry.Path,
                 GameName = gameInformation.Name,
+                Version = version,
                 GameExecutableFileName = gameInformation.GameExecutableFile.Name,
                 Architecture = gameInformation.Architecture.ToString(),
                 UnityVersion = gameInformation.UnityVersion,

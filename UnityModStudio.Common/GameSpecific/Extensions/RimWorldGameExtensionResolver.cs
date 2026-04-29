@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UnityModStudio.Common.GameSpecific;
+namespace UnityModStudio.Common.GameSpecific.Extensions;
 
 public class RimWorldGameExtensionResolver : IGameExtensionResolver
 {

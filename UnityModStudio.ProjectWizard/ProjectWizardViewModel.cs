@@ -9,7 +9,7 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using UnityModStudio.Common;
-using UnityModStudio.Common.GameSpecific;
+using UnityModStudio.Common.GameSpecific.Extensions;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Options;
 
@@ -248,7 +248,12 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
         RefreshProperties();
     }
 
-    protected override void OnValidGamePathChanged() => RefreshProperties();
+    protected override void OnValidGamePathChanged(GameInformation gameInformation)
+    {
+        base.OnValidGamePathChanged(gameInformation);
+
+        RefreshProperties();
+    }
 
     protected override void RefreshProperties()
     {

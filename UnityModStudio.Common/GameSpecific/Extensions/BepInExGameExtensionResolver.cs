@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace UnityModStudio.Common.GameSpecific;
+namespace UnityModStudio.Common.GameSpecific.Extensions;
 
 public class BepInExGameExtensionResolver : IGameExtensionResolver
 {

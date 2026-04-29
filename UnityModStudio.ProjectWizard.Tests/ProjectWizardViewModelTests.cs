@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using Moq;
 using UnityModStudio.Common;
-using UnityModStudio.Common.GameSpecific;
+using UnityModStudio.Common.GameSpecific.Extensions;
 using UnityModStudio.Common.Options;
 using UnityModStudio.Options;
 using UnityModStudio.Options.Tests;

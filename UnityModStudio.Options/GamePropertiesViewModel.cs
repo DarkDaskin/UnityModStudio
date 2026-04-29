@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.Composition;
+﻿using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
+using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Input;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
+using UnityModStudio.Common;
+using UnityModStudio.Common.GameSpecific.Versions;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Options
@@ -61,6 +63,13 @@ namespace UnityModStudio.Options
             }
         }
 
+        [ImportMany]
+        public IGameVersionResolver[]? GameVersionResolvers
+        {
+            get;
+            set => SetProperty(ref field, value);
+        }
+
         public GamePropertiesViewModel(Game game)
         {
             Game = game;
@@ -103,10 +112,15 @@ namespace UnityModStudio.Options
                 ModsPath = selectedPath;
         }
 
-        protected override void OnValidGamePathChanged()
+        protected override void OnValidGamePathChanged(GameInformation gameInformation)
         {
+            base.OnValidGamePathChanged(gameInformation);
+
             if (string.IsNullOrWhiteSpace(DisplayName))
                 DisplayName = GameName ?? "";
+
+            if (string.IsNullOrWhiteSpace(GameVersion))
+                GameVersion = GameVersionResolvers?.ResolveGameVersion(gameInformation);
         }
 
         protected override void OnConfirm()

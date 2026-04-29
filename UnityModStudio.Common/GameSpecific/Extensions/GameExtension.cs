@@ -1,4 +1,4 @@
-﻿namespace UnityModStudio.Common.GameSpecific;
+﻿namespace UnityModStudio.Common.GameSpecific.Extensions;
 
 public class GameExtension
 {

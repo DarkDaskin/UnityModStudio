@@ -154,7 +154,7 @@ namespace UnityModStudio.Options
                 BitmapSizeOptions.FromEmptyOptions());
         }
 
-        private void OnValidGamePathChanged(GameInformation gameInformation)
+        protected virtual void OnValidGamePathChanged(GameInformation gameInformation)
         {
             GameName = gameInformation.Name;
             Architecture = gameInformation.Architecture.ToString();
@@ -163,11 +163,7 @@ namespace UnityModStudio.Options
             MonoProfile = gameInformation.GetMonoProfileString();
             GameExecutableFileName = gameInformation.GameExecutableFile.Name;
             GameIcon = GetGameIcon(gameInformation);
-
-            OnValidGamePathChanged();
         }
-
-        protected virtual void OnValidGamePathChanged() { }
 
         protected virtual void RefreshProperties()
         {
