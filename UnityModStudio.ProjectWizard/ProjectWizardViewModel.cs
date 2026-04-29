@@ -163,7 +163,10 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
         if (GeneralSettingsManager is null)
             return;
 
-        Game ??= Games.FirstOrDefault(game => game.Id == GeneralSettingsManager.Settings.LastSelectedGameId);
+        var selectedGame = Game ??= Games.FirstOrDefault(game => game.Id == GeneralSettingsManager.Settings.LastSelectedGameId);
+        // Force combo box update in case selected game display name or version has updated.
+        Game = null;
+        Game = selectedGame;
     }
 
     private bool SupportsModLoader(Game game) => GetGameExtensions(game).Any(extension => extension.ModLoaderId == ModLoaderId);
@@ -230,6 +233,8 @@ public class ProjectWizardViewModel : GamePropertiesViewModelBase
             
         if (!GameManager.ShowEditDialog(Game))
             return;
+
+        ThreadHelper.JoinableTaskFactory.Run(GameManager.GameRegistry.SaveSafeAsync);
 
         InvalidateGame(Game);
 

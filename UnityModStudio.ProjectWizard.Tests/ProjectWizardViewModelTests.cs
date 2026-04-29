@@ -368,6 +368,9 @@ public sealed class ProjectWizardViewModelTests : GameManagerTestBase
             .Setup(gameManager => gameManager.ShowEditDialog(It.IsNotNull<Game>()))
             .Returns(true)
             .Callback((Game gameToUpdate) => gameToUpdate.DisplayName = "New name");
+        Mock.Get(vm.GameManager.GameRegistry)
+            .Setup(gameRegistry => gameRegistry.SaveAsync())
+            .Returns(Task.CompletedTask);
 
         vm.UpdateGameCommand.Execute(null);
 
