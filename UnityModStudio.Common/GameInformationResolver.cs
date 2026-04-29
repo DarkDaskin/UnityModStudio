@@ -39,6 +39,7 @@ namespace UnityModStudio.Common
                 var (moniker, isSubset) = GetTargetFrameworkInfo(assemblyFiles);
             
                 var (gameName, company) = GetAppInfo(gameDataDirectory);
+                gameName ??= Path.GetFileNameWithoutExtension(gameExecutableFile.Name);
 
                 var (frameworkAssemblyFiles, gameAssemblyFiles) = GroupAssemblies(assemblyFiles);
 
