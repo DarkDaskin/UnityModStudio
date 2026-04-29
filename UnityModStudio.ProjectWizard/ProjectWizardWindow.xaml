@@ -85,7 +85,7 @@
             Name="GamePathComboBox"
             Grid.Row="0"
             Grid.Column="1"
-            DisplayMemberPath="DisplayName"
+            DisplayMemberPath="DisplayNameWithVersion"
             ItemsSource="{Binding Games}"
             SelectedItem="{Binding Game}" />
           <Button

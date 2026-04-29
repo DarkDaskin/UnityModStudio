@@ -16,7 +16,7 @@ public interface IGameRegistry : IStore
     void RemoveGame(Game game);
     void EnsureAllGameProperties(Game game);
     Game? FindGameById(Guid id);
-    IReadOnlyCollection<Game> FindGamesByDisplayName(string name);
+    IReadOnlyCollection<Game> FindGamesByDisplayNameAndVersion(string displayName, string? version);
     IReadOnlyCollection<Game> FindGamesByGameNameAndVersion(string gameName, string? version);
     GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties, bool strictMatch);
 }
@@ -56,8 +56,9 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
 
     public Game? FindGameById(Guid id) => _games.TryGetValue(id, out var game) ? game : null;
     
-    public IReadOnlyCollection<Game> FindGamesByDisplayName(string name) => 
-        Games.Where(game => string.Equals(game.DisplayName, name, StringComparison.CurrentCultureIgnoreCase))
+    public IReadOnlyCollection<Game> FindGamesByDisplayNameAndVersion(string displayName, string? version) => 
+        Games.Where(game => string.Equals(game.DisplayName, displayName, StringComparison.CurrentCultureIgnoreCase) &&
+                                     string.Equals(game.Version ?? "", version ?? "", StringComparison.InvariantCultureIgnoreCase))
             .ToArray();
 
     public IReadOnlyCollection<Game> FindGamesByGameNameAndVersion(string gameName, string? version) => 
@@ -67,6 +68,7 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
 
     public GameMatchResult FindGameByProperties(IReadOnlyDictionary<string, string> properties, bool strictMatch)
     {
+        // First match by ID alone. In non-strict mode check other properties, allowing ID to differ.
         if (properties.TryGetValue(nameof(Game.Id), out var idString))
         {
             if (_games.TryGetValue(Guid.Parse(idString), out var match))
@@ -75,34 +77,40 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
                 return new GameMatchResult.NoMatch();
         }
 
-        if (properties.TryGetValue(nameof(Game.DisplayName), out var displayName))
+        // Get both display name and game name, returning no match if neither is defined.
+        if (!properties.TryGetValue(nameof(Game.DisplayName), out var displayName) & !properties.TryGetValue(nameof(Game.GameName), out var gameName))
+            return new GameMatchResult.NoMatch();
+
+        // In strict mode both must match when present, in non-strict mode allow display name to differ.
+        var query = Games.AsEnumerable();
+        if (strictMatch)
         {
-            var matches = FindGamesByDisplayName(displayName);
-            if (matches.Count > 0 || strictMatch)
-                return GameMatchResult.Create(matches, "");
+            if (displayName != null)
+                query = query.Where(game => game.DisplayName == displayName);
+            if (gameName != null)
+                query = query.Where(game => game.GameName == gameName);
+        }
+        else
+            query = gameName != null
+                ? query.Where(game => game.GameName == gameName)
+                : query.Where(game => game.DisplayName == displayName);
+
+        if (properties.TryGetValue(nameof(Game.Version), out var version))
+            query = query.Where(game => game.Version == version);
+
+        var matches = query.ToList();
+
+        // Only match by empty version if ambiguous, so old projects which miss GameVersion won't fail.
+        if (matches.Count > 1 && string.IsNullOrEmpty(version) && !strictMatch)
+        {
+            var matchesWithEmptyVersion = matches.FindAll(game => string.IsNullOrEmpty(game.Version));
+            if (matchesWithEmptyVersion.Count > 0)
+                matches = matchesWithEmptyVersion;
         }
 
-        if (properties.TryGetValue(nameof(Game.GameName), out var gameName))
-        {
-            var query = Games.Where(game => game.GameName == gameName);
-
-            if (properties.TryGetValue(nameof(Game.Version), out var version))
-                query = query.Where(game => game.Version == version);
-
-            var matches = query.ToList();
-
-            // Only match by empty version if ambiguous, so old projects which miss GameVersion won't fail.
-            if (matches.Count > 1 && string.IsNullOrEmpty(version) && !strictMatch)
-            {
-                var matchesWithEmptyVersion = matches.FindAll(game => string.IsNullOrEmpty(game.Version));
-                if (matchesWithEmptyVersion.Count > 0)
-                    matches = matchesWithEmptyVersion;
-            }
-
-            if (matches.Count > 0)
-                return GameMatchResult.Create(matches, "");
-        }
-
+        if (matches.Count > 0)
+            return GameMatchResult.Create(matches, "");
+        
         return new GameMatchResult.NoMatch();
     }
 

@@ -76,7 +76,7 @@ public sealed class GameRegistryTests : StoreTestsBase
 
         var game2 = gameRegistry.Games.ElementAt(1);
         Assert.AreEqual(new Guid("01144589-1c88-4c52-91a4-e6cc2998f35c"), game2.Id);
-        Assert.AreEqual("Game 2 v1.0", game2.DisplayName);
+        Assert.AreEqual("Game 2", game2.DisplayName);
         Assert.AreEqual(@"C:\Games\Game2_1", game2.Path);
         Assert.AreEqual("Mods", game2.ModsPath);
         Assert.AreEqual("1.0", game2.Version);
@@ -93,7 +93,7 @@ public sealed class GameRegistryTests : StoreTestsBase
 
         var game3 = gameRegistry.Games.ElementAt(2);
         Assert.AreEqual(new Guid("84d1866f-c4db-4d27-ad31-3b1fc9f34fd4"), game3.Id);
-        Assert.AreEqual("Game 2 v2.0", game3.DisplayName);
+        Assert.AreEqual("Game 2", game3.DisplayName);
         Assert.AreEqual(@"C:\Games\Game2_2", game3.Path);
         Assert.AreEqual("Mods", game3.ModsPath);
         Assert.AreEqual("2.0", game3.Version);
@@ -209,18 +209,33 @@ public sealed class GameRegistryTests : StoreTestsBase
     }
 
     [TestMethod]
-    public async Task WhenSearchingExistingGameByDisplayName_ReturnGame()
+    public async Task WhenSearchingExistingGameByDisplayNameAndNullVersion_ReturnGame()
     {
         IGameRegistry gameRegistry = new GameRegistry(StorePath);
         SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
-        var games = gameRegistry.FindGamesByDisplayName("Game 1");
+        var games = gameRegistry.FindGamesByDisplayNameAndVersion("Game 1", null);
 
         Assert.IsNotNull(games);
         Assert.AreEqual(1, games.Count);
         var game = games.First();
         Assert.AreEqual(new Guid("91eda532-02c2-441c-808d-07a474692ede"), game.Id);
+    }
+
+    [TestMethod]
+    public async Task WhenSearchingExistingGameByDisplayNameAndNonNullVersion_ReturnGame()
+    {
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        SetStoreFile("GameRegistry_Initial.json");
+        await gameRegistry.LoadAsync();
+
+        var games = gameRegistry.FindGamesByDisplayNameAndVersion("Game 2", "1.0");
+
+        Assert.IsNotNull(games);
+        Assert.AreEqual(1, games.Count);
+        var game = games.First();
+        Assert.AreEqual(new Guid("01144589-1c88-4c52-91a4-e6cc2998f35c"), game.Id);
     }
 
     [TestMethod]
@@ -230,13 +245,13 @@ public sealed class GameRegistryTests : StoreTestsBase
         SetStoreFile("GameRegistry_Initial.json");
         await gameRegistry.LoadAsync();
 
-        var games = gameRegistry.FindGamesByDisplayName("NonExistentGame");
+        var games = gameRegistry.FindGamesByDisplayNameAndVersion("NonExistentGame", null);
 
         Assert.IsEmpty(games);
     }
 
     [TestMethod]
-    public async Task WhenSearchingExistingGameByGameNameAndullVersion_ReturnGame()
+    public async Task WhenSearchingExistingGameByGameNameAndNullVersion_ReturnGame()
     {
         IGameRegistry gameRegistry = new GameRegistry(StorePath);
         SetStoreFile("GameRegistry_Initial.json");

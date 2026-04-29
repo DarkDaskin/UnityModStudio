@@ -74,8 +74,8 @@ namespace UnityModStudio.Options
             BrowseForModsPathCommand = new DelegateCommand(BrowseForModsPath, null, ThreadHelper.JoinableTaskFactory);
 
             AddRule(() => DisplayName, displayName => !string.IsNullOrWhiteSpace(displayName), "Display name must not be empty.");
-            AddRule(() => DisplayName, displayName => GameManager is null || !GameManager.GameRegistry.FindGamesByDisplayName(displayName).Except([Game]).Any(), 
-                "Display name must be unique.");
+            AddRule(() => DisplayName, displayName => GameManager is null || !GameManager.GameRegistry.FindGamesByDisplayNameAndVersion(displayName, GameVersion).Except([Game]).Any(), 
+                "Display name with game version must be unique.");
             AddRule(() => GameVersion, 
                 gameVersion => GameName is null || GameManager is null || !GameManager.GameRegistry.FindGamesByGameNameAndVersion(GameName, gameVersion).Except([Game]).Any(), 
                 "Game version must be unique across games with same game name.");

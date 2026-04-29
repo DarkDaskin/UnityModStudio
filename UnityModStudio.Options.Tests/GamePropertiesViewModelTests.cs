@@ -161,7 +161,28 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
         var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind(existingGame) };
 
         Assert.IsTrue(vm.HasErrors);
-        Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.DisplayName)).SequenceEqual(["Display name must be unique."]));
+        Assert.IsTrue(vm.GetErrors(nameof(GamePropertiesViewModel.DisplayName)).SequenceEqual(["Display name with game version must be unique."]));
+    }
+
+    [TestMethod]
+    public void WhenDisplayNameWithVersionIsUnique_ProduceNoError()
+    {
+        var game = new Game
+        {
+            DisplayName = "Unity2018Test",
+            Version = "1.0",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+        };
+        var existingGame = new Game
+        {
+            DisplayName = "Unity2018Test",
+            Version = "2.0",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-netstandard20-v2.0"),
+        };
+        var vm = new GamePropertiesViewModel(game) { GameManager = SetupGameManagerWithFind(existingGame) };
+
+        Assert.IsFalse(vm.HasErrors);
+        Assert.IsEmpty(vm.GetErrors(nameof(GamePropertiesViewModel.DisplayName)));
     }
 
     [TestMethod]
@@ -382,8 +403,8 @@ public sealed class GamePropertiesViewModelTests : GameManagerTestBase
     {
         var gameManager = SetupGameManager(games);
         Mock.Get(gameManager.GameRegistry)
-            .Setup(gameRegistry => gameRegistry.FindGamesByDisplayName(It.IsAny<string>()))
-            .Returns((string displayName) => gameManager.GameRegistry.Games.Where(game => game.DisplayName == displayName).ToArray());
+            .Setup(gameRegistry => gameRegistry.FindGamesByDisplayNameAndVersion(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns((string displayName, string? version) => gameManager.GameRegistry.Games.Where(game => game.DisplayName == displayName && game.Version == version).ToArray());
         Mock.Get(gameManager.GameRegistry)
             .Setup(gameRegistry => gameRegistry.FindGamesByGameNameAndVersion(It.IsAny<string>(), It.IsAny<string>()))
             .Returns((string? gameName, string? version) => gameManager.GameRegistry.Games.Where(game => game.GameName == gameName && game.Version == version).ToArray());

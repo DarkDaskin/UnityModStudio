@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace UnityModStudio.Common.Options
 {
@@ -25,5 +26,8 @@ namespace UnityModStudio.Common.Options
         public string? UnityVersion { get; set; }
         public string? TargetFrameworkMoniker { get; set; }
         public string? MonoProfile { get; set; }
+
+        [JsonIgnore]
+        public string DisplayNameWithVersion => string.IsNullOrWhiteSpace(Version) ? DisplayName : $"{DisplayName} [{Version}]";
     }
 }
