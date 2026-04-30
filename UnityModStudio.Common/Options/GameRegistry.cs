@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using UnityModStudio.Common.GameSpecific.Versions;
 
 namespace UnityModStudio.Common.Options;
 
@@ -15,6 +16,7 @@ public interface IGameRegistry : IStore
     void AddGame(Game game);
     void RemoveGame(Game game);
     void EnsureAllGameProperties(Game game);
+    void UpdateAllGameProperties(Game game, IEnumerable<IGameVersionResolver>? gameVersionResolvers = null);
     Game? FindGameById(Guid id);
     IReadOnlyCollection<Game> FindGamesByDisplayNameAndVersion(string displayName, string? version);
     IReadOnlyCollection<Game> FindGamesByGameNameAndVersion(string gameName, string? version);
@@ -46,12 +48,32 @@ public sealed class GameRegistry(string storePath) : StoreBase<Game[]>(storePath
             return;
         }
 
-        game.GameName = gameInformation!.Name;
+        UpdateGame(game, gameInformation);
+    }
+
+    public void UpdateAllGameProperties(Game game, IEnumerable<IGameVersionResolver>? gameVersionResolvers = null)
+    {
+        if (!GameInformationResolver.TryGetGameInformation(game.Path, out var gameInformation, out _, out _))
+        {
+            Debug.WriteLine($"UpdateAllGameProperties failed to resolve game information for path '{game.Path}'.");
+            return;
+        }
+
+        UpdateGame(game, gameInformation);
+
+        var newVersion = gameVersionResolvers?.ResolveGameVersion(gameInformation);
+        if (newVersion != null)
+            game.Version = newVersion;
+    }
+
+    private static void UpdateGame(Game game, GameInformation gameInformation)
+    {
+        game.GameName = gameInformation.Name;
         game.GameExecutableFileName = gameInformation.GameExecutableFile.Name;
         game.Architecture = gameInformation.Architecture.ToString();
         game.UnityVersion = gameInformation.UnityVersion;
         game.TargetFrameworkMoniker = gameInformation.TargetFrameworkMoniker;
-        game.MonoProfile = gameInformation.GetMonoProfileString();
+        game.MonoProfile = gameInformation.GetMonoProfileString();  
     }
 
     public Game? FindGameById(Guid id) => _games.TryGetValue(id, out var game) ? game : null;

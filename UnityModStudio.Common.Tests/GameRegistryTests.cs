@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using Moq;
+using UnityModStudio.Common.GameSpecific.Versions;
 using UnityModStudio.Common.Options;
 
 namespace UnityModStudio.Common.Tests;
@@ -142,6 +144,29 @@ public sealed class GameRegistryTests : StoreTestsBase
         gameRegistry.EnsureAllGameProperties(game);
 
         Assert.AreEqual("Unity2018Test", game.GameName);
+        Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
+        Assert.AreEqual("X64", game.Architecture);
+        Assert.AreEqual("2018.4.36f1", game.UnityVersion);
+        Assert.AreEqual("net472", game.TargetFrameworkMoniker);
+        Assert.AreEqual(".NET 4.7.2", game.MonoProfile);
+    }
+
+    [TestMethod]
+    public void WhenUpdateAllGamePropertiesInvoked_ResolveAllProperties()
+    {
+        IGameRegistry gameRegistry = new GameRegistry(StorePath);
+        var game = new Game
+        {
+            DisplayName = "Game 1",
+            Path = Path.Combine(SampleGameInfo.DownloadPath, "2018-net4-v1.0"),
+        };
+        gameRegistry.AddGame(game);
+        
+        gameRegistry.UpdateAllGameProperties(game, [
+            Mock.Of<IGameVersionResolver>(resolver => resolver.GetGameVersion(It.IsNotNull<GameInformation>()) == "1.0")]);
+
+        Assert.AreEqual("Unity2018Test", game.GameName);
+        Assert.AreEqual("1.0", game.Version);
         Assert.AreEqual("Unity2018Test.exe", game.GameExecutableFileName);
         Assert.AreEqual("X64", game.Architecture);
         Assert.AreEqual("2018.4.36f1", game.UnityVersion);

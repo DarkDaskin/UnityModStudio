@@ -23,6 +23,8 @@
     <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
       <Setter Property="Margin" Value="4" />
     </Style>
+
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
   </UserControl.Resources>
 
   <Grid>
@@ -56,6 +58,15 @@
       </ListBox.ItemContainerStyle>
     </ListBox>
 
+    <ProgressBar
+      Grid.Row="1"
+      Grid.Column="0"
+      Width="100"
+      Height="20"
+      VerticalAlignment="Center"
+      IsIndeterminate="True"
+      Visibility="{Binding IsUpdating, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
     <StackPanel Grid.Row="1" Grid.Column="1">
       <Button Command="{Binding AddGameCommand}" Content="Add..." />
       <Button
@@ -69,6 +80,8 @@
       <Separator />
       <Button Command="{Binding ImportFromRegistryCommand}" Content="Import from installed programs..." />
       <Button Command="{Binding ImportFromSteamCommand}" Content="Import from Steam..." />
+      <Separator />
+      <Button Command="{Binding UpdateAllCommand}" Content="Update all" />
     </StackPanel>
   </Grid>
 </UserControl>
