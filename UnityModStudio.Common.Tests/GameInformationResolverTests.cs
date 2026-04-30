@@ -172,7 +172,7 @@ public sealed class GameInformationResolverTests
         switch (gameType)
         {
             case "357-net20":
-                Assert.IsNull(gameInformation.Name);
+                Assert.AreEqual("357-net20", gameInformation.Name);
                 Assert.IsNull(gameInformation.Company);
                 Assert.AreEqual(Architecture.X86, gameInformation.Architecture);
                 Assert.AreEqual("3.5.7f6", gameInformation.UnityVersion);
@@ -182,7 +182,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual(1, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "357-net20-subset":
-                Assert.IsNull(gameInformation.Name);
+                Assert.AreEqual("357-net20-subset", gameInformation.Name);
                 Assert.IsNull(gameInformation.Company);
                 Assert.AreEqual(Architecture.X86, gameInformation.Architecture);
                 Assert.AreEqual("3.5.7f6", gameInformation.UnityVersion);
@@ -192,7 +192,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual(1, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "472-net20":
-                Assert.IsNull(gameInformation.Name);
+                Assert.AreEqual("472-net20", gameInformation.Name);
                 Assert.IsNull(gameInformation.Company);
                 Assert.AreEqual(Architecture.X86, gameInformation.Architecture);
                 Assert.AreEqual("4.7.2f1", gameInformation.UnityVersion);
@@ -202,7 +202,7 @@ public sealed class GameInformationResolverTests
                 Assert.AreEqual(4, gameInformation.GameAssemblyFiles.Count);
                 break;
             case "472-net20-subset":
-                Assert.IsNull(gameInformation.Name);
+                Assert.AreEqual("472-net20-subset", gameInformation.Name);
                 Assert.IsNull(gameInformation.Company);
                 Assert.AreEqual(Architecture.X86, gameInformation.Architecture);
                 Assert.AreEqual("4.7.2f1", gameInformation.UnityVersion);
