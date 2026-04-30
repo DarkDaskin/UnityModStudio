@@ -13,9 +13,7 @@ public class ConfigureDoorstop : Task
     public ITaskItem? ConfigPath { get; set; }
 
     public ITaskItem? TargetAssemblyPath { get; set; }
-
-    public bool UseForModLoading { get; set; }
-
+    
     public override bool Execute()
     {
         var configPath = ConfigPath!.GetMetadata("FullPath");
@@ -30,16 +28,13 @@ public class ConfigureDoorstop : Task
             ("enabled", "true")
         };
 
-        if (UseForModLoading)
+        var targetAssemblyPath = TargetAssemblyPath?.GetMetadata("FullPath");
+        if (!File.Exists(targetAssemblyPath))
         {
-            var targetAssemblyPath = TargetAssemblyPath?.GetMetadata("FullPath");
-            if (!File.Exists(targetAssemblyPath))
-            {
-                Log.LogErrorWithCode("UMS0013", "Target assembly file does not exist.");
-                return false;
-            }
-            values.Add(("target_assembly", GetRelativePath(targetAssemblyPath!, configPath)));
+            Log.LogErrorWithCode("UMS0013", "Target assembly file does not exist.");
+            return false;
         }
+        values.Add(("target_assembly", GetRelativePath(targetAssemblyPath!, configPath)));
 
         SetIniValues(configPath, "General", values);
 

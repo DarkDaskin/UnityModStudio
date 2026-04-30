@@ -26,6 +26,8 @@
     <_FullIntermediateOutputPath>$(IntermediateOutputPath)</_FullIntermediateOutputPath>
     <_FullIntermediateOutputPath Condition="!$([System.IO.Path]::IsPathRooted('$(_FullIntermediateOutputPath)'))">$(MSBuildProjectDirectory)\$(_FullIntermediateOutputPath)</_FullIntermediateOutputPath>
     <_OutputPathsCheckResultProjectFilePath>$(_FullIntermediateOutputPath)$(MSBuildProjectName).OutputPathsCheckResult.targets</_OutputPathsCheckResultProjectFilePath>
+    <_DoorstopDummyAssemblyFileName>DoorstopDummy.dll</_DoorstopDummyAssemblyFileName>
+    <_DoorstopDummyAssemblyPath>$(MSBuildThisFileDirectory)..\tools\$(_DoorstopDummyAssemblyFileName)</_DoorstopDummyAssemblyPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -555,6 +557,7 @@
       <_PrimaryDoorstopDllTargetPath>$(GamePath)$(_PrimaryDoorstopDllName)</_PrimaryDoorstopDllTargetPath>
       <_AlternateDoorstopDllTargetPath>$(GamePath)$(_AlternateDoorstopDllName)</_AlternateDoorstopDllTargetPath>
       <_DoorstopConfigTargetPath>$(GamePath)$(_DoorstopConfigFileName)</_DoorstopConfigTargetPath>
+      <_DoorstopDummyAssemblyTargetPath>$(GamePath)$(_DoorstopDummyAssemblyFileName)</_DoorstopDummyAssemblyTargetPath>
     </PropertyGroup>
 
     <Copy SourceFiles="$(_DoorstopDllSourcePath)" DestinationFiles="$(_PrimaryDoorstopDllTargetPath)" SkipUnchangedFiles="True" Condition="'$(UseAlternateDoorstopDllName)' != 'true'" />
@@ -562,16 +565,17 @@
     <Delete Files="$(_PrimaryDoorstopDllTargetPath)" Condition="Exists('$(_PrimaryDoorstopDllTargetPath)') and '$(UseAlternateDoorstopDllName)' == 'true'" />
     <Delete Files="$(_AlternateDoorstopDllTargetPath)" Condition="Exists('$(_AlternateDoorstopDllTargetPath)') and '$(UseAlternateDoorstopDllName)' != 'true'" />
     <Copy SourceFiles="$(_DoorstopConfigSourcePath)" DestinationFiles="$(_DoorstopConfigTargetPath)" Condition="!Exists('$(_DoorstopConfigTargetPath)')" />
+    <Copy SourceFiles="$(_DoorstopDummyAssemblyPath)" DestinationFiles="$(_DoorstopDummyAssemblyTargetPath)" Condition="!Exists('$(_DoorstopDummyAssemblyTargetPath)') and '$(DoorstopMode)' == 'Debugging'" />
+    <Delete Files="$(_DoorstopDummyAssemblyTargetPath)" Condition="Exists('$(_DoorstopDummyAssemblyTargetPath)') and '$(DoorstopMode)' != 'Debugging'" />
   </Target>
 
   <Target Name="ConfigureDoorstop" AfterTargets="CopyModFilesToGame;LinkModToGame" DependsOnTargets="DeployDoorstop;PrepareModPaths" Condition="'$(DoorstopMode)' != '' and '$(DoorstopMode)' != 'Disabled'">
     <PropertyGroup>
-      <DoorstopTargetAssemblyPath Condition="'$(DoorstopTargetAssemblyPath)' == ''">$(DeployedModAssemblyPath)</DoorstopTargetAssemblyPath>
-      <_UseDoorstopForModLoading>false</_UseDoorstopForModLoading>
-      <_UseDoorstopForModLoading Condition="'$(DoorstopMode)' == 'DebuggingAndModLoading'">true</_UseDoorstopForModLoading>
+      <DoorstopTargetAssemblyPath Condition="'$(DoorstopMode)' == 'DebuggingAndModLoading' and '$(DoorstopTargetAssemblyPath)' == ''">$(DeployedModAssemblyPath)</DoorstopTargetAssemblyPath>
+      <DoorstopTargetAssemblyPath Condition="'$(DoorstopMode)' == 'Debugging'">$(_DoorstopDummyAssemblyTargetPath)</DoorstopTargetAssemblyPath>
     </PropertyGroup>
 
-    <ConfigureDoorstop ConfigPath="$(_DoorstopConfigTargetPath)" TargetAssemblyPath="$(DoorstopTargetAssemblyPath)" UseForModLoading="$(_UseDoorstopForModLoading)" />
+    <ConfigureDoorstop ConfigPath="$(_DoorstopConfigTargetPath)" TargetAssemblyPath="$(DoorstopTargetAssemblyPath)" />
   </Target>
 
   <Target Name="_CollectPathsFromSpecificGameVersionBuilds">
