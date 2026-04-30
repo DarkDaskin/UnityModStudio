@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DoorstopDummy\DoorstopDummy.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\UnityModStudio.Steam\UnityModStudio.Steam.csproj" PrivateAssets="all" />
   </ItemGroup>
