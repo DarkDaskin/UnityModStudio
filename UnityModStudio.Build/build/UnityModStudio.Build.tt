@@ -355,7 +355,7 @@
   <Target Name="PreResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" />
 
   <Target Name="ResolveGameAssemblyReferences" BeforeTargets="ResolveAssemblyReferences;GameAssemblyReferencesResolved" DependsOnTargets="GamePropertiesResolved" 
-          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(MSBuildAllProjects)" Outputs="$(_ResolvedReferencesProjectFilePath)" Condition="'$(EffectiveGameVersionType)' != 'Multiple' and '$(_IsNoGameBuild)' != 'true'">
+          Inputs="$(_GamePropertiesChangeTimestampFilePath);$(AppInfoFilePath);$(PrimaryGameAssemblyPath);$(MSBuildAllProjects)" Outputs="$(_ResolvedReferencesProjectFilePath)" Condition="'$(EffectiveGameVersionType)' != 'Multiple' and '$(_IsNoGameBuild)' != 'true'">
     <CreateProperty Value="true">
       <Output TaskParameter="ValueSetByTask" PropertyName="_ResolveGameAssemblyReferencesIsRunning" />
     </CreateProperty>
@@ -367,13 +367,22 @@
 
     <ResolveGameAssemblyReferences GamePath="$(GamePath)" TargetFramework="$(TargetFramework)" ExistingReferences="@(Reference)">
       <Output TaskParameter="Architecture" PropertyName="GameArchitecture" />
+      <Output TaskParameter="ActualGameName" PropertyName="_ActualGameName" />
+      <Output TaskParameter="ActualGameVersion" PropertyName="_ActualGameVersion" />
+      <Output TaskParameter="AppInfoFilePath" PropertyName="AppInfoFilePath" />
+      <Output TaskParameter="PrimaryGameAssemblyPath" PropertyName="PrimaryGameAssemblyPath" />
       <Output TaskParameter="ReferencesToAdd" ItemName="_GameReferencesToAdd" />
       <Output TaskParameter="ReferencesToUpdate" ItemName="_GameReferencesToUpdate" />
       <Output TaskParameter="ReferencesToRemove" ItemName="_GameReferencesToRemove" />
     </ResolveGameAssemblyReferences>
 
+    <Error Code="UMS0018" Text="The actual game name '$(_ActualGameName)' does not match the expected game name '$(GameName)'." Condition="'$(_ActualGameName)' != '$(GameName)'" />
+    <Error Code="UMS0019" Text="The actual game version '$(_ActualGameVersion)' does not match the expected game version '$(GameVersion)'." Condition="'$(GameVersion)' != '' and '$(_ActualGameVersion)' != '' and '$(_ActualGameVersion)' != '$(GameVersion)'" />
+
     <ItemGroup>
       <_ResolvedReferenceProperty Include="GameArchitecture" Value="$(GameArchitecture)" />
+      <_ResolvedReferenceProperty Include="AppInfoFilePath" Value="$(AppInfoFilePath)" />
+      <_ResolvedReferenceProperty Include="PrimaryGameAssemblyPath" Value="$(PrimaryGameAssemblyPath)" />
       <_GameReferenceToSave Include="@(_GameReferencesToAdd)" ItemName="Reference" ItemAction="Include" IncludeMetadata="HintPath;Private;IsImplicitlyDefined;IsImplicitlyDefinedGameReference"
                             Condition="'$(DisableImplicitFrameworkReferences)' != 'true'" />
       <_GameReferenceToSave Include="@(_GameReferencesToUpdate)" ItemName="Reference" ItemAction="Update" IncludeMetadata="HintPath;Private" />

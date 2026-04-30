@@ -1,15 +1,18 @@
-﻿using System;
+﻿using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using UnityModStudio.Common;
+using UnityModStudio.Common.GameSpecific.Versions;
 
 namespace UnityModStudio.Build.Tasks;
 
 public class ResolveGameAssemblyReferences : Task
 {
+    private static readonly IGameVersionResolver[] GameVersionResolvers = GetGameVersionResolvers();
+
     [Required]
     public string? GamePath { get; set; }
 
@@ -20,6 +23,18 @@ public class ResolveGameAssemblyReferences : Task
 
     [Output]
     public string? Architecture { get; private set; }
+
+    [Output]
+    public string? ActualGameName { get; private set; }
+
+    [Output]
+    public string? ActualGameVersion { get; private set; }
+
+    [Output]
+    public string? AppInfoFilePath { get; private set; }
+
+    [Output]
+    public string? PrimaryGameAssemblyPath { get; private set; }
 
     [Output]
     public ITaskItem[] ReferencesToAdd { get; private set; } = [];
@@ -39,6 +54,10 @@ public class ResolveGameAssemblyReferences : Task
         }
 
         Architecture = gameInformation.Architecture.ToString();
+        ActualGameName = gameInformation.Name;
+        ActualGameVersion = GameVersionResolvers.ResolveGameVersion(gameInformation);
+        AppInfoFilePath = gameInformation.AppInfoFile?.FullName;
+        PrimaryGameAssemblyPath = gameInformation.PrimaryGameAssemblyFile?.FullName;
 
         IEnumerable<FileInfo> assemblyFiles = gameInformation.GameAssemblyFiles;
         assemblyFiles = assemblyFiles.Concat(gameInformation.FrameworkAssemblyFiles);
@@ -84,5 +103,13 @@ public class ResolveGameAssemblyReferences : Task
         ReferencesToRemove = referencesToRemove.ToArray();
 
         return true;
+    }
+
+    private static IGameVersionResolver[] GetGameVersionResolvers()
+    {
+        return typeof(IGameVersionResolver).Assembly.GetExportedTypes()
+            .Where(type => typeof(IGameVersionResolver).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
+            .Select(type => (IGameVersionResolver)Activator.CreateInstance(type)!)
+            .ToArray();
     }
 }

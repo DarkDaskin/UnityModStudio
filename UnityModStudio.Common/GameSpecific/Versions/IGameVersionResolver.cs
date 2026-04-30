@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace UnityModStudio.Common.GameSpecific.Versions;
 
+/// <remarks>
+/// Implementations of this interface should have a public parameterless constructor.
+/// </remarks>
 [InheritedExport]
 public interface IGameVersionResolver
 {
