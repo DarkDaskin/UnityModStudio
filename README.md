@@ -44,5 +44,9 @@ Required workloads:
 Additionally you may need to install targeting packs for .NET versions your games use.
 
 # Contents
-- A [Visual Studio 2022+ extension](https://marketplace.visualstudio.com/items?itemName=darkdaskin.UnityModStudio2022) containing the project template and its wizard, options page for managing the game registry, and the debugger.
+- The [Unity Mod Studio Visual Studio 2022+ extension](https://marketplace.visualstudio.com/items?itemName=darkdaskin.UnityModStudio2022) containing the generic project template and its wizard, options page for managing the game registry, and the debugger.
+- The [Unity Mod Studio for BepInEx Visual Studio 2022+ extension](https://marketplace.visualstudio.com/items?itemName=darkdaskin.UnityModStudioForBepInEx) containing the BepInEx project templates and their wizard. 
+- The [Unity Mod Studio for RimWorld Visual Studio 2022+ extension](https://marketplace.visualstudio.com/items?itemName=darkdaskin.UnityModStudioForRimWorld) containing the RimWorld project template and its wizard, and an options page. 
 - The [`UnityModStudio.Build`](https://www.nuget.org/packages/UnityModStudio.Build/) NuGet package which resolves game assembly references and helps building and debugging the mod.
+- The [`UnityModStudio.BepInEx.Build`](https://www.nuget.org/packages/UnityModStudio.BepInEx.Build/) NuGet package which helps building BepInEx mods.
+- The [`UnityModStudio.RimWorld.Build`](https://www.nuget.org/packages/UnityModStudio.RimWorld.Build/) NuGet package which helps building RimWorld mods.
