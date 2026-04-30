@@ -32,6 +32,8 @@ jobs:
       run: dotnet test --no-build -c Release ./UnityModStudio.Options.Tests/
     - name: Test UnityModStudio.ProjectWizard
       run: dotnet test --no-build -c Release ./UnityModStudio.ProjectWizard.Tests/
+    - name: Test UnityModStudio.Steam
+      run: dotnet test --no-build -c Release ./UnityModStudio.Steam.Tests/      
     - name: Test UnityModStudio.Build
       run: dotnet test --no-build -c Release ./UnityModStudio.Build.Tests/
     - name: Test UnityModStudio.BepInEx.Build
