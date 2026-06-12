@@ -32,9 +32,9 @@ public static class FileGenerator
         foreach (var version in gameVersions)
         {
             var profile = GetOrAddChild(profiles, version.Key);
-            profile["commandName"] = "Executable";
+            profile["commandName"] = "UnityMod";
             if (!string.IsNullOrEmpty(version.Value))
-                profile["gameVersion"] = version.Value;
+                profile["GameVersion"] = version.Value;
         }
     }
 

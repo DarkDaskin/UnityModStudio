@@ -94,7 +94,8 @@ public class UnityModDebugger(ConfiguredProject configuredProject, [ImportMany] 
     private async Task<GameConfiguration> GetGameConfigurationAsync(ILaunchProfile? profile)
     {
         var properties = ConfiguredProject.Services.ProjectPropertiesProvider!.GetCommonProperties();
-        var gameVersion = profile?.OtherSettings.TryGetValue("gameVersion", out var obj) ?? false ? obj as string : null;
+        var gameVersion = profile?.OtherSettings.TryGetValue("GameVersion", out var obj) ?? false ? obj as string :
+            profile?.OtherSettings.TryGetValue("gameVersion", out obj) ?? false ? obj as string : null;
         var configuration = await GameConfiguration.GetAsync(properties, gameVersion);
         if (string.IsNullOrEmpty(configuration.GameExecutablePath) && !string.IsNullOrEmpty(gameVersion))
             configuration = await GameConfiguration.GetAsync(properties, null);
