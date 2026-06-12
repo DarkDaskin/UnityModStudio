@@ -5,15 +5,31 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="UnityModLaunchProfile.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.Memory" Version="10.0.7" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.12.50" />
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.6142705" />
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.SDK" Version="17.9.380" />
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Sdk.Tools" Version="17.9.380">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Shell.Framework" Version="17.12.40391" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\UnityModStudio.Common\UnityModStudio.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <XamlPropertyRule Include="UnityModLaunchProfile.xaml">
+      <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
+      <DataAccess>None</DataAccess>
+      <RuleInjection>None</RuleInjection>
+    </XamlPropertyRule>
   </ItemGroup>
 
   <!-- Fix duplicate types. See https://stackoverflow.com/a/51035245/280778 -->

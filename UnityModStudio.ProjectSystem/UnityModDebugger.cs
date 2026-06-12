@@ -18,7 +18,7 @@ namespace UnityModStudio.ProjectSystem;
 [Export(typeof(IDebugProfileLaunchTargetsProvider)), Order(2000)]
 [AppliesTo(ProjectCapability.UnityModStudio)]
 [method: ImportingConstructor]
-public class UnityModDebugger(ConfiguredProject configuredProject)
+public class UnityModDebugger(ConfiguredProject configuredProject, [ImportMany] IProcessLifecycleParticipant[] processLifecycleParticipants)
     : DebugLaunchProviderBase(configuredProject), IDebugProfileLaunchTargetsProvider
 {
     private const string UnityDebugEngineName = "Unity";
@@ -79,7 +79,7 @@ public class UnityModDebugger(ConfiguredProject configuredProject)
     // TODO: only support proper profile
     public bool SupportsProfile(ILaunchProfile profile)
     {
-        if (profile.CommandName != "Executable")
+        if (profile.CommandName is not ("Executable" or "UnityMod"))
             return false;
 
         return ThreadingService.ExecuteSynchronously(() => IsEnabledAsync(profile));
@@ -128,9 +128,25 @@ public class UnityModDebugger(ConfiguredProject configuredProject)
         if (!noDebug)
             psi.Arguments = $"--doorstop-mono-debug-enabled true --doorstop-mono-debug-suspend true --doorstop-mono-debug-address {_endPoint}";
 
+        foreach (var participant in processLifecycleParticipants) 
+            await participant.OnBeforeLaunchAsync(profile, psi);
+
         var process = Process.Start(psi);
         if (process == null)
             throw new InvalidOperationException("Unable to launch the game.");
+
+        process.EnableRaisingEvents = true;
+
+        foreach (var participant in processLifecycleParticipants)
+            await participant.OnAfterLaunchAsync(profile, process);
+
+        process.Exited += (_, _) => ThreadingService.ExecuteSynchronously(async () =>
+        {
+            foreach (var participant in processLifecycleParticipants)
+                await participant.OnAfterExitAsync(profile, process);
+
+            process.Dispose();
+        });
 
         // TODO: wait for restart by Steam, if any
     }

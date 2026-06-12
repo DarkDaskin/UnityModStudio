@@ -30,5 +30,6 @@
         <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectWizard" Path="|UnityModStudio.RimWorld.ProjectWizard|" AssemblyName="|UnityModStudio.RimWorld.ProjectWizard;AssemblyName|" />
         <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.Options" Path="|UnityModStudio.RimWorld.Options|" />
         <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.Common" Path="|UnityModStudio.RimWorld.Common|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%.ProjectSystem" Path="|UnityModStudio.RimWorld.ProjectSystem|" />
     </Assets>
 </PackageManifest>

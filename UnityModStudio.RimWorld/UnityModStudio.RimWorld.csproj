@@ -90,6 +90,12 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
+    <ProjectReference Include="..\UnityModStudio.RimWorld.ProjectSystem\UnityModStudio.RimWorld.ProjectSystem.csproj">
+      <Project>{ace8b4e9-86b4-4fdd-b059-5eec9aea5d43}</Project>
+      <Name>UnityModStudio.RimWorld.ProjectSystem</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
     <ProjectReference Include="..\UnityModStudio.RimWorld.ProjectTemplate.CSharp\UnityModStudio.RimWorld.ProjectTemplate.CSharp.csproj">
       <Project>{8CB7AAF6-383D-4FD2-8B96-6DF07DBC5723}</Project>
       <Name>UnityModStudio.RimWorld.ProjectTemplate.CSharp</Name>

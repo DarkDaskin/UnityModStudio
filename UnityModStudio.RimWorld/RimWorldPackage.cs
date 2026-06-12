@@ -24,6 +24,7 @@ namespace UnityModStudio.RimWorld;
 /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
 /// </para>
 /// </remarks>
+[ProvideBindingPath]
 [ProvideOptionPage(typeof(RimWorldPage), RimWorldPage.CategoryName, RimWorldPage.PageName, 0, 0, true)]
 [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 [Guid(PackageGuidString)]

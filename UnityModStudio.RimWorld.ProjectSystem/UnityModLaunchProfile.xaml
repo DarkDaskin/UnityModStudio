@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Rule Name="UnityModLaunchProfile"
+      OverrideMode="Extend"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns="http://schemas.microsoft.com/build/2009/properties">
+
+  <Rule.Categories>
+    <Category Name="RimWorld" Description="RimWorld" DisplayName="RimWorld"/>
+  </Rule.Categories>
+
+  <StringProperty Name="SaveFile" DisplayName="Save file"
+                  Description="Path to the save file to load at game startup." Subtype="file"
+                  Category="RimWorld"/>
+
+</Rule>
