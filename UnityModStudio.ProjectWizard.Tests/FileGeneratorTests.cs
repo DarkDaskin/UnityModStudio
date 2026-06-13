@@ -78,17 +78,17 @@ public class FileGeneratorTests
                 },
                 ["Version1"] = new JsonObject
                 {
-                    ["commandName"] = "Executable",
-                    ["gameVersion"] = "1.0"
+                    ["commandName"] = "UnityMod",
+                    ["GameVersion"] = "1.0"
                 },
                 ["Version2"] = new JsonObject
                 {
-                    ["commandName"] = "Executable",
-                    ["gameVersion"] = "2.0"
+                    ["commandName"] = "UnityMod",
+                    ["GameVersion"] = "2.0"
                 },
                 ["AnotherGame"] = new JsonObject
                 {
-                    ["commandName"] = "Executable"
+                    ["commandName"] = "UnityMod"
                 },
             }
         };
